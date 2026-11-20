@@ -1,0 +1,1087 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Raku Nihongo Gakkou</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#06071a">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Zen+Maru+Gothic:wght@700;900&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans+Devanagari:wght@400;500;700&family=Noto+Sans+Myanmar:wght@400;700&family=Kaushan+Script&display=swap">
+<style>
+/* Raku Nihongo Gakkou v6: midnight aurora + ink-drawn hanko. Indigo→crimson gradient brand, glass surfaces, kanji-glyph navigation. */
+:root{
+  --bg:#f4f3fa; --paper:#ffffff; --ink:#111430; --muted:#5f6485; --line:#e3e2ef;
+  --ai:#3d3df5; --ai-soft:#ececff; --shu:#e81f55; --shu-soft:#ffe7ee; --ok:#0c9a60; --ok-soft:#dff5ea;
+  --gold:#d99a00; --shadow:0 1px 2px rgba(17,20,48,.05),0 10px 30px rgba(17,20,48,.07);
+  --grad:linear-gradient(125deg,#14104a 0%,#3527c9 48%,#e81f55 100%);
+  --f-disp:'Plus Jakarta Sans','Zen Maru Gothic','Noto Sans JP','Noto Sans Devanagari','Noto Sans Myanmar',system-ui,sans-serif;
+  --f-body:'Plus Jakarta Sans','Noto Sans JP','Noto Sans Devanagari','Noto Sans Myanmar',system-ui,sans-serif;
+  --f-jp:'Zen Maru Gothic','Noto Sans JP',sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#090a17; --paper:#13152b; --ink:#eceeff; --muted:#9ea2c6; --line:#262948;
+  --ai:#9491ff; --ai-soft:#1f1f4b; --shu:#ff4f7f; --shu-soft:#3b1427; --ok:#43d899; --ok-soft:#0f3427;
+  --gold:#ffc53f; --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 30px rgba(0,0,0,.3); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#090a17; --paper:#13152b; --ink:#eceeff; --muted:#9ea2c6; --line:#262948;
+  --ai:#9491ff; --ai-soft:#1f1f4b; --shu:#ff4f7f; --shu-soft:#3b1427; --ok:#43d899; --ok-soft:#0f3427;
+  --gold:#ffc53f; --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 30px rgba(0,0,0,.3); color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--ai);outline-offset:2px;border-radius:8px}
+.wrap{max-width:1020px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 40px}
+h1,h2,h3{font-family:var(--f-disp);font-weight:800;text-wrap:balance;line-height:1.25;margin:0;letter-spacing:-.01em}
+.muted{color:var(--muted)}
+.note{font-size:13px;color:var(--muted)}
+.eyebrow{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:800}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow)}
+a.card{text-decoration:none;color:inherit}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.tag{display:inline-block;font:800 10px/1.6 var(--f-body);letter-spacing:.06em;padding:0 6px;border-radius:6px;background:var(--ai-soft);color:var(--ai);margin-right:6px;vertical-align:2px}
+
+/* hanko (drawn 楽) */
+svg.hk rect{fill:var(--shu)} svg.hk path{fill:none;stroke:#fff;stroke-width:7.5;stroke-linecap:round;stroke-linejoin:round}
+
+/* buttons */
+.btn{border:0;border-radius:14px;padding:12px 20px;font-weight:800;background:var(--ai);color:#fff;font-family:var(--f-disp);font-size:15px;text-decoration:none;display:inline-block;text-align:center;transition:transform .15s,box-shadow .15s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(61,61,245,.25)}
+.btn:active{transform:none}
+.btn.grad{background:linear-gradient(120deg,#3527c9,#e81f55)}
+.btn.red{background:var(--shu)}
+.btn.ghost{background:transparent;color:var(--ai);border:1.5px solid var(--ai)}
+.btn.light{background:#fff;color:#14104a}
+.btn.glass{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.35)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.iconbtn{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700}
+.chip{border:1.5px solid var(--line);background:var(--paper);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:600}
+.chip.on{border-color:transparent;background:var(--ink);color:var(--paper)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+select{border:1.5px solid var(--line);background:var(--paper);border-radius:12px;padding:8px 10px}
+select.glass{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.35);color:#fff}
+select.glass option{color:#111}
+.linkbtn{border:0;background:none;color:var(--ai);font-weight:800;text-decoration:underline;padding:0}
+.langsel{display:inline-flex;align-items:center;gap:2px;border:1px solid var(--line);border-radius:999px;padding:0 4px 0 10px;background:var(--paper);font-size:13px}
+.langsel select{border:0;background:transparent;padding:6px 4px;font-weight:700;max-width:150px}
+
+/* header */
+header.top{position:sticky;top:0;z-index:6;background:color-mix(in srgb,var(--paper) 82%,transparent);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+header.top .in{max-width:1020px;margin:0 auto;padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;margin-right:auto;text-decoration:none;color:inherit;min-width:0}
+.brand svg.hk{width:42px;height:42px;flex:none;transform:rotate(-5deg)}
+.brand b{font-family:var(--f-disp);font-weight:800;font-size:17px;display:block;line-height:1.1;white-space:nowrap}
+.brand b em{font-style:normal;color:var(--shu)}
+.brand small{display:block;color:var(--muted);font-size:11px;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+.brand small strong{color:var(--ink);font-size:13.5px;font-weight:800;letter-spacing:.1em}
+.tools{display:flex;gap:6px;align-items:center}
+nav.tabs{display:flex;gap:4px;width:100%;overflow-x:auto;scrollbar-width:none}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs a{display:flex;align-items:center;gap:6px;padding:6px 12px 6px 6px;border-radius:999px;text-decoration:none;color:var(--muted);font-weight:700;font-size:14px;white-space:nowrap}
+nav.tabs a i{font:900 13px/1 var(--f-jp);font-style:normal;width:24px;height:24px;border-radius:8px;display:grid;place-items:center;background:var(--ai-soft);color:var(--ai)}
+nav.tabs a.on{background:var(--ink);color:var(--paper)}
+nav.tabs a.on i{background:linear-gradient(135deg,#3527c9,#e81f55);color:#fff}
+nav.bnav{display:none}
+@media (max-width:760px){
+  nav.tabs{display:none}
+  body{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+  nav.bnav{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;position:fixed;left:0;right:0;bottom:0;z-index:8;padding:6px max(6px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px));background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--line)}
+  nav.bnav a{display:grid;justify-items:center;gap:2px;text-decoration:none;color:var(--muted);font-size:10px;font-weight:700;padding:2px 0;min-width:0}
+  nav.bnav a span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  nav.bnav a i{font:900 17px/1 var(--f-jp);font-style:normal;width:36px;height:30px;border-radius:11px;display:grid;place-items:center;transition:background .2s}
+  nav.bnav a.on{color:var(--ink)}
+  nav.bnav a.on i{background:linear-gradient(135deg,#3527c9,#e81f55);color:#fff;box-shadow:0 6px 14px rgba(232,31,85,.3)}
+  .brand small{font-size:10px}.brand small strong{font-size:12px}
+  .langsel select{max-width:96px}
+}
+.foot-note{padding-block:6px 30px;font-size:12px;color:var(--muted);text-align:center}
+
+/* splash */
+#splash{position:fixed;inset:0;z-index:50;background:#06071a;color:#fff;overflow:hidden;display:grid;place-items:center;transition:opacity .7s,transform .7s;padding:24px 16px}
+#splash.out{opacity:0;transform:scale(1.05);pointer-events:none}
+.aur{position:absolute;width:62vmax;height:62vmax;border-radius:50%;filter:blur(90px);opacity:.55;animation:aur 16s ease-in-out infinite alternate;pointer-events:none}
+.aur.a1{background:#3527c9;left:-20vmax;top:-24vmax}
+.aur.a2{background:#e81f55;right:-24vmax;bottom:-26vmax;animation-delay:-6s}
+.aur.a3{background:#0ab4ff;left:30%;top:40%;width:34vmax;height:34vmax;opacity:.25;animation-delay:-11s}
+@keyframes aur{to{transform:translate(8vmax,6vmax) scale(1.15)}}
+.sp-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:46px 46px;-webkit-mask-image:radial-gradient(circle at 50% 45%,#000 0,transparent 70%);mask-image:radial-gradient(circle at 50% 45%,#000 0,transparent 70%)}
+.sp-kana{position:absolute;inset:0;pointer-events:none}
+.sp-kana i{position:absolute;top:105%;font-style:normal;font-family:var(--f-jp);font-weight:900;color:rgba(255,255,255,.07);animation:rise linear infinite}
+@keyframes rise{to{transform:translateY(-125vh) rotate(25deg)}}
+.sp-in{position:relative;text-align:center;max-width:680px}
+.sp-hk{width:118px;height:118px;display:block;margin:0 auto 18px;filter:drop-shadow(0 18px 40px rgba(232,31,85,.45));animation:pop .7s cubic-bezier(.2,1.4,.4,1) both}
+.sp-hk rect{fill:#e81f55}
+.sp-hk path{fill:none;stroke:#fff;stroke-width:7.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:130;stroke-dashoffset:130;animation:ink .32s ease-out forwards;animation-delay:calc(.45s + var(--i) * .11s)}
+@keyframes ink{to{stroke-dashoffset:0}}
+@keyframes pop{from{transform:scale(.4) rotate(-25deg);opacity:0}to{transform:scale(1) rotate(-6deg);opacity:1}}
+.sp-school{font-weight:800;font-size:clamp(14px,3.8vw,21px);letter-spacing:.42em;margin-right:-.42em}
+.sp-school span{display:inline-block;opacity:0;animation:up .6s ease-out forwards}
+.sp-school span:nth-child(1){animation-delay:1.6s}.sp-school span:nth-child(2){animation-delay:1.75s}.sp-school span:nth-child(3){animation-delay:1.9s;color:#ff6b93}
+.sp-jp{font:900 clamp(24px,6vw,38px)/1.3 var(--f-jp);margin-top:4px;opacity:0;animation:up .6s 2s ease-out forwards}
+.sp-with{margin-top:14px;font-size:12px;letter-spacing:.4em;text-transform:uppercase;opacity:0;animation:up .6s 2.15s ease-out forwards}
+.sp-name{font-weight:800;font-size:clamp(38px,10vw,80px);line-height:1.05;letter-spacing:.05em;background:linear-gradient(90deg,#fff 0%,#ffd166 30%,#ff6b93 55%,#fff 80%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;opacity:0;animation:up .7s 2.25s ease-out forwards,shine 4s 2.4s linear infinite}
+@keyframes shine{to{background-position:-220% 0}}
+.sp-tag{margin-top:10px;opacity:0;animation:up .6s 2.45s ease-out forwards;color:rgba(255,255,255,.82);font-size:15px}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.sp-langs{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:22px;opacity:0;animation:up .6s 2.6s ease-out forwards}
+.sp-langs button{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:999px;padding:8px 14px;font-size:14px;font-weight:600}
+.sp-langs button.on{background:#fff;color:#14104a;border-color:#fff}
+.sp-go{margin-top:18px;background:linear-gradient(120deg,#3527c9,#e81f55);color:#fff;border:0;border-radius:999px;padding:14px 30px;font-weight:800;font-size:16px;opacity:0;animation:up .6s 2.75s ease-out forwards;box-shadow:0 12px 30px rgba(232,31,85,.35)}
+.sp-bar{position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(255,255,255,.08)}
+.sp-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3527c9,#e81f55);animation:bar 3.4s linear forwards}
+#splash.pick .sp-bar{display:none}
+@keyframes bar{to{width:100%}}
+@media (prefers-reduced-motion:reduce){#splash *{animation-duration:.01s!important;animation-delay:0s!important;animation-iteration-count:1!important}.sp-kana{display:none}.aur{animation:none}}
+
+/* login */
+.loginwrap{position:relative;min-height:100vh;min-height:100dvh;background:#06071a;overflow:hidden;display:grid;place-items:center;padding:70px 16px 40px;color:#fff}
+.lg-top{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:16px;z-index:2}
+.loginwrap .langsel{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.25);color:#fff}
+.loginwrap .langsel option{color:#111}
+.login{position:relative;width:min(440px,100%);padding:30px 26px;background:rgba(19,21,43,.72);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);color:#fff;text-align:left}
+.login svg.hk{width:78px;height:78px;display:block;margin:0 auto 12px;transform:rotate(-6deg)}
+.lg-school{text-align:center;font-weight:800;letter-spacing:.3em;font-size:14px;margin-right:-.3em}
+.lg-school b{color:#ff6b93}
+.lg-jp{text-align:center;font:900 24px/1.3 var(--f-jp)}
+.lg-name{text-align:center;font-weight:800;font-size:clamp(28px,8vw,36px);letter-spacing:.06em;margin:6px 0 20px;background:linear-gradient(90deg,#fff,#ffd166,#ff6b93);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lg-name small{display:block;font-size:11px;letter-spacing:.4em;color:rgba(255,255,255,.65);-webkit-text-fill-color:rgba(255,255,255,.65)}
+.field{display:grid;gap:6px;margin-bottom:14px}
+.field label{font-size:13px;font-weight:700;color:var(--muted)}
+.field input{border:1.5px solid var(--line);background:var(--bg);border-radius:14px;padding:12px 14px;font-size:16px}
+.login .field label{color:rgba(255,255,255,.75)}
+.login .field input{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.2);color:#fff}
+.login .note{color:rgba(255,255,255,.7)}
+.err{color:var(--shu);font-size:14px;min-height:22px}
+.login .err{color:#ff8fae}
+
+/* home */
+.hero2{position:relative;overflow:hidden;margin-top:18px;border-radius:28px;padding:26px 24px;background:var(--grad);color:#fff;display:grid;grid-template-columns:1.5fr 1fr;gap:18px 20px;align-items:center;box-shadow:0 20px 50px rgba(53,39,201,.25)}
+.hero2::after{content:"楽";position:absolute;right:-30px;bottom:-110px;font:900 300px/1 var(--f-jp);color:rgba(255,255,255,.07);pointer-events:none}
+.hero2>*{position:relative;z-index:1}
+.h-hello{font-size:15px;opacity:.9}
+.h-eyebrow{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;opacity:.8;margin-top:6px}
+.hero2 h1{font-size:clamp(24px,4.4vw,36px);margin-top:4px}
+.hero2 p{margin:8px 0 0;opacity:.88}
+.h-r{display:grid;justify-items:center;gap:4px}
+.ring{width:150px;height:150px}
+.ring-n{font-family:var(--f-disp);font-weight:800;font-size:26px;fill:#fff}
+.ring-l{font-size:11px;fill:rgba(255,255,255,.75)}
+.h-rl{font-size:13px;opacity:.9;text-align:center}
+.h-teacher{grid-column:1/-1;display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);border-radius:18px;padding:12px 16px;backdrop-filter:blur(6px)}
+.h-teacher svg.hk{width:46px;height:46px;flex:none;transform:rotate(-6deg)}
+.h-teacher svg.hk rect{fill:#fff}.h-teacher svg.hk path{stroke:#e81f55}
+.h-teacher small{display:block;font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.8}
+.h-teacher b{display:block;font-weight:800;font-size:clamp(22px,4.8vw,30px);letter-spacing:.1em;line-height:1.15}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+.stat{padding:16px;position:relative;overflow:hidden}
+.stat i{position:absolute;right:10px;top:4px;font:900 40px/1 var(--f-jp);font-style:normal;color:var(--ai);opacity:.1}
+.stat b{font-family:var(--f-disp);font-weight:800;font-size:28px;display:block;font-variant-numeric:tabular-nums}
+.stat span{font-size:13px;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:1.3fr 1fr;gap:14px;margin-top:14px}
+.wotd{background:linear-gradient(140deg,#14104a,#3527c9);color:#fff;border:0;padding:20px;position:relative}
+.wotd .w{font:900 38px/1.15 var(--f-jp);margin-top:4px}
+.wotd .r{opacity:.8}
+.wotd .eyebrow{color:rgba(255,255,255,.7)}
+.wotd .mn{margin-top:4px}
+.wotd .tag{background:rgba(255,255,255,.18);color:#fff}
+.speak{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:600}
+.speak.inv{background:transparent;color:inherit;border-color:rgba(255,255,255,.5)}
+.srsbox{padding:20px;display:grid;gap:4px;align-content:center}
+.srsbox b{font-family:var(--f-disp);font-weight:800;font-size:46px;line-height:1;background:linear-gradient(120deg,#3527c9,#e81f55);-webkit-background-clip:text;background-clip:text;color:transparent}
+.paths{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:14px}
+.path{padding:20px;display:grid;gap:10px;align-content:start}
+.path .kana{font-size:12px;color:var(--shu);font-weight:800;letter-spacing:.12em}
+.path h2{font-size:22px}
+.bar{height:8px;background:var(--ai-soft);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#3527c9,#e81f55);border-radius:99px}
+.chart,.badges{padding:18px 20px;margin-top:14px}
+.brow{display:grid;grid-template-columns:170px 1fr 48px;gap:10px;align-items:center;margin-top:10px;font-size:14px}
+.brow small{display:block;color:var(--muted);font-size:11px}
+.brow b{text-align:right;font-variant-numeric:tabular-nums}
+.bgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:10px}
+.badge{border:1.5px dashed var(--line);border-radius:16px;padding:10px 6px;text-align:center;opacity:.45;filter:grayscale(1)}
+.badge.on{opacity:1;filter:none;border-style:solid;border-color:var(--gold)}
+.badge span{font:900 24px/1.2 var(--f-jp);display:block}
+.badge small{font-size:11px;line-height:1.3;display:block}
+
+/* quiz */
+.qhead{margin-top:18px;padding:16px 20px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.qhead h2{font-size:20px;margin-right:auto}
+.timer{font-variant-numeric:tabular-nums;font-weight:800;color:var(--muted)}
+.timer.warn{color:var(--shu)}
+.qlist{display:grid;gap:14px;margin-top:14px}
+.q{padding:18px 20px;position:relative}
+.q.is-ok{border-color:color-mix(in srgb,var(--ok) 45%,var(--line))}
+.q.is-ng{border-color:color-mix(in srgb,var(--shu) 45%,var(--line))}
+.q .meta{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted);margin-bottom:8px;flex-wrap:wrap}
+.q .num{font-family:var(--f-disp);font-weight:800;font-size:14px;color:#fff;background:linear-gradient(135deg,#3527c9,#e81f55);border-radius:9px;padding:1px 9px}
+.q .stem{font-family:'Noto Sans JP',sans-serif;font-size:19px;line-height:1.8;padding-right:64px}
+.q .stem.word{font:900 28px/1.5 var(--f-jp)}
+.u{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:5px;text-decoration-color:var(--shu);font-weight:700}
+.blank{display:inline-block;min-width:3.2em;border-bottom:2px solid var(--ink);margin:0 4px}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+.opts.long{grid-template-columns:1fr}
+.opt{text-align:left;border:1.5px solid var(--line);background:var(--bg);border-radius:14px;padding:11px 13px;display:flex;gap:10px;align-items:flex-start;font-family:'Noto Sans JP',sans-serif;font-size:16px;min-width:0;transition:border-color .15s,background .15s}
+.opt:not(:disabled):hover{border-color:var(--ai)}
+.opt .c{font-weight:700;color:var(--muted);flex:none}
+.opt.sel{border-color:var(--ai);background:var(--ai-soft)}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--shu);background:var(--shu-soft)}
+.opt:disabled{cursor:default}
+.stamp{position:absolute;right:16px;top:12px;width:58px;height:58px;display:grid;place-items:center;font:900 44px/1 var(--f-jp);color:var(--shu);animation:stamp .35s ease-out}
+@keyframes stamp{from{transform:scale(1.8) rotate(-12deg);opacity:0}to{transform:scale(1) rotate(-6deg);opacity:1}}
+.expl{margin-top:12px;border-radius:14px;padding:12px 14px;font-size:14.5px;border-left:4px solid}
+.expl.ok{background:var(--ok-soft);border-color:var(--ok)}
+.expl.ng{background:var(--shu-soft);border-color:var(--shu)}
+.ex-h{display:flex;gap:6px 12px;align-items:baseline;flex-wrap:wrap}
+.expl.ok .ex-h>b{color:var(--ok)}.expl.ng .ex-h>b{color:var(--shu)}
+.ex-h .jp{font-family:'Noto Sans JP',sans-serif;font-size:17px}
+.ex-m{display:grid;gap:3px;margin-top:8px}
+.score{padding:22px;margin-top:14px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.score .big{font-family:var(--f-disp);font-weight:800;font-size:48px;color:var(--shu);font-variant-numeric:tabular-nums;line-height:1}
+.hanamaru{width:86px;height:86px;flex:none}
+.foot{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:16px}
+ruby rt{font-size:.5em;color:var(--muted);font-weight:400}
+
+/* flashcards */
+.flash{margin-top:14px;padding:30px 20px;text-align:center;min-height:290px;display:grid;place-items:center;gap:10px}
+.flash .w{font:900 clamp(42px,10vw,68px)/1.1 var(--f-jp)}
+.flash .back{display:grid;gap:4px;font-size:18px}
+.rate{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.rate .btn small{display:block;font-size:11px;font-weight:600;opacity:.85}
+.empty{padding:30px;text-align:center;color:var(--muted)}
+
+/* words */
+.wtools{margin-top:18px;padding:14px 16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.wtools input{flex:1 1 220px;min-width:0;border:1.5px solid var(--line);background:var(--bg);border-radius:14px;padding:10px 14px;font-size:16px}
+.tblwrap{overflow-x:auto;margin-top:14px;padding:0}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border-bottom:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--ink);color:var(--paper);font-weight:800;position:sticky;top:0;font-size:13px}
+td.n{color:var(--muted);font-variant-numeric:tabular-nums;width:3em}
+tr.t1 td.w,tr.t1 td.ne{color:var(--shu);font-weight:800}
+tr.t2 td.w,tr.t2 td.ne{font-weight:700}
+td.w{font-family:'Noto Sans JP',sans-serif;font-size:17px}
+tr[data-kanji]{cursor:pointer}
+tr[data-kanji]:hover td{background:var(--ai-soft)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;margin-top:10px}
+.legend .r{color:var(--shu);font-weight:800}.legend .b{font-weight:700}
+
+/* modal + kanji card */
+.modal{position:fixed;inset:0;background:rgba(6,7,26,.6);backdrop-filter:blur(4px);z-index:30;display:grid;place-items:center;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.sheet{width:min(720px,100%);max-height:100%;overflow:auto;padding:22px;position:relative}
+.sheet .close{position:absolute;right:14px;top:14px}
+.kw .w{font:900 38px/1.3 var(--f-jp)}
+.kcard{display:grid;grid-template-columns:200px 1fr;gap:18px;margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
+.kstroke{display:grid;gap:8px;justify-items:center}
+.kstroke svg{width:180px;height:180px;background:var(--bg);border-radius:16px;border:1px solid var(--line);background-image:linear-gradient(var(--line),var(--line)),linear-gradient(var(--line),var(--line));background-size:1px 100%,100% 1px;background-position:center;background-repeat:no-repeat}
+.kstroke path{fill:none;stroke:var(--ink);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+.kbig{font:900 46px/1 var(--f-jp);color:var(--shu)}
+.kinfo dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:10px 0}
+.kinfo dt{color:var(--muted);font-size:13px}
+.kinfo dd{margin:0}
+.rel{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px}
+.rel small{color:var(--muted)}
+.chip small{opacity:.75}
+.exs{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);font-size:17px}
+.attr{font-size:11px;color:var(--muted);margin:14px 0 0}
+.certimg{width:100%;border-radius:12px;box-shadow:var(--shadow);margin-top:12px}
+.admin{margin-top:20px;padding:22px;max-width:520px}
+.toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:14px;font-size:14px;z-index:60}
+@media (max-width:760px){
+  .hero2{grid-template-columns:1fr;padding:22px 18px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .grid2,.paths{grid-template-columns:1fr}
+  .opts{grid-template-columns:1fr}
+  .q .stem{font-size:17px}
+  .bgrid{grid-template-columns:repeat(3,1fr)}
+  .kcard{grid-template-columns:1fr}
+  .brow{grid-template-columns:120px 1fr 40px}
+  .brand b{font-size:15px}
+}
+
+.sp-exams{margin-top:6px;opacity:0;animation:up .6s 2.5s ease-out forwards;font-size:12px;letter-spacing:.14em;color:#ffd166;font-weight:700}
+.lg-ex{text-align:center;font-size:11.5px;letter-spacing:.12em;color:#ffd166;font-weight:700;margin:-12px 0 18px}
+.courses{margin-top:18px}
+.crow{display:flex;gap:8px;overflow-x:auto;padding:8px 2px 4px;scrollbar-width:none}
+.crow::-webkit-scrollbar{display:none}
+.course{flex:none;min-width:118px;border:1.5px solid var(--line);background:var(--paper);border-radius:16px;padding:10px 12px;display:grid;gap:1px;opacity:.6}
+.course b{font-weight:800;font-size:14px;white-space:nowrap}
+.course small{color:var(--muted);font-size:11.5px}
+.course .st{font-size:10.5px;font-weight:800;letter-spacing:.06em;color:var(--muted);margin-top:4px}
+.course.on{opacity:1;border-color:transparent;background:linear-gradient(135deg,#3527c9,#e81f55);color:#fff;box-shadow:0 8px 20px rgba(53,39,201,.25)}
+.course.on small,.course.on .st{color:rgba(255,255,255,.85)}
+.ex-sec{margin-top:10px}
+.ex-l{display:block;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.ex-o{list-style:none;margin:4px 0 0;padding:0;display:grid;gap:4px}
+.ex-o li{padding:6px 10px;border-radius:10px;background:color-mix(in srgb,var(--paper) 70%,transparent)}
+.ex-o li.r{outline:1.5px solid var(--ok)}
+.ex-o li.w{outline:1.5px solid var(--shu)}
+.ex-o .jp{font-family:'Noto Sans JP',sans-serif;font-weight:700}
+.ex-o i{color:var(--muted)}
+
+.course{font:inherit;text-align:left;cursor:pointer;color:inherit}
+.course.sel{outline:3px solid #ffd166;outline-offset:2px;opacity:1}
+.soonnote{margin-top:10px;padding:12px 14px;font-size:14px;border-left:4px solid var(--gold)}
+.sp-hk.sm{width:72px;height:72px;margin-bottom:12px}
+.sp-q{font-weight:800;font-size:clamp(20px,5vw,28px);margin-bottom:16px}
+.sp-exgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;width:min(620px,calc(100vw - 32px));margin:0 auto}
+@media (max-width:420px){.sp-exgrid{grid-template-columns:1fr 1fr}}
+.sp-exgrid button{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:16px;padding:12px;display:grid;gap:2px;text-align:left;font:inherit;cursor:pointer}
+.sp-exgrid button b{font-weight:800;font-size:15px}
+.sp-exgrid button small{font-size:11px;letter-spacing:.06em;color:rgba(255,255,255,.65);font-weight:700}
+.sp-exgrid button.on{background:linear-gradient(135deg,#3527c9,#e81f55);border-color:transparent}
+.sp-exgrid button:hover{border-color:#ffd166}
+
+.unlockcard{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-top:14px;padding:16px 18px;border:1.5px dashed var(--gold)}
+.unlockcard p{margin:4px 0 0;color:var(--muted);font-size:14px}
+.unlockpage{max-width:480px;margin:24px auto;text-align:center;display:grid;gap:12px;justify-items:center}
+.unlockpage form{display:grid;gap:10px;width:100%;text-align:left}
+.unlockpage input{font:700 20px/1.2 ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;padding:12px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--paper);color:inherit;width:100%}
+.lockbtn{text-decoration:none;display:inline-grid;place-items:center}
+
+.pricebox{margin:18px 0 6px;text-align:left}
+.prow{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:8px 0}
+.pr{border:1.5px solid var(--line,#ddd);border-radius:12px;padding:10px 6px;text-align:center;display:flex;flex-direction:column;gap:4px}
+.pr b{font-size:13px}.pr span{font-size:17px;font-weight:800;color:var(--gold)}
+.pr.sel{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 10%,transparent)}
+@media (max-width:420px){.prow{grid-template-columns:repeat(3,1fr)}}
+.unlockpage svg.hk{width:64px;height:64px;display:block;margin:0 auto 10px;transform:rotate(-6deg)}
+.dhero{display:flex;gap:16px;align-items:center;margin-top:14px}.dhero svg.hk{width:56px;height:56px;flex:none;transform:rotate(-6deg)}.dhero h2{margin:4px 0}
+.dsets{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:14px}
+.dset{display:grid;gap:8px}.dset small{color:var(--muted)}.dset.lk{opacity:.85}.dset .row{display:flex;gap:8px;flex-wrap:wrap}
+.opts.tf{grid-template-columns:1fr 1fr}.opts.tf .c{font-size:22px}
+.passage{background:var(--soft,rgba(127,127,127,.08));border-left:4px solid var(--gold);padding:12px 14px;border-radius:10px;margin:8px 0 12px;line-height:1.9;font-size:15px}
+
+.q .passage{white-space:normal;line-height:2;font-size:15px;background:var(--bg2,rgba(127,127,127,.08));border-left:4px solid var(--shu,#d62828);border-radius:10px;padding:12px 14px;margin:6px 0 12px}
+.psame{font-size:13px;margin:4px 0 8px}
+
+.mondai{margin:18px 2px 8px;padding:10px 12px;border-radius:10px;background:var(--soft,rgba(127,127,127,.08));font-size:14px;line-height:1.7}.mondai b{display:inline-block;background:var(--ink,#1b1f2a);color:#fff;border-radius:6px;padding:1px 8px;margin-right:6px}
+.motbl{border-collapse:collapse;margin:6px 0;font-size:14px;width:100%}.motbl td{border:1px solid var(--line,#ddd);padding:4px 8px}.motbl.sc td{font-size:15px}
+.verdict{font-weight:900;font-size:22px;margin:8px 0 2px}.verdict.ok{color:var(--ok,#13804f)}.verdict.ng{color:var(--shu,#d62828)}
+
+.lsn{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:6px 0 10px}
+.lsn .lpic{flex-basis:100%;font-size:44px;line-height:1.3;text-align:center;padding:14px;border-radius:14px;background:var(--soft,rgba(127,127,127,.08));letter-spacing:6px}
+.btn.play{padding:10px 18px}.btn.play.on{outline:3px solid var(--red,#e5484d)}.btn.play:disabled{opacity:.5}
+.lsn .lst{font-size:13px}
+.script{margin:10px 0;padding:10px 12px;border-radius:12px;background:var(--soft,rgba(127,127,127,.08));font-size:14px;line-height:1.8}
+.script summary{cursor:pointer;font-weight:700;margin-bottom:4px}
+</style>
+<div id="app"><div class="loginwrap"><div class="aur a1"></div><div class="aur a2"></div></div></div>
+<div id="toast" class="toast" hidden></div>
+<script>
+/* i18n: order = ja, en, ne, vi, id, my, zh, tl */
+const LANGS=[['ja','日本語'],['en','English'],['ne','नेपाली'],['vi','Tiếng Việt'],['id','Bahasa Indonesia'],['my','မြန်မာ'],['zh','中文'],['tl','Filipino']];
+const I={
+explQ:['問題の意味','What the question says','प्रश्नको अर्थ','Nghĩa của câu hỏi','Arti soal','မေးခွန်း၏ အဓိပ္ပာယ်','题目意思','Kahulugan ng tanong'],
+explWhy:['なぜ正解？','Why this is correct','किन सही?','Vì sao đúng?','Mengapa benar?','ဘာကြောင့် မှန်သလဲ','为什么正确？','Bakit tama?'],
+explOpts:['選択肢の意味','Meaning of each choice','हरेक विकल्पको अर्थ','Nghĩa từng lựa chọn','Arti setiap pilihan','ရွေးချယ်စရာတစ်ခုစီ၏ အဓိပ္ပာယ်','各选项的意思','Kahulugan ng bawat pagpipilian'],
+noMeaning:['意味なし（こういう言葉はありません）','No meaning (not a real word)','अर्थ छैन (यस्तो शब्द हुँदैन)','Không có nghĩa (không phải từ thật)','Tidak ada arti (bukan kata asli)','အဓိပ္ပာယ်မရှိ (စကားလုံး မဟုတ်)','无意义（没有这个词）','Walang kahulugan (hindi totoong salita)'],
+courses:['コースを選ぶ','Choose your course','कोर्स छान्नुहोस्','Chọn khóa học','Pilih kursus','သင်တန်း ရွေးပါ','选择课程','Pumili ng kurso'],
+soon:['近日公開','Coming soon','छिट्टै आउँदैछ','Sắp ra mắt','Segera hadir','မကြာမီ','即将推出','Malapit na'],
+open:['公開中','Open','चालु','Đang mở','Tersedia','ဖွင့်ထားသည်','已开放','Bukas'],
+allExams:['JLPT N5〜N1 · JFT · BJT · 特定技能（外食・介護・運転）','JLPT N5–N1 · JFT · BJT · SSW: Food · Nursing · Driving','JLPT N5–N1 · JFT · BJT · SSW: Food · Nursing · Driving','JLPT N5–N1 · JFT · BJT · SSW: Ẩm thực · Điều dưỡng · Lái xe','JLPT N5–N1 · JFT · BJT · SSW: Makanan · Perawat · Mengemudi','JLPT N5–N1 · JFT · BJT · SSW: အစားအသောက် · သူနာပြု · ယာဉ်မောင်း','JLPT N5–N1 · JFT · BJT · 特定技能：餐饮 · 护理 · 驾驶','JLPT N5–N1 · JFT · BJT · SSW: Food · Nursing · Driving'],
+loading:['読み込み中…','Loading…','लोड हुँदैछ…','Đang tải…','Memuat…','ဖွင့်နေသည်…','加载中…','Naglo-load…'],
+loadFail:['データを読み込めませんでした。ページを開き直してください。','Could not load data. Please reopen the page.','डाटा लोड भएन। पेज फेरि खोल्नुहोस्।','Không tải được dữ liệu. Hãy mở lại trang.','Data gagal dimuat. Silakan buka ulang halaman.','ဒေတာ မဖွင့်နိုင်ပါ။ စာမျက်နှာကို ပြန်ဖွင့်ပါ။','数据加载失败，请重新打开页面。','Hindi na-load ang data. Buksan muli ang page.'],
+pickExam:['何の試験の勉強をしますか？','What are you preparing for?','कुन परीक्षाको तयारी गर्नुहुन्छ?','Bạn đang ôn thi gì?','Kamu bersiap untuk ujian apa?','ဘာစာမေးပွဲအတွက် ပြင်ဆင်မလဲ။','你在准备什么考试？','Anong exam ang pinaghahandaan mo?'],
+soonNote:['{c} は近日公開です。それまでは N3 で練習できます。','{c} is coming soon. Until then you can practise with N3.','{c} छिट्टै आउँदैछ। त्यतिन्जेल N3 बाट अभ्यास गर्न सक्नुहुन्छ।','{c} sắp ra mắt. Trong lúc chờ, bạn có thể luyện N3.','{c} segera hadir. Sementara itu kamu bisa berlatih N3.','{c} မကြာမီ လာမည်။ ထိုအထိ N3 ဖြင့် လေ့ကျင့်နိုင်သည်။','{c} 即将推出。在此之前可以先练习 N3。','Malapit na ang {c}. Habang wala pa, mag-practice muna sa N3.'],
+freeTag:['無料','Free','निःशुल्क','Miễn phí','Gratis','အခမဲ့','免费','Libre'],
+freeDemo:['セット1は無料で練習できます。','Set 1 is free to practise.','सेट 1 निःशुल्क अभ्यास गर्न सकिन्छ।','Bộ 1 được luyện miễn phí.','Set 1 gratis untuk latihan.','Set 1 ကို အခမဲ့ လေ့ကျင့်နိုင်သည်။','第1套可免费练习。','Libre ang Set 1 para mag-practice.'],
+lockedN:['残りの{n}セットはコードで開きます。','The other {n} sets open with a code.','बाँकी {n} सेट code हालेपछि खुल्छन्।','{n} bộ còn lại mở bằng mã.','{n} set lainnya dibuka dengan kode.','ကျန် set {n} ခုကို ကုဒ်ဖြင့် ဖွင့်ရသည်။','其余{n}套需要输入代码解锁。','Ang natitirang {n} set ay bubuksan gamit ang code.'],
+unlockT:['全セットを開く','Unlock all sets','सबै सेट खोल्नुहोस्','Mở khóa tất cả','Buka semua set','set အားလုံး ဖွင့်ရန်','解锁全部','I-unlock lahat'],
+unlockBtn:['コードで開く','Unlock with code','Code हालेर खोल्नुहोस्','Mở bằng mã','Buka dengan kode','ကုဒ်ဖြင့် ဖွင့်ပါ','用代码解锁','I-unlock gamit ang code'],
+enterCode:['コード','Your code','तपाईंको code','Mã của bạn','Kode kamu','သင့်ကုဒ်','你的代码','Ang code mo'],
+codeErr:['コードが正しくありません。','That code is not valid.','यो code मिलेन।','Mã không hợp lệ.','Kode tidak valid.','ကုဒ် မမှန်ပါ။','代码无效。','Hindi tama ang code.'],
+unlocked:['全セットが開きました！','All sets are unlocked!','सबै सेट खुले!','Đã mở tất cả!','Semua set terbuka!','set အားလုံး ပွင့်ပြီ!','全部已解锁！','Bukas na lahat!'],
+priceT:['料金（1コース・全セット）','Price (one course, all sets)','मूल्य (एउटा कोर्स, सबै सेट)','Giá (một khóa, tất cả bộ)','Harga (satu kursus, semua set)','စျေးနှုန်း (သင်တန်းတစ်ခု၊ set အားလုံး)','价格（一门课程，全部套题）','Presyo (isang kurso, lahat ng set)'],
+priceNote:['お支払い後、そのコース専用のコードがもらえます。','After payment you get a code for that course only.','भुक्तानीपछि त्यही कोर्सको मात्र code पाइन्छ।','Sau khi thanh toán, bạn nhận mã cho khóa đó.','Setelah membayar, kamu dapat kode khusus kursus itu.','ငွေပေးပြီးနောက် ထိုသင်တန်းအတွက်သာ ကုဒ် ရမည်။','付款后获得该课程专用代码。','Pagkatapos magbayad, makukuha mo ang code para sa kursong iyon lamang.'],
+buyNote:['コードは、お支払いの後にBinod先生からもらえます。','You get a code from Binod sir after payment.','भुक्तानी गरेपछि Binod sir ले code दिनुहुन्छ।','Sau khi thanh toán, thầy Binod sẽ gửi mã.','Setelah membayar, kamu dapat kode dari Binod sir.','ငွေပေးပြီးနောက် Binod ဆရာထံမှ ကုဒ် ရမည်။','付款后由Binod老师提供代码。','Makukuha mo ang code kay Binod sir pagkatapos magbayad.'],
+tap:['タップして始める','Tap to start','थिचेर सुरु गर्नुहोस्','Chạm để bắt đầu','Ketuk untuk mulai','စတင်ရန် နှိပ်ပါ','点击开始','I-tap para magsimula'],
+tagline:['日本語の試験に、楽しく合格。','Pass your Japanese exams, the fun way.','जापानी परीक्षा पास, रमाइलो तरिकाले।','Đỗ các kỳ thi tiếng Nhật thật vui.','Lulus ujian bahasa Jepang dengan cara seru.','ဂျပန်စာ စာမေးပွဲများကို ပျော်ပျော်နဲ့ အောင်ပါ။','轻松愉快通过日语考试。','Pumasa sa mga Japanese exam sa masayang paraan.'],
+navHome:['ホーム','Home','होम','Trang chủ','Beranda','ပင်မ','首页','Home'],
+navQuiz:['練習','Practice','अभ्यास','Luyện tập','Latihan','လေ့ကျင့်','练习','Pagsasanay'],
+navMock:['模試','Mock test','模試 परीक्षा','Thi thử','Tryout','စမ်းသပ်စာမေးပွဲ','模拟考试','Mock test'],
+navSrs:['単語カード','Flashcards','दोहोर्‍याइ','Thẻ ôn tập','Kartu hafalan','မှတ်ဉာဏ်ကတ်','记忆卡','Flashcards'],
+navRev:['間違い','Mistakes','गल्ती','Câu sai','Kesalahan','အမှားများ','错题','Mga mali'],
+navWords:['単語帳','Dictionary','शब्दकोश','Từ điển','Kamus','အဘိဓာန်','词典','Diksiyonaryo'],
+navAdmin:['管理','Admin','एडमिन','Admin','Admin','Admin','管理','Admin'],
+theme:['テーマ切替','Change theme','रङ बदल्नुहोस्','Đổi giao diện','Ganti tema','အရောင်ပြောင်း','切换主题','Palitan ang tema'],
+logout:['ログアウト','Log out','बाहिर','Đăng xuất','Keluar','ထွက်ရန်','退出','Mag-log out'],
+lang:['言語','Language','भाषा','Ngôn ngữ','Bahasa','ဘာသာစကား','语言','Wika'],
+pw:['パスワード','Password','पासवर्ड','Mật khẩu','Kata sandi','စကားဝှက်','密码','Password'],
+loginBtn:['ログイン','Log in','लगइन','Đăng nhập','Masuk','ဝင်ရန်','登录','Mag-log in'],
+askSir:['IDとパスワードは Binod Paudel 先生にお尋ねください。','Ask Binod Paudel sir for your ID and password.','ID र पासवर्ड Binod Paudel सरसँग माग्नुहोस्।','Hãy hỏi thầy Binod Paudel để lấy ID và mật khẩu.','Minta ID dan kata sandi kepada Pak Binod Paudel.','ID နှင့် စကားဝှက်ကို ဆရာ Binod Paudel ထံ တောင်းပါ။','请向 Binod Paudel 老师索取 ID 和密码。','Hingin ang ID at password kay Sir Binod Paudel.'],
+loginErr:['IDまたはパスワードが違います。','ID or password is incorrect. Try again.','ID वा पासवर्ड मिलेन। फेरि प्रयास गर्नुहोस्।','ID hoặc mật khẩu không đúng. Hãy thử lại.','ID atau kata sandi salah. Coba lagi.','ID သို့မဟုတ် စကားဝှက် မှားနေသည်။ ထပ်ကြိုးစားပါ။','ID 或密码错误，请重试。','Mali ang ID o password. Subukang muli.'],
+student:['学生','Student','विद्यार्थी','Học viên','Siswa','ကျောင်းသား','学生','Estudyante'],
+hello:['こんにちは','Hello','नमस्ते','Xin chào','Halo','မင်္ဂလာပါ','你好','Kumusta'],
+teacher:['講師','Teacher','शिक्षक','Giáo viên','Guru','ဆရာ','老师','Guro'],
+setsInfo:['JLPT N3 · 模試26回分 · {n}問','JLPT N3 · 26 model sets · {n} questions','JLPT N3 · २६ मोडल सेट · {n} प्रश्न','JLPT N3 · 26 đề mẫu · {n} câu','JLPT N3 · 26 set model · {n} soal','JLPT N3 · နမူနာ ၂၆ စုံ · မေးခွန်း {n}','JLPT N3 · 26 套模拟题 · {n} 题','JLPT N3 · 26 model set · {n} tanong'],
+goalT:['今日の目標：{n}問','Today\'s goal: {n} questions','आजको लक्ष्य: {n} प्रश्न','Mục tiêu hôm nay: {n} câu','Target hari ini: {n} soal','ယနေ့ ပန်းတိုင်: မေးခွန်း {n}','今日目标：{n} 题','Layunin ngayon: {n} tanong'],
+intro:['まず漢字、次に語彙。1ページ10問、最後に〇✕と正解の意味を表示します。','Kanji first, then vocabulary. 10 questions per page, then 〇/✕ with the meaning of the correct answer.','पहिले कान्जी, त्यसपछि शब्दको अर्थ। हरेक पेजमा १० प्रश्न, अन्त्यमा 〇/✕ र सही उत्तरको अर्थ।','Kanji trước, sau đó từ vựng. Mỗi trang 10 câu, cuối cùng hiện 〇/✕ và nghĩa của đáp án đúng.','Kanji dulu, lalu kosakata. 10 soal per halaman, lalu 〇/✕ dan arti jawaban yang benar.','ခန်းဂျီးအရင်၊ ပြီးမှ ဝေါဟာရ။ စာမျက်နှာတစ်ခုလျှင် မေးခွန်း ၁၀၊ နောက်ဆုံးတွင် 〇/✕ နှင့် အဖြေမှန်၏ အဓိပ္ပာယ်။','先练汉字，再练词汇。每页10题，最后显示〇/✕和正确答案的意思。','Kanji muna, saka bokabularyo. 10 tanong bawat pahina, tapos 〇/✕ at kahulugan ng tamang sagot.'],
+startP:['練習を始める','Start practice','अभ्यास सुरु गर्नुहोस्','Bắt đầu luyện tập','Mulai latihan','လေ့ကျင့်မှု စတင်ရန်','开始练习','Simulan ang practice'],
+goalL:['1日の目標','Daily goal','दैनिक लक्ष्य','Mục tiêu mỗi ngày','Target harian','နေ့စဉ် ပန်းတိုင်','每日目标','Araw-araw na layunin'],
+todayDone:['今日解いた問題','Answered today','आज गरेका प्रश्न','Đã làm hôm nay','Dijawab hari ini','ယနေ့ ဖြေပြီး','今日已答','Nasagot ngayon'],
+goalMet:['目標達成！','Goal reached!','लक्ष्य पूरा!','Đạt mục tiêu!','Target tercapai!','ပန်းတိုင် ပြည့်ပြီ!','目标完成！','Naabot ang layunin!'],
+today:['今日','Today','आज','Hôm nay','Hari ini','ယနေ့','今天','Ngayon'],
+stDone:['解いた問題','Questions done','गरिसकेका प्रश्न','Câu đã làm','Soal selesai','ဖြေပြီးသော မေးခွန်း','已做题数','Natapos na tanong'],
+stAcc:['正答率','Accuracy','सही दर','Tỉ lệ đúng','Akurasi','မှန်ကန်မှုနှုန်း','正确率','Katumpakan'],
+stStreak:['連続日数','Day streak','लगातार दिन','Ngày liên tiếp','Hari beruntun','ဆက်တိုက်ရက်','连续天数','Sunod-sunod na araw'],
+stWeak:['復習が必要 →','To review →','गल्ती दोहोर्‍याउनुपर्ने →','Cần ôn lại →','Perlu diulang →','ပြန်လေ့လာရန် →','需复习 →','Kailangang ulitin →'],
+wotd:['今日の単語','Word of the day','आजको शब्द','Từ của ngày','Kata hari ini','ယနေ့ စကားလုံး','今日单词','Salita ng araw'],
+say:['聞く','Listen','सुन्नुहोस्','Nghe','Dengar','နားထောင်','听','Pakinggan'],
+kcard:['漢字カード','Kanji card','कान्जी कार्ड','Thẻ Kanji','Kartu kanji','ခန်းဂျီးကတ်','汉字卡','Kanji card'],
+srsT:['スマート単語カード','Smart flashcards','स्मार्ट फ्ल्यासकार्ड','Thẻ ghi nhớ thông minh','Kartu hafalan pintar','စမတ် မှတ်ဉာဏ်ကတ်','智能记忆卡','Smart flashcards'],
+srsDue:['今日復習する単語','Words to review today','आज दोहोर्‍याउनुपर्ने शब्द','Từ cần ôn hôm nay','Kata untuk diulang hari ini','ယနေ့ ပြန်လေ့လာရမည့် စကားလုံး','今日需复习的单词','Mga salitang uulitin ngayon'],
+srsHint:['忘れかけた単語が自動で出てきます →','Words you are forgetting come back automatically →','बिर्सन लागेको शब्द आफैं फेरि आउँछ →','Từ sắp quên sẽ tự động quay lại →','Kata yang mulai lupa muncul lagi otomatis →','မေ့ခါနီး စကားလုံးများ အလိုအလျောက် ပြန်ပေါ်လာမည် →','快忘的单词会自动再出现 →','Kusang bumabalik ang mga salitang nakakalimutan →'],
+kanji:['漢字','Kanji','कान्जी','Kanji','Kanji','ခန်းဂျီး','汉字','Kanji'],
+kanjiSub:['漢字読み・表記 · {n}問','Reading & writing · {n} questions','漢字読み र 表記 · {n} प्रश्न','Đọc & viết · {n} câu','Baca & tulis · {n} soal','ဖတ်နည်း၊ ရေးနည်း · မေးခွန်း {n}','读音・书写 · {n} 题','Pagbasa at pagsulat · {n} tanong'],
+kanjiGo:['漢字を練習','Practice kanji','कान्जी अभ्यास','Luyện Kanji','Latihan kanji','ခန်းဂျီး လေ့ကျင့်','练习汉字','I-practice ang kanji'],
+mean:['語彙','Vocabulary','शब्दको अर्थ','Từ vựng','Kosakata','ဝေါဟာရ','词汇','Bokabularyo'],
+meanSub:['文脈規定・言い換え・用法 · {n}問','Context · paraphrase · usage · {n} questions','文脈規定 · 言い換え · 用法 · {n} प्रश्न','Ngữ cảnh · đồng nghĩa · cách dùng · {n} câu','Konteks · padanan · penggunaan · {n} soal','အခြေအနေ · အဓိပ္ပာယ်တူ · အသုံးပြုပုံ · မေးခွန်း {n}','语境・近义・用法 · {n} 题','Konteksto · kasingkahulugan · gamit · {n} tanong'],
+meanGo:['語彙を練習','Practice vocabulary','अर्थ अभ्यास','Luyện từ vựng','Latihan kosakata','ဝေါဟာရ လေ့ကျင့်','练习词汇','I-practice ang bokabularyo'],
+chartT:['問題タイプ別の正答率','Accuracy by question type','खण्डअनुसार सही दर','Tỉ lệ đúng theo dạng câu','Akurasi per jenis soal','မေးခွန်းအမျိုးအစားအလိုက် မှန်ကန်မှု','各题型正确率','Katumpakan ayon sa uri ng tanong'],
+weak:['苦手なタイプ：','Your weakest type:','तपाईंको कमजोर खण्ड:','Dạng bạn yếu nhất:','Jenis terlemah Anda:','သင်၏ အားနည်းသော အမျိုးအစား:','你的薄弱题型：','Pinakamahinang uri mo:'],
+practiceThis:['これを練習する →','Practice this →','यही अभ्यास गर्नुहोस् →','Luyện dạng này →','Latih ini →','ဒါကို လေ့ကျင့်ရန် →','练习这个 →','I-practice ito →'],
+weakHint:['各タイプ5問解くと、苦手なタイプがここに表示されます。','After 5 questions in each type, your weak type shows here.','हरेक खण्डमा ५ प्रश्न गरेपछि कमजोर खण्ड यहाँ देखिन्छ।','Sau 5 câu mỗi dạng, dạng yếu sẽ hiện ở đây.','Setelah 5 soal per jenis, jenis terlemah muncul di sini.','အမျိုးအစားတစ်ခုစီ ၅ ပုဒ်ဖြေပြီးလျှင် အားနည်းချက်ကို ဤနေရာတွင် ပြမည်။','每种题型做5题后，这里会显示薄弱题型。','Pagkatapos ng 5 tanong bawat uri, lalabas dito ang mahina mong uri.'],
+badgesT:['バッジと修了証','Badges & certificates','ब्याज र सर्टिफिकेट','Huy hiệu & chứng chỉ','Lencana & sertifikat','တံဆိပ်နှင့် လက်မှတ်','徽章和证书','Badges at sertipiko'],
+certK:['🎓 漢字の修了証','🎓 Kanji certificate','🎓 कान्जी खण्ड सर्टिफिकेट','🎓 Chứng chỉ Kanji','🎓 Sertifikat kanji','🎓 ခန်းဂျီး လက်မှတ်','🎓 汉字证书','🎓 Sertipiko sa kanji'],
+certM:['🎓 語彙の修了証','🎓 Vocabulary certificate','🎓 अर्थ खण्ड सर्टिफिकेट','🎓 Chứng chỉ từ vựng','🎓 Sertifikat kosakata','🎓 ဝေါဟာရ လက်မှတ်','🎓 词汇证书','🎓 Sertipiko sa bokabularyo'],
+certRule:['模試で36/60以上、またはタイプ別に全問を70%以上正解すると修了証がもらえます。','Get a certificate with 36/60 or more on a mock test, or 70%+ on all questions of a section.','模試 मा ३६/६० वा कुनै खण्डका सबै प्रश्न ७०% सही गरेपछि सर्टिफिकेट पाइन्छ।','Đạt 36/60 trở lên ở bài thi thử, hoặc đúng 70% trở lên toàn bộ một phần để nhận chứng chỉ.','Dapatkan sertifikat dengan nilai 36/60 ke atas di tryout, atau 70%+ benar di semua soal satu bagian.','စမ်းသပ်စာမေးပွဲတွင် ၃၆/၆၀ နှင့်အထက် သို့မဟုတ် အပိုင်းတစ်ခုလုံး ၇၀% မှန်လျှင် လက်မှတ်ရမည်။','模拟考试达到36/60以上，或某部分全部题目正确率70%以上即可获得证书。','Makakakuha ng sertipiko sa 36/60 pataas sa mock test, o 70% pataas sa lahat ng tanong ng isang bahagi.'],
+b1:['初めての練習','First practice','पहिलो अभ्यास','Lần luyện đầu','Latihan pertama','ပထမ လေ့ကျင့်မှု','第一次练习','Unang practice'],
+bq:['{n}問','{n} questions','{n} प्रश्न','{n} câu','{n} soal','မေးခွန်း {n}','{n}题','{n} tanong'],
+ball:['全{n}問','All {n}','सबै {n}','Tất cả {n}','Semua {n}','အားလုံး {n}','全部{n}题','Lahat ng {n}'],
+streakN:['{n}日連続','{n}-day streak','{n} दिन लगातार','{n} ngày liên tiếp','{n} hari beruntun','{n} ရက် ဆက်တိုက်','连续{n}天','{n} araw sunod-sunod'],
+allK:['漢字すべて','All kanji','सबै कान्जी','Hết Kanji','Semua kanji','ခန်းဂျီး အားလုံး','全部汉字','Lahat ng kanji'],
+allM:['語彙すべて','All vocabulary','सबै अर्थ','Hết từ vựng','Semua kosakata','ဝေါဟာရ အားလုံး','全部词汇','Lahat ng bokabularyo'],
+t_reading:['漢字の読み方','Kanji reading','कान्जी पढाइ','Cách đọc Kanji','Cara baca kanji','ခန်းဂျီး ဖတ်နည်း','汉字读音','Pagbasa ng kanji'],
+t_writing:['漢字の書き方','Kanji writing','कान्जी लेखाइ','Cách viết Kanji','Penulisan kanji','ခန်းဂျီး ရေးနည်း','汉字书写','Pagsulat ng kanji'],
+t_context:['空欄に入る語','Fill in the blank','खाली ठाउँ भर्ने','Điền vào chỗ trống','Isi bagian kosong','ကွက်လပ်ဖြည့်','选词填空','Punan ang patlang'],
+t_paraphrase:['近い意味','Similar meaning','उस्तै अर्थ','Nghĩa tương tự','Arti serupa','အဓိပ္ပာယ်တူ','近义表达','Kaparehong kahulugan'],
+gram:['文法','Grammar','व्याकरण','Ngữ pháp','Tata bahasa','သဒ္ဒါ','语法','Gramatika'],
+gramSub:['文法形式・文の組み立て・文章の文法 · {n}問','Grammar form · sentence order · text grammar · {n} questions','文法形式 · ★ क्रम मिलाउने · अनुच्छेद · {n} प्रश्न','Ngữ pháp · sắp xếp câu · đoạn văn · {n} câu','Bentuk tata bahasa · susun kalimat · paragraf · {n} soal','သဒ္ဒါ · စာကြောင်းစီ · စာပိုဒ် · {n} မေးခွန်း','语法形式 · 句子排序 · 文章语法 · {n}题','Anyo · ayos ng pangungusap · talata · {n} tanong'],
+gramGo:['文法を始める','Start grammar','व्याकरण सुरु गर्नुहोस्','Bắt đầu ngữ pháp','Mulai tata bahasa','သဒ္ဒါ စတင်','开始语法','Simulan ang gramatika'],
+read:['読解','Reading','पढाइ','Đọc hiểu','Membaca','စာဖတ်','阅读','Pagbasa'],
+readSub:['短文・中文・情報検索 · {n}問','Short, mid & info passages · {n} questions','छोटो, मध्यम र सूचना पाठ · {n} प्रश्न','Đoạn ngắn, trung, tìm thông tin · {n} câu','Teks pendek, sedang, informasi · {n} soal','စာတို · စာလတ် · သတင်းအချက် · {n} မေးခွန်း','短篇 · 中篇 · 信息检索 · {n}题','Maikli, katamtaman, impormasyon · {n} tanong'],
+readGo:['読解を始める','Start reading','पढाइ सुरु गर्नुहोस्','Bắt đầu đọc hiểu','Mulai membaca','စာဖတ် စတင်','开始阅读','Simulan ang pagbasa'],
+samePsg:['上と同じ文章','Same passage as above','माथिकै पाठ','Cùng đoạn văn ở trên','Teks yang sama di atas','အထက်ပါ စာပိုဒ်','同上文章','Parehong talata sa itaas'],
+t_grammar:['（ ）に入る文法','Choose the grammar','सही व्याकरण छान्ने','Chọn ngữ pháp','Pilih tata bahasa','သဒ္ဒါရွေး','选择语法','Piliin ang gramatika'],
+t_order:['★に入るもの','Sentence order (★)','★ मा पर्ने शब्द','Sắp xếp câu (★)','Susun kalimat (★)','စာကြောင်းစီ (★)','句子排序（★）','Ayos ng pangungusap (★)'],
+t_bunsho:['文章の空欄','Passage blanks','अनुच्छेदको खाली ठाउँ','Chỗ trống trong đoạn văn','Isian paragraf','စာပိုဒ် ကွက်လပ်','文章填空','Patlang sa talata'],
+listen:["聴解", "Listening", "सुनाइ", "Nghe hiểu", "Menyimak", "နားထောင်ခြင်း", "听力", "Pakikinig"],
+listenSub:["{n}問 · 音声を聞いて答える", "{n} questions · listen and answer", "{n} प्रश्न · सुनेर उत्तर दिनुहोस्", "{n} câu · nghe và trả lời", "{n} soal · dengar dan jawab", "မေးခွန်း {n} · နားထောင်ပြီးဖြေ", "{n}题 · 听后回答", "{n} tanong · makinig at sumagot"],
+listenGo:["聴解を始める", "Start listening", "सुनाइ सुरु गर्नुहोस्", "Bắt đầu nghe", "Mulai menyimak", "နားထောင်ခြင်း စတင်", "开始听力", "Simulan ang pakikinig"],
+t_listen:["聞いて答える", "Listen and answer", "सुनेर उत्तर दिने", "Nghe và trả lời", "Dengar dan jawab", "နားထောင်ပြီးဖြေ", "听后回答", "Makinig at sumagot"],
+part3:["第3部", "Part 3", "तेस्रो भाग", "Phần 3", "Bagian 3", "အပိုင်း ၃", "第3部分", "Bahagi 3"],
+play:["▶ 音声を聞く", "▶ Play audio", "▶ आवाज सुन्नुहोस्", "▶ Nghe", "▶ Putar audio", "▶ နားထောင်ရန်", "▶ 播放", "▶ Pakinggan"],
+playing:["再生中…", "Playing…", "बज्दैछ…", "Đang phát…", "Memutar…", "ဖွင့်နေသည်…", "播放中…", "Nagpe-play…"],
+playOnce:["模試では音声は1回だけです", "Audio plays only once in the mock test", "Mock मा आवाज एक पटक मात्र बज्छ", "Chỉ phát một lần trong bài thi thử", "Audio hanya sekali di tes simulasi", "စမ်းသပ်စာမေးပွဲတွင် တစ်ကြိမ်သာ", "模拟考试只播放一次", "Isang beses lang sa mock test"],
+script:["スクリプト", "Script", "स्क्रिप्ट (संवाद)", "Lời thoại", "Naskah", "စာသား", "原文", "Script"],
+noVoice:["この端末に日本語の音声がありません。設定で日本語の読み上げ音声を追加してください。", "No Japanese voice on this device. Add a Japanese text-to-speech voice in settings.", "यो फोनमा जापानी आवाज छैन। Settings मा Text-to-speech मा जापानी आवाज थप्नुहोस्।", "Thiết bị không có giọng tiếng Nhật. Hãy thêm giọng đọc tiếng Nhật trong cài đặt.", "Tidak ada suara Jepang. Tambahkan suara Jepang di pengaturan.", "ဂျပန်အသံ မရှိပါ။ ဆက်တင်တွင် ထည့်ပါ။", "此设备没有日语语音，请在设置中添加。", "Walang Japanese na boses. Magdagdag sa settings."],
+total180:["合計", "Total", "जम्मा", "Tổng", "Total", "စုစုပေါင်း", "合计", "Kabuuan"],
+passRule3:["JLPTと同じ基準：各科目19点以上、合計95点以上で合格。", "JLPT rule: at least 19 in each section and 95/180 in total.", "JLPT कै नियम: हरेक खण्डमा कम्तीमा १९ र जम्मा ९५/१८० भए पास।", "Quy tắc JLPT: mỗi phần ≥19 và tổng ≥95/180.", "Aturan JLPT: tiap bagian ≥19 dan total ≥95/180.", "JLPT စည်းမျဉ်း: အပိုင်းတိုင်း ≥19၊ စုစုပေါင်း ≥95/180။", "JLPT标准：各科≥19分，总分≥95/180。", "Panuntunan JLPT: ≥19 bawat bahagi at ≥95/180 kabuuan."],
+t_dokkai:['文章を読んで答える','Read and answer','पढेर उत्तर दिने','Đọc và trả lời','Baca dan jawab','ဖတ်ပြီး ဖြေ','阅读回答','Basahin at sagutin'],
+part1:['第1部','Part 1','पहिलो भाग','Part 1','Part 1','Part 1','第1部','Part 1'],
+part2:['第2部','Part 2','दोस्रो भाग','Part 2','Part 2','Part 2','第2部','Part 2'],
+mockRule:['本番と同じ問題数・順番・時間です。時間になると自動で採点します。聴解はありません。','Same number of questions, order and time as the real exam. It is marked automatically when time runs out. No listening.','वास्तविक परीक्षाजस्तै प्रश्न संख्या, क्रम र समय। समय सकिएपछि आफैं जाँचिन्छ। सुन्ने (聴解) भाग छैन।','Same number of questions, order and time as the real exam. It is marked automatically when time runs out. No listening.','Same number of questions, order and time as the real exam. It is marked automatically when time runs out. No listening.','Same number of questions, order and time as the real exam. It is marked automatically when time runs out. No listening.','本番と同じ問題数・順番・時間です。時間になると自動で採点します。聴解はありません。','Same number of questions, order and time as the real exam. It is marked automatically when time runs out. No listening.'],
+done1:['おわり。つぎは第2部です。','finished. Next is Part 2.','सकियो। अब दोस्रो भाग।','finished. Next is Part 2.','finished. Next is Part 2.','finished. Next is Part 2.','おわり。つぎは第2部です。','finished. Next is Part 2.'],
+totalNoL:['合計（聴解なし）','Total (no listening)','जम्मा (聴解 बाहेक)','Total (no listening)','Total (no listening)','Total (no listening)','合計（聴解なし）','Total (no listening)'],
+passY:['の目安です','(estimate)','(अनुमान)','(estimate)','(estimate)','(estimate)','の目安です','(estimate)'],
+passN:['の目安です','(estimate)','(अनुमान)','(estimate)','(estimate)','(estimate)','の目安です','(estimate)'],
+passRule:['JLPTと同じ基準点：各科目19点以上。合格点95/180を聴解なしの120点に直して64点以上。','JLPT rules: at least 19 in each section; pass mark 95/180 scaled to 64/120 without listening.','JLPT कै नियम: हरेक खण्डमा कम्तीमा १९ अंक; पास अंक ९५/१८० लाई 聴解 बिना १२० मा बदल्दा ६४।','JLPT rules: at least 19 in each section; pass mark 95/180 scaled to 64/120 without listening.','JLPT rules: at least 19 in each section; pass mark 95/180 scaled to 64/120 without listening.','JLPT rules: at least 19 in each section; pass mark 95/180 scaled to 64/120 without listening.','JLPTと同じ基準点：各科目19点以上。合格点95/180を聴解なしの120点に直して64点以上。','JLPT rules: at least 19 in each section; pass mark 95/180 scaled to 64/120 without listening.'],
+t_usage:['正しい使い方','Correct usage','प्रयोग','Cách dùng đúng','Penggunaan benar','မှန်ကန်သော အသုံး','正确用法','Tamang gamit'],
+close:['閉じる','Close','बन्द','Đóng','Tutup','ပိတ်ရန်','关闭','Isara'],
+stroke:['↻ 書き順','↻ Stroke order','↻ स्ट्रोक क्रम','↻ Thứ tự nét','↻ Urutan goresan','↻ ရေးဆွဲစဉ်','↻ 笔顺','↻ Ayos ng stroke'],
+meaningL:['意味','Meaning','अर्थ','Nghĩa','Arti','အဓိပ္ပာယ်','意思','Kahulugan'],
+strokes:['画数','Strokes','स्ट्रोक','Số nét','Goresan','ရေးချက်','笔画','Stroke'],
+rel:['この漢字を使う他の単語：','Other words with this kanji:','यो कान्जी भएका अरू शब्द:','Từ khác có Kanji này:','Kata lain dengan kanji ini:','ဤခန်းဂျီးပါသော အခြားစကားလုံး:','含此汉字的其他单词：','Ibang salita na may kanji na ito:'],
+noK:['この単語に漢字はありません。','This word has no kanji.','यो शब्दमा कान्जी छैन।','Từ này không có Kanji.','Kata ini tidak memiliki kanji.','ဤစကားလုံးတွင် ခန်းဂျီး မပါပါ။','这个单词没有汉字。','Walang kanji ang salitang ito.'],
+exs:['模試に出た文','Sentences from the model sets','मोडल सेटमा आएको वाक्य','Câu trong đề mẫu','Kalimat dari set model','နမူနာစုံတွင် ပါသော ဝါကျ','模拟题中的例句','Mga pangungusap mula sa model set'],
+kFail:['漢字データを読み込めませんでした。','Kanji data failed to load.','कान्जी डाटा लोड भएन।','Không tải được dữ liệu Kanji.','Data kanji gagal dimuat.','ခန်းဂျီး ဒေတာ မဖွင့်နိုင်ပါ။','汉字数据加载失败。','Hindi na-load ang data ng kanji.'],
+choose:['練習を選ぶ','Choose practice','अभ्यास छान्नुहोस्','Chọn bài luyện','Pilih latihan','လေ့ကျင့်ခန်း ရွေးပါ','选择练习','Pumili ng practice'],
+all:['すべて','All','सबै','Tất cả','Semua','အားလုံး','全部','Lahat'],
+set:['セット','Set','सेट','Bộ','Set','အစုံ','套题','Set'],
+setN:['第{n}回','Set {n}','सेट {n}','Bộ {n}','Set {n}','အစုံ {n}','第{n}套','Set {n}'],
+allSets:['全セット','All sets','सबै सेट','Tất cả các bộ','Semua set','အစုံ အားလုံး','全部套题','Lahat ng set'],
+order:['順番','Order','क्रम','Thứ tự','Urutan','အစီအစဉ်','顺序','Pagkakasunod'],
+ordExam:['試験の順番','Exam order','परीक्षाको क्रम','Theo thứ tự đề','Urutan ujian','စာမေးပွဲ အစီအစဉ်','按考试顺序','Ayos ng exam'],
+ordShuf:['ランダム','Shuffle','मिसाएर (random)','Ngẫu nhiên','Acak','ကျပန်း','随机','Shuffle'],
+ordNew:['未回答のみ','Only new','नगरेका मात्र','Chỉ câu chưa làm','Hanya yang baru','မဖြေရသေးသည်များသာ','只做新题','Bago lang'],
+start:['スタート →','Start →','सुरु गर्नुहोस् →','Bắt đầu →','Mulai →','စတင် →','开始 →','Simulan →'],
+mockH:['JLPT本番のような試験','A test just like the JLPT','JLPT जस्तै परीक्षा','Bài thi giống JLPT thật','Ujian seperti JLPT asli','JLPT ကဲ့သို့ စာမေးပွဲ','和JLPT一样的考试','Pagsusulit na parang JLPT'],
+mockD:['1セットの文字・語彙を時間制限付きで一度に解きます。最後に60点満点の推定点を表示します。','All 文字・語彙 questions of one set with a time limit. At the end you get an estimated score out of 60.','एउटा सेटका सबै 文字・語彙 प्रश्न एकैचोटि, समय सीमासहित। अन्त्यमा ६० मध्ये अनुमानित अंक।','Làm toàn bộ câu 文字・語彙 của một bộ trong thời gian giới hạn. Cuối cùng có điểm ước tính trên 60.','Semua soal 文字・語彙 dari satu set dengan batas waktu. Di akhir ada perkiraan nilai dari 60.','အစုံတစ်ခု၏ 文字・語彙 မေးခွန်းအားလုံးကို အချိန်ကန့်သတ်ဖြင့် ဖြေရမည်။ နောက်ဆုံးတွင် ၆၀ အနက် ခန့်မှန်းရမှတ် ပြမည်။','在限定时间内完成一套的全部文字・词汇题，最后显示满分60的估计分数。','Lahat ng tanong na 文字・語彙 ng isang set na may oras. Sa dulo, tantiyang iskor mula sa 60.'],
+time:['時間','Time','समय','Thời gian','Waktu','အချိန်','时间','Oras'],
+min:['{n}分','{n} min','{n} मिनेट','{n} phút','{n} menit','{n} မိနစ်','{n}分钟','{n} minuto'],
+jlptLike:['（本番と同じ）','(like JLPT)','(JLPT जस्तै)','(như JLPT)','(seperti JLPT)','(JLPT ကဲ့သို့)','（同JLPT）','(gaya ng JLPT)'],
+hard:['（難しい）','(hard)','(कडा)','(khó)','(sulit)','(ခက်)','（难）','(mahirap)'],
+startExam:['試験を始める','Start the test','परीक्षा सुरु गर्नुहोस्','Bắt đầu thi','Mulai ujian','စာမေးပွဲ စတင်','开始考试','Simulan ang pagsusulit'],
+last:['前回 {n}/60','last {n}/60','पछिल्लो {n}/60','lần trước {n}/60','terakhir {n}/60','နောက်ဆုံး {n}/60','上次 {n}/60','huli {n}/60'],
+noMist:['間違えた問題はありません。まず練習しましょう。','No mistakes yet. Practice first!','गल्ती भएका प्रश्न छैनन्। पहिले अभ्यास गर्नुहोस्।','Chưa có câu sai. Hãy luyện tập trước!','Belum ada kesalahan. Latihan dulu!','အမှား မရှိသေးပါ။ အရင် လေ့ကျင့်ပါ။','还没有错题，先去练习吧！','Wala pang mali. Mag-practice muna!'],
+noQs:['この条件の問題はありません。','No questions for this choice.','यो छनोटमा प्रश्न छैनन्।','Không có câu hỏi cho lựa chọn này.','Tidak ada soal untuk pilihan ini.','ဤရွေးချယ်မှုတွင် မေးခွန်း မရှိပါ။','没有符合条件的题目。','Walang tanong para dito.'],
+revT:['間違いの復習','Review mistakes','गल्ती दोहोर्‍याउने','Ôn câu sai','Ulangi kesalahan','အမှားများ ပြန်လေ့လာ','复习错题','Ulitin ang mga mali'],
+furi:['ふりがな','Furigana','फुरिगाना','Furigana','Furigana','ဖူရီဂါနာ','假名注音','Furigana'],
+pageOf:['{a} / {b} ページ','Page {a} / {b}','पेज {a} / {b}','Trang {a} / {b}','Halaman {a} / {b}','စာမျက်နှာ {a} / {b}','第 {a} / {b} 页','Pahina {a} / {b}'],
+qN:['{n}問','{n} questions','{n} प्रश्न','{n} câu','{n} soal','မေးခွန်း {n}','{n} 题','{n} tanong'],
+right:['〇 正解！','〇 Correct!','〇 सही!','〇 Đúng!','〇 Benar!','〇 မှန်သည်!','〇 正确！','〇 Tama!'],
+wrong:['✕ 不正解','✕ Wrong','✕ गलत','✕ Sai','✕ Salah','✕ မှားသည်','✕ 错误','✕ Mali'],
+ans:['正解','Correct answer','सही उत्तर','Đáp án đúng','Jawaban benar','အဖြေမှန်','正确答案','Tamang sagot'],
+youChose:['あなたの答え {c}','You chose {c}','तपाईंले {c} छान्नुभयो','Bạn chọn {c}','Anda memilih {c}','သင်ရွေးသည် {c}','你选了 {c}','Pinili mo ang {c}'],
+noAns:['未回答','Not answered','उत्तर दिनुभएन','Chưa trả lời','Tidak dijawab','မဖြေရသေး','未作答','Hindi sinagot'],
+result:['結果','Result','नतिजा','Kết quả','Hasil','ရလဒ်','结果','Resulta'],
+est:['推定点：','Estimated score:','अनुमानित अंक:','Điểm ước tính:','Perkiraan nilai:','ခန့်မှန်းရမှတ်:','估计分数：','Tantiyang iskor:'],
+passNote:['JLPT N3の言語知識の基準点は19/60です。この点数は目安です。','JLPT N3 needs at least 19/60 in language knowledge. This score is only an estimate.','JLPT N3 मा 言語知識 खण्डको न्यूनतम १९/६० चाहिन्छ। यो अंक अनुमान मात्र हो।','JLPT N3 cần tối thiểu 19/60 phần kiến thức ngôn ngữ. Điểm này chỉ là ước tính.','JLPT N3 butuh minimal 19/60 di bagian pengetahuan bahasa. Nilai ini hanya perkiraan.','JLPT N3 တွင် ဘာသာစကားအသိပညာ အနည်းဆုံး ၁၉/၆၀ လိုသည်။ ဤရမှတ်သည် ခန့်မှန်းချက်သာ ဖြစ်သည်။','JLPT N3 语言知识部分至少需要19/60。此分数仅供参考。','Kailangan ng JLPT N3 ang hindi bababa sa 19/60 sa kaalaman sa wika. Tantiya lang ang iskor na ito.'],
+getCert:['🎓 修了証をもらう','🎓 Get your certificate','🎓 सर्टिफिकेट लिनुहोस्','🎓 Nhận chứng chỉ','🎓 Ambil sertifikat','🎓 လက်မှတ် ရယူရန်','🎓 领取证书','🎓 Kunin ang sertipiko'],
+certNeed:['36/60以上で修了証がもらえます。','Score 36/60 or more to get a certificate.','३६/६० वा बढी ल्याए सर्टिफिकेट पाइन्छ।','Đạt 36/60 trở lên để nhận chứng chỉ.','Raih 36/60 atau lebih untuk sertifikat.','၃၆/၆၀ နှင့်အထက် ရလျှင် လက်မှတ်ရမည်။','达到36/60以上即可获得证书。','Kumuha ng 36/60 pataas para sa sertipiko.'],
+perfect:['はなまる！全問正解。すばらしい！','Hanamaru! All correct. Excellent!','はなまる！ सबै सही। धेरै राम्रो!','Hanamaru! Đúng hết. Xuất sắc!','Hanamaru! Semua benar. Hebat!','はなまる! အားလုံးမှန်သည်။ အလွန်တော်သည်!','はなまる！全部正确，太棒了！','Hanamaru! Lahat tama. Napakahusay!'],
+good:['よくできました！✕の問題の正解を確認しましょう。','Well done! Check the correct answers for the ✕ ones.','राम्रो! ✕ भएका प्रश्नको सही उत्तर हेर्नुहोस्।','Tốt lắm! Xem đáp án đúng của câu ✕.','Bagus! Lihat jawaban benar untuk yang ✕.','ကောင်းသည်! ✕ ဖြစ်သော မေးခွန်းများ၏ အဖြေမှန်ကို ကြည့်ပါ။','做得好！看看✕题的正确答案。','Magaling! Tingnan ang tamang sagot sa mga ✕.'],
+again:['大丈夫！正解を見て、もう一度挑戦しましょう。','No worries! Check the answers and try again.','चिन्ता नगर्नुहोस्। सही उत्तर हेरेर फेरि प्रयास गर्नुहोस्।','Đừng lo! Xem đáp án và thử lại.','Tidak apa-apa! Lihat jawabannya dan coba lagi.','စိတ်မပူပါနှင့်။ အဖြေကြည့်ပြီး ထပ်ကြိုးစားပါ။','别担心！看看答案再试一次。','Ayos lang! Tingnan ang sagot at subukang muli.'],
+next:['次の問題 →','Next Question →','अर्को प्रश्न →','Câu tiếp theo →','Soal berikutnya →','နောက်မေးခွန်း →','下一页 →','Susunod na tanong →'],
+fin:['終了 · もう一度選ぶ','Done · choose again','सकियो · फेरि छान्नुहोस्','Xong · chọn lại','Selesai · pilih lagi','ပြီးပြီ · ပြန်ရွေးရန်','完成 · 重新选择','Tapos · pumili ulit'],
+answered:['{a}/{b} 回答済み','{a}/{b} answered','{a}/{b} उत्तर दिइयो','Đã trả lời {a}/{b}','{a}/{b} dijawab','{a}/{b} ဖြေပြီး','已答 {a}/{b}','{a}/{b} nasagot'],
+check:['答え合わせ 〇✕','Check answers 〇✕','उत्तर जाँच्नुहोस् 〇✕','Kiểm tra đáp án 〇✕','Periksa jawaban 〇✕','အဖြေစစ်ရန် 〇✕','核对答案 〇✕','Suriin ang sagot 〇✕'],
+remain:['あと{n}問 · もう一度押すと採点','{n} left · tap again to check','{n} प्रश्न बाँकी छ · फेरि थिच्दा जाँचिन्छ','Còn {n} câu · chạm lần nữa để chấm','Sisa {n} · ketuk lagi untuk periksa','{n} ပုဒ်ကျန် · ထပ်နှိပ်လျှင် စစ်မည်','还剩{n}题 · 再点一次核对','{n} pa · i-tap ulit para suriin'],
+timeUp:['時間切れ。採点しました。','Time is up. Answers checked.','समय सकियो। उत्तर जाँचियो।','Hết giờ. Đã chấm bài.','Waktu habis. Jawaban diperiksa.','အချိန်ပြည့်ပြီ။ အဖြေစစ်ပြီး။','时间到，已核对答案。','Ubos na ang oras. Nasuri na.'],
+srsLeft:['今日残り {a} · 覚えた単語 {b}/{c}','Left today {a} · learned {b}/{c}','आज बाँकी {a} · सिकिसकेका {b}/{c}','Còn hôm nay {a} · đã học {b}/{c}','Sisa hari ini {a} · dipelajari {b}/{c}','ယနေ့ကျန် {a} · သင်ပြီး {b}/{c}','今日剩余 {a} · 已学 {b}/{c}','Natitira ngayon {a} · natutunan {b}/{c}'],
+newW:['新しい単語','New word','नयाँ शब्द','Từ mới','Kata baru','စကားလုံးသစ်','新单词','Bagong salita'],
+revW:['復習','Review','दोहोर्‍याइ','Ôn tập','Ulangan','ပြန်လေ့လာ','复习','Review'],
+recall:['意味を思い出してからタップ','Recall the meaning, then tap','अर्थ सम्झनुहोस्, अनि थिचेर हेर्नुहोस्','Nhớ nghĩa rồi chạm để xem','Ingat artinya, lalu ketuk','အဓိပ္ပာယ်ကို စဉ်းစားပြီး နှိပ်ပါ','先回想意思，再点击','Alalahanin ang kahulugan, saka i-tap'],
+flip:['カードをめくる','Flip card','कार्ड पल्टाउनुहोस्','Lật thẻ','Balik kartu','ကတ်လှန်ရန်','翻卡','Baligtarin ang card'],
+showM:['意味を見る','Show meaning','अर्थ हेर्नुहोस्','Xem nghĩa','Lihat arti','အဓိပ္ပာယ်ကြည့်','看意思','Ipakita ang kahulugan'],
+forgot:['忘れた','Forgot','बिर्सें','Quên','Lupa','မေ့သွားပြီ','忘了','Nakalimutan'],
+againToday:['今日もう一度','Again today','आज फेरि','Hôm nay lại','Lagi hari ini','ယနေ့ ထပ်','今天再来','Ulit ngayon'],
+remember:['覚えた','Remembered','याद छ','Nhớ','Ingat','မှတ်မိသည်','记得','Naalala'],
+inDays:['{n}日後','in {n} days','{n} दिनपछि','sau {n} ngày','{n} hari lagi','{n} ရက်အကြာ','{n}天后','sa {n} araw'],
+easy:['簡単','Easy','सजिलो','Dễ','Mudah','လွယ်သည်','简单','Madali'],
+srsDone:['💮 今日の復習は終わりました！','💮 Today\'s review is done!','💮 आजको दोहोर्‍याइ सकियो!','💮 Đã ôn xong hôm nay!','💮 Ulangan hari ini selesai!','💮 ယနေ့ ပြန်လေ့လာမှု ပြီးပြီ!','💮 今日复习完成！','💮 Tapos na ang review ngayon!'],
+learn10:['新しい単語を10個学ぶ','Learn 10 new words','१० नयाँ शब्द सिक्नुहोस्','Học 10 từ mới','Pelajari 10 kata baru','စကားလုံးသစ် ၁၀ လုံး သင်ရန်','学习10个新单词','Mag-aral ng 10 bagong salita'],
+search:['検索：漢字 / ひらがな / ネパール語 / 英語','Search: kanji / hiragana / Nepali / English','खोज्नुहोस्: 漢字 / ひらがな / नेपाली / English','Tìm: kanji / hiragana / tiếng Nepal / tiếng Anh','Cari: kanji / hiragana / Nepal / Inggris','ရှာရန်: ခန်းဂျီး / ဟိရဂါနာ / နီပေါ / အင်္ဂလိပ်','搜索：汉字 / 平假名 / 尼泊尔语 / 英语','Hanapin: kanji / hiragana / Nepali / English'],
+searchL:['検索','Search','खोज्नुहोस्','Tìm','Cari','ရှာရန်','搜索','Hanapin'],
+t1:['最重要','Most important','अत्यन्त महत्त्वपूर्ण','Rất quan trọng','Sangat penting','အလွန်အရေးကြီး','最重要','Pinakamahalaga'],
+t2:['重要','Important','महत्त्वपूर्ण','Quan trọng','Penting','အရေးကြီး','重要','Mahalaga'],
+t3:['その他','Others','अरू','Khác','Lainnya','အခြား','其他','Iba pa'],
+legR:['赤太字 = 最重要','Red bold = most important','रातो बोल्ड = अत्यन्त महत्त्वपूर्ण','Đỏ đậm = rất quan trọng','Merah tebal = sangat penting','အနီထူ = အလွန်အရေးကြီး','红色粗体 = 最重要','Pulang bold = pinakamahalaga'],
+legB:['黒太字 = 重要','Black bold = important','कालो बोल्ड = महत्त्वपूर्ण','Đen đậm = quan trọng','Hitam tebal = penting','အနက်ထူ = အရေးကြီး','黑色粗体 = 重要','Itim na bold = mahalaga'],
+legN:['普通 = その他','Normal = less important','सामान्य = कम महत्त्वपूर्ण','Thường = ít quan trọng','Biasa = kurang penting','ပုံမှန် = အရေးနည်း','普通 = 次要','Karaniwan = hindi gaanong mahalaga'],
+tapHint:['単語をタップすると漢字カードが開きます','Tap a word to open its kanji card','शब्दमा थिच्दा कान्जी कार्ड खुल्छ','Chạm vào từ để mở thẻ Kanji','Ketuk kata untuk membuka kartu kanji','စကားလုံးကို နှိပ်လျှင် ခန်းဂျီးကတ် ပွင့်မည်','点击单词打开汉字卡','I-tap ang salita para buksan ang kanji card'],
+wN:['{n}語','{n} words','{n} शब्द','{n} từ','{n} kata','စကားလုံး {n}','{n} 个单词','{n} salita'],
+nothing:['見つかりませんでした。','Nothing found. Try another word.','केही भेटिएन। अर्को शब्द खोज्नुहोस्।','Không tìm thấy. Hãy thử từ khác.','Tidak ditemukan. Coba kata lain.','မတွေ့ပါ။ အခြားစကားလုံး ရှာပါ။','未找到，请换个词。','Walang nahanap. Subukan ang ibang salita.'],
+colW:['単語','Word','शब्द','Từ','Kata','စကားလုံး','单词','Salita'],
+colF:['ふりがな','Furigana','फुरिगाना','Furigana','Furigana','ဖူရီဂါနာ','读音','Furigana'],
+colNe:['ネパール語','Nepali','नेपाली','Tiếng Nepal','Nepal','နီပေါ','尼泊尔语','Nepali'],
+colEn:['英語','English','English','Tiếng Anh','Inggris','အင်္ဂလိပ်','英语','English'],
+first400:['最初の400語を表示中。検索かセットで絞り込んでください。','Showing the first 400. Search or pick a set to narrow down.','पहिलो ४०० देखाइएको छ। खोजेर वा सेट छानेर साँघुरो बनाउनुहोस्।','Đang hiện 400 từ đầu. Hãy tìm hoặc chọn bộ để thu hẹp.','Menampilkan 400 pertama. Cari atau pilih set untuk mempersempit.','ပထမ ၄၀၀ ကို ပြထားသည်။ ရှာ၍ သို့မဟုတ် အစုံရွေး၍ ကျဉ်းပါ။','显示前400个。请搜索或选择套题缩小范围。','Unang 400 ang ipinapakita. Maghanap o pumili ng set.'],
+certT:['🎓 修了証','🎓 Certificate','🎓 सर्टिफिकेट','🎓 Chứng chỉ','🎓 Sertifikat','🎓 လက်မှတ်','🎓 证书','🎓 Sertipiko'],
+certName:['修了証に書く名前（この端末にだけ保存されます）','Name for the certificate (saved only on this device)','सर्टिफिकेटमा लेख्ने नाम (यो नाम तपाईंकै फोनमा मात्र रहन्छ)','Tên trên chứng chỉ (chỉ lưu trên thiết bị này)','Nama di sertifikat (hanya disimpan di perangkat ini)','လက်မှတ်ပေါ်ရှိ အမည် (ဤစက်တွင်သာ သိမ်းမည်)','证书上的姓名（仅保存在本设备）','Pangalan sa sertipiko (sa device na ito lang naka-save)'],
+certMake:['修了証を作る','Create certificate','सर्टिफिकेट बनाउनुहोस्','Tạo chứng chỉ','Buat sertifikat','လက်မှတ် ပြုလုပ်ရန်','生成证书','Gumawa ng sertipiko'],
+certHint:['画像を長押しして保存、または下のボタンを押してください。','Long-press the image to save, or tap the button below.','फोनमा तस्बिरमा थिचिराखेर सेभ गर्नुहोस्, वा तलको बटन थिच्नुहोस्।','Nhấn giữ ảnh để lưu, hoặc chạm nút bên dưới.','Tekan lama gambar untuk menyimpan, atau ketuk tombol di bawah.','ပုံကို ဖိထားပြီး သိမ်းပါ သို့မဟုတ် အောက်ခလုတ်ကို နှိပ်ပါ။','长按图片保存，或点击下方按钮。','Pindutin nang matagal ang larawan para i-save, o i-tap ang button sa ibaba.'],
+save:['⬇ 保存','⬇ Save','⬇ सेभ गर्नुहोस्','⬇ Lưu','⬇ Simpan','⬇ သိမ်းရန်','⬇ 保存','⬇ I-save'],
+lp:['画像を長押しして保存してください。','Long-press the image to save it.','तस्बिरमा थिचिराखेर सेभ गर्नुहोस्।','Nhấn giữ ảnh để lưu.','Tekan lama gambar untuk menyimpan.','ပုံကို ဖိထားပြီး သိမ်းပါ။','长按图片保存。','Pindutin nang matagal ang larawan para i-save.']
+};
+let LI=2;
+function t(k,v){const a=I[k];let s=a?(a[LI]||a[1]):k;if(v)for(const x in v)s=s.split('{'+x+'}').join(v[x]);return s}
+
+(function(){
+const SALT='raku-nihongo|';
+const KANJI_T=['reading','writing'], MEAN_T=['context','paraphrase','usage'], GRAM_T=['grammar','order','bunsho'], READ_T=['dokkai'], LISTEN_T=['listen'], ALL_T=KANJI_T.concat(MEAN_T,GRAM_T,READ_T,LISTEN_T);
+const SECT={kanji:KANJI_T,mean:MEAN_T,gram:GRAM_T,read:READ_T,listen:LISTEN_T};const SECJ={kanji:'漢字',mean:'語彙',gram:'文法',read:'読解',listen:'聴解'};const secOf=ty=>Object.keys(SECT).find(k=>SECT[k].includes(ty))||'kanji';
+const TL={reading:'漢字読み',writing:'表記',context:'文脈規定',paraphrase:'言い換え類義',usage:'用法',grammar:'文法形式',order:'文の組み立て',bunsho:'文章の文法',dokkai:'読解',listen:'聴解'};
+const TN=k=>LI===0?'':t('t_'+k);
+const C='①②③④';
+const MOJ={1:{1:'＿＿＿のことばの読み方として最もよいものを、１・２・３・４から一つえらびなさい。',2:'＿＿＿のことばを漢字で書くとき、最もよいものを、１・２・３・４から一つえらびなさい。',3:'（　　）に入れるのに最もよいものを、１・２・３・４から一つえらびなさい。',4:'＿＿＿に意味が最も近いものを、１・２・３・４から一つえらびなさい。',5:'つぎのことばの使い方として最もよいものを、１・２・３・４から一つえらびなさい。'},
+ 2:{1:'つぎの文の（　　）に入れるのに最もよいものを、１・２・３・４から一つえらびなさい。',2:'つぎの文の　★　に入る最もよいものを、１・２・３・４から一つえらびなさい。',3:'つぎの文章を読んで、文章全体の内容を考えて、（　）に入る最もよいものを、１・２・３・４から一つえらびなさい。',4:'つぎの（１）から（４）の文章を読んで、質問に答えなさい。答えは、１・２・３・４から最もよいものを一つえらびなさい。',5:'つぎの（１）と（２）の文章を読んで、質問に答えなさい。答えは、１・２・３・４から最もよいものを一つえらびなさい。',6:'つぎの文章を読んで、質問に答えなさい。答えは、１・２・３・４から最もよいものを一つえらびなさい。',7:'右のページは、ある案内である。これを読んで、下の質問に答えなさい。答えは、１・２・３・４から最もよいものを一つえらびなさい。'},
+ 3:{1:'問題１では、まず質問を聞いてください。それから話を聞いて、１から４の中から、最もよいものを一つえらんでください。',2:'問題２では、まず質問を聞いてください。そのあと、せんたくしを読んでください。それから話を聞いて、１から４の中から、最もよいものを一つえらんでください。',3:'問題３では、問題用紙に何もいんさつされていません。話の前に質問はありません。まず話を聞いてください。それから、質問とせんたくしを聞いて、１から４の中から、最もよいものを一つえらんでください。',4:'問題４では、絵を見ながら質問を聞いてください。やじるし（➡️）の人は何と言いますか。１から３の中から、最もよいものを一つえらんでください。',5:'問題５では、問題用紙に何もいんさつされていません。まず文を聞いてください。それから、その返事を聞いて、１から３の中から、最もよいものを一つえらんでください。'}};
+const PTS={1:{1:2,2:2,3:2,4:2,5:3},2:{1:1,2:2,3:3,4:5,5:6,6:10,7:6},3:{1:3,2:2,3:3,4:2,5:1}};
+const PART={1:['言語知識（文字・語彙）',30],2:['言語知識（文法）・読解',70],3:['聴解',40]};
+function jlptScore(rs){const raw={g:0,gm:0,r:0,rm:0,l:0,lm:0};rs.forEach(([q,ok])=>{const p=(PTS[q.pt]||{})[q.mo]||1;const k=q.pt===3?'l':(q.pt===2&&q.mo>=4)?'r':'g';raw[k+'m']+=p;if(ok)raw[k]+=p});
+  const lk=raw.gm?Math.round(raw.g/raw.gm*60):0,rd=raw.rm?Math.round(raw.r/raw.rm*60):0,ls=raw.lm?Math.round(raw.l/raw.lm*60):0,hasL=raw.lm>0;
+  return {lk,rd,ls,hasL,tot:lk+rd+ls,hasR:raw.rm>0,pass:hasL?(lk>=19&&rd>=19&&ls>=19&&lk+rd+ls>=95):(raw.rm>0&&lk>=19&&rd>=19&&lk+rd>=64)}}
+/* ---------- 聴解 audio (device Japanese voice) ---------- */
+const TTS={v:[],busy:false,load(){try{this.v=speechSynthesis.getVoices().filter(v=>/^ja/i.test(v.lang))}catch(e){this.v=[]}},
+  ok(){return 'speechSynthesis' in window},
+  voice(sp){const a=this.v;if(!a.length)return null;const fem=a.filter(v=>/female|kyoko|haruka|nanami|ayumi|mizuki|sayaka|o-ren|女性/i.test(v.name)),mal=a.filter(v=>/(^|[^e])male|otoya|ichiro|keita|hattori|kenji|takumi|daichi|男性/i.test(v.name));
+    if(sp==='M')return mal[0]||a[a.length>1?1:0];return fem[0]||a[0]},
+  stop(){this.busy=false;try{speechSynthesis.cancel()}catch(e){}},
+  lines(q){const L=[];const say=(sp,tx)=>L.push([sp,tx]);const o=q.o;const nums=['１','２','３','４'];
+    if(q.mo===4){say('N',q.in);o.forEach((x,j)=>say('M',nums[j]+'、'+x))}
+    else if(q.mo===5){q.sc.forEach(l=>say(l[0],l[1]));const other=q.sc[0][0]==='M'?'F':'M';o.forEach((x,j)=>say(other,nums[j]+'、'+x))}
+    else{say('N',q.in);if(q.mo===2)say('P','');q.sc.forEach(l=>say(l[0],l[1]));say('N',q.q);if(q.mo===3)o.forEach((x,j)=>say('N',nums[j]+'、'+x))}
+    return L},
+  play(q,done){if(!this.ok()){done&&done(false);return}this.load();this.stop();this.busy=true;const L=this.lines(q);let i=0;const same=this.v.length<2;
+    const nx=()=>{if(!this.busy)return;if(i>=L.length){this.busy=false;done&&done(true);return}const [sp,tx]=L[i++];
+      if(sp==='P'||!tx){setTimeout(nx,sp==='P'?2500:300);return}
+      const u=new SpeechSynthesisUtterance(tx);u.lang='ja-JP';const vv=this.voice(sp);if(vv)u.voice=vv;u.rate=.95;
+      u.pitch=sp==='M'?(same?.7:.9):sp==='F'?(same?1.35:1.1):1;u.onend=()=>setTimeout(nx,/^[１２３４]、/.test(tx)?700:450);u.onerror=()=>setTimeout(nx,200);speechSynthesis.speak(u)};
+    nx()}};
+try{speechSynthesis.onvoiceschanged=()=>TTS.load();TTS.load()}catch(e){}
+let D=null, LOGIN=null, isOwner=false, ART=null, KJ=null, KEYS=null, UNL=false, LX={};
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const LS={get(k,d){try{const v=localStorage.getItem('rk_'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('rk_'+k,JSON.stringify(v))}catch(e){}}};
+const SS={get(k){try{return sessionStorage.getItem('rk_'+k)}catch(e){return null}},set(k,v){try{sessionStorage.setItem('rk_'+k,v)}catch(e){}}};
+function toast(s){const el=$('#toast');el.textContent=s;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,2600)}
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const dayNum=()=>Math.floor((Date.now()-new Date().getTimezoneOffset()*6e4)/864e5);
+
+/* language */
+function setLang(code){const i=LANGS.findIndex(l=>l[0]===code);LI=i<0?2:i;LS.set('lang',LANGS[LI][0]);document.documentElement.lang=LANGS[LI][0]}
+(function(){let c=LS.get('lang',null);if(!c){const n=(navigator.language||'').slice(0,2).toLowerCase();c=({ja:'ja',en:'en',ne:'ne',vi:'vi',id:'id',ms:'id',my:'my',zh:'zh',tl:'tl',fil:'tl'})[n]||'ne'}setLang(c)})();
+const langSel=id=>`<label class="langsel" title="${t('lang')}"><span aria-hidden="true">🌐</span><select id="${id}" aria-label="${t('lang')}">${LANGS.map(([c,n],i)=>`<option value="${c}" ${i===LI?'selected':''}>${n}</option>`).join('')}</select></label>`;
+function bindLang(id){const s=document.getElementById(id);if(s)s.onchange=e=>{setLang(e.target.value);render()}}
+
+/* sha256 */
+function sha256js(ascii){function r(v,a){return(v>>>a)|(v<<(32-a))}const mp=Math.pow,mw=mp(2,32);let res='',words=[],bl=ascii.length*8,hash=[],k=[],pc=0,ic={};for(let c=2;pc<64;c++){if(!ic[c]){for(let i=0;i<313;i+=c)ic[i]=c;hash[pc]=(mp(c,.5)*mw)|0;k[pc++]=(mp(c,1/3)*mw)|0}}hash=hash.slice(0,8);ascii+='\x80';while(ascii.length%64-56)ascii+='\x00';for(let i=0;i<ascii.length;i++){const j=ascii.charCodeAt(i);words[i>>2]|=j<<((3-i)%4)*8}words[words.length]=((bl/mw)|0);words[words.length]=(bl);for(let j=0;j<words.length;){const w=words.slice(j,j+=16),oh=hash;hash=hash.slice(0,8);for(let i=0;i<64;i++){const w15=w[i-15],w2=w[i-2],a=hash[0],e=hash[4];const t1=hash[7]+(r(e,6)^r(e,11)^r(e,25))+((e&hash[5])^((~e)&hash[6]))+k[i]+(w[i]=(i<16)?w[i]:(w[i-16]+(r(w15,7)^r(w15,18)^(w15>>>3))+w[i-7]+(r(w2,17)^r(w2,19)^(w2>>>10)))|0);const t2=(r(a,2)^r(a,13)^r(a,22))+((a&hash[1])^(a&hash[2])^(hash[1]&hash[2]));hash=[(t1+t2)|0].concat(hash);hash[4]=(hash[4]+t1)|0}for(let i=0;i<8;i++)hash[i]=(hash[i]+oh[i])|0}for(let i=0;i<8;i++)for(let j=3;j+1;j--){const b=(hash[i]>>(j*8))&255;res+=((b<16)?0:'')+b.toString(16)}return res}
+async function sha256(s){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){return sha256js(unescape(encodeURIComponent(s)))}}
+
+/* settings + progress */
+const S=Object.assign({furi:false,goal:20},LS.get('set',{}));
+const saveS=()=>LS.set('set',S);
+const P={res:LS.get('res',{}),days:LS.get('days',[]),log:LS.get('log',{}),hana:LS.get('hana',0),
+  save(){LS.set('res',this.res);LS.set('days',this.days);LS.set('log',this.log);LS.set('hana',this.hana)},
+  mark(id,ok){this.res[id]=ok?1:0;const d=today();if(!this.days.includes(d))this.days.push(d);this.log[d]=(this.log[d]||0)+1}};
+const qid=q=>q.s+'-'+q.n;
+function streak(){const s=new Set(P.days);let n=0;const d=new Date();const f=x=>x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');if(!s.has(f(d)))d.setDate(d.getDate()-1);while(s.has(f(d))){n++;d.setDate(d.getDate()-1)}return n}
+const IV=[0,1,3,7,14,30];
+const SR={c:LS.get('srs',{}),save(){LS.set('srs',this.c)},
+  due(){const n=dayNum();return D.w.filter(w=>{const c=this.c[w[0]];return c&&c.d<=n})},
+  fresh(k){return D.w.filter(w=>!this.c[w[0]]).slice(0,k)},
+  rate(w,r){const c=this.c[w]||{b:0,d:0};c.b=r===0?0:Math.min(5,c.b+(r===2?2:1));c.d=dayNum()+(r===0?0:IV[c.b]);this.c[w]=c;this.save()}};
+
+/* theme */
+function setTheme(v){if(v)document.documentElement.setAttribute('data-theme',v);else document.documentElement.removeAttribute('data-theme');LS.set('theme',v)}
+setTheme(LS.get('theme',null));
+
+/* ---------- opening screen: ink-drawn 楽 hanko + aurora ---------- */
+const RAKU=["M52.99,11c0.01,1-0.13,1.85-0.49,2.5c-0.96,2.28-4.06,5.8-6.91,8.18","M40.25,22.82c1.02,1.2,1.520,2.13,1.59,3.43c0.18,3.66,0.58,14.52,0.93,21.23c0.1,1.93,0.18,3.01,0.21,3.94","M42.02,23.77c0.46-0.02,19.25-2.12,20.85-2.23c1.68-0.12,2.640,1.22,2.640,2.27c0,1.24-0.89,14.65-1.22,23.45c-0.06,1.57-0.1,2.48-0.14,3.64","M43.41,36.12c3,0,17.27-1.75,20.66-1.75","M44.13,49.6c4.43,0,13.11-1.01,18.85-1.01","M20.22,20c3.89,1.72,10.05,7.07,11.03,9.75","M16.92,54.38c1.46,0.87,2.81,0.38,3.89-0.5c1.05-0.85,7.42-7.56,11.44-11.88","M87.2,17.13c0.02,0.99-0.24,1.86-0.76,2.61c-1.67,2.73-6.03,7.12-9.69,9.26","M77,40.5c5.12,2.03,12,7.25,14.5,11.5","M17.28,67.66c1.48,0.19,5.44,0.92,9.36,0.57c15.23-1.35,38.23-3.6,56.2-4.19c3.93-0.13,6.61-0.04,9.11,0.5","M52.45,54.75c1.05,1,1.63,2.66,1.65,3.74c0.09,4.690,0,25.11-0.12,34.76c-0.03,2.4-0.06,4.12-0.09,4.74","M49.25,66.75c0,1.25-1.14,2.74-1.81,3.63C40.9,79.16,28.88,89.01,18,93.75","M56.76,67.11C62.25,72,82.25,86,88.79,89.82c1.85,1.08,3.38,1.61,5.210,1.93"];
+const hanko=(cls)=>`<svg class="${cls}" viewBox="0 0 109 109" aria-hidden="true"><rect x="3" y="3" width="103" height="103" rx="22"/>${RAKU.map((d,i)=>`<path d="${d}" style="--i:${i}"/>`).join('')}</svg>`;
+function splash(){
+  const first=!LS.get('lang_ok',false);
+  if(SS.get('splash')&&!first)return;SS.set('splash','1');
+  const kana='あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん漢字語彙楽学校日本'.split('');
+  const el=document.createElement('div');el.id='splash';el.setAttribute('role','dialog');el.setAttribute('aria-label','Raku Nihongo Gakkou');
+  el.innerHTML=`<div class="aur a1"></div><div class="aur a2"></div><div class="aur a3"></div><div class="sp-grid"></div>
+  <div class="sp-kana" aria-hidden="true">${[...Array(26)].map((_,i)=>`<i style="left:${(i*37)%100}%;animation-delay:-${(i*1.7)%14}s;animation-duration:${12+(i%5)*3}s;font-size:${16+(i%4)*10}px">${kana[(i*7)%kana.length]}</i>`).join('')}</div>
+  <div class="sp-in">${hanko('sp-hk')}
+   <div class="sp-school"><span>RAKU</span> <span>NIHONGO</span> <span>GAKKOU</span></div>
+   <div class="sp-jp">楽日本語学校</div>
+   <div class="sp-with">with</div><div class="sp-name">BINOD PAUDEL</div>
+   <div class="sp-tag">${t('tagline')}</div><div class="sp-exams">${t('allExams')}</div>
+   <div class="sp-langs" role="group" aria-label="Language">${LANGS.map(([c,n],i)=>`<button data-l="${c}" class="${i===LI?'on':''}">${n}</button>`).join('')}</div>
+   <button class="sp-go">${t('tap')} →</button></div>
+  <div class="sp-bar"><i></i></div>`;
+  document.body.appendChild(el);
+  let done=false;const close=()=>{if(done)return;done=true;LS.set('lang_ok',true);el.classList.add('out');setTimeout(()=>el.parentNode&&el.parentNode.removeChild(el),700)};
+  el.querySelectorAll('[data-l]').forEach(b=>b.onclick=e=>{e.stopPropagation();setLang(b.dataset.l);el.querySelectorAll('[data-l]').forEach(x=>x.classList.toggle('on',x===b));el.querySelector('.sp-tag').textContent=t('tagline');el.querySelector('.sp-exams').textContent=t('allExams');el.querySelector('.sp-go').textContent=t('tap')+' →';render()});
+  const pickExam=()=>{const box=el.querySelector('.sp-in');box.innerHTML=`${hanko('sp-hk sm')}<div class="sp-q">${t('pickExam')}</div><div class="sp-exgrid">${COURSES.map(([k,n,sub,on])=>`<button data-e="${k}" class="${on?'on':''}"><b>${n}</b><small>${on?t('open'):t('soon')}</small></button>`).join('')}</div>`;box.querySelectorAll('[data-e]').forEach(b=>b.onclick=e=>{e.stopPropagation();LS.set('exam',b.dataset.e);close();render()})};
+  el.querySelector('.sp-go').onclick=e=>{e.stopPropagation();if(first||!LS.get('exam',''))pickExam();else close()};
+  if(!first&&LS.get('exam','')){el.onclick=close;setTimeout(close,3400)}else el.classList.add('pick');
+}
+
+/* boot */
+async function boot(){
+  splash();
+  try{const [d,k]=await Promise.all([fetch('data.json').then(r=>r.json()),fetch('keys.json',{cache:'no-store'}).then(r=>r.json())]);D=d;KEYS=k;if((d.sets||[]).length&&d.sets.every(n=>(d.free||[]).includes(n)))UNL=true}
+  catch(e){$('#app').innerHTML=`<div class="wrap"><div class="empty card" style="margin-top:30px">${t('loadFail')}</div></div>`;return}
+  render();
+  {const c=LS.get('code','');if(c)unlock(c,true)}
+  try{if(window.claude&&claude.use){const u=await claude.use('user');isOwner=u?await u.isOwner():false;ART=await claude.use('artifact');if(isOwner)render()}}catch(e){}
+}
+function normLogin(l){if(l&&l.users)return l;if(l&&l.h)return{users:[{id:'',h:l.h}]};return{users:[]}}
+const authed=()=>true;
+const b64d=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+const isLocked=n=>!UNL&&!(D.free||[]).includes(+n);
+async function unlock(code,silent){
+  code=(code||'').toUpperCase().replace(/[^0-9A-Z]/g,'');const w=KEYS&&KEYS.w&&KEYS.w[code.slice(0,4)];
+  if(code.length!==12||!w){if(silent&&KEYS)LS.set('code','');return false}
+  let mk;
+  try{const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(code),'PBKDF2',false,['deriveKey']);
+    const k=await crypto.subtle.deriveKey({name:'PBKDF2',salt:b64d(w[0]),iterations:KEYS.it,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['decrypt']);
+    const raw=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64d(w[1])},k,b64d(w[2]));
+    mk=await crypto.subtle.importKey('raw',raw,'AES-GCM',false,['decrypt'])}
+  catch(e){if(silent)LS.set('code','');return false}
+  try{const L=await fetch('locked.json').then(r=>r.json());
+    const raw=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64d(L.iv)},mk,b64d(L.ct));
+    const B=JSON.parse(new TextDecoder().decode(raw));
+    if(!UNL){D.q=D.q.concat(B.q);D.w=D.w.concat(B.w);LX=B.ex;UNL=true}
+    LS.set('code',code);render();return true}
+  catch(e){return false}
+}
+const me=()=>isOwner?'Binod Paudel':'';
+
+function render(){
+  if(!D)return;
+  const r=(location.hash||'#home').slice(1);
+  if(['drive','bjt'].includes(exam())&&['home','quiz','mock','review','words','srs','unlock'].includes(r))return driveRoute(r);
+  const views={home:renderHome,quiz:renderQuiz,mock:renderMock,review:()=>Q.start({mode:'review'}),words:renderWords,srs:renderSRS,admin:renderAdmin,unlock:renderUnlock};
+  if(r==='quiz'&&Q.list.length&&Q.inPage&&Q.mode==='normal')return renderPage();
+  (views[r]||renderHome)();
+}
+window.addEventListener('hashchange',()=>{Q.inPage=false;window.scrollTo(0,0);render()});
+
+function shell(active,inner){
+  const tabs=[['home','家',t('navHome')],['quiz','練',t('navQuiz')],['mock','試',t('navMock')],['srs','札',t('navSrs')],['review','誤',t('navRev')],['words','辞',t('navWords')]];
+  if(isOwner)tabs.push(['admin','管',t('navAdmin')]);
+  const nav=cls=>`<nav class="${cls}">${tabs.map(([h,k,s])=>`<a href="#${h}" class="${h===active?'on':''}" ${h===active?'aria-current="page"':''}><i aria-hidden="true">${k}</i><span>${s}</span></a>`).join('')}</nav>`;
+  $('#app').innerHTML=`<header class="top"><div class="in"><a class="brand" href="#home">${hanko('hk')}<div><b>Raku Nihongo <em>Gakkou</em></b><small>with <strong>BINOD PAUDEL</strong></small></div></a>
+  <div class="tools">${langSel('langTop')}<button class="iconbtn" id="themeBtn" aria-label="${t('theme')}">◐</button>${UNL?'':`<a class="iconbtn lockbtn" href="#unlock" aria-label="${t('unlockT')}">🔒</a>`}</div>
+  ${nav('tabs')}</div></header><main class="wrap">${inner}</main>
+  <footer class="wrap foot-note">© 楽日本語学校 Raku Nihongo Gakkou · Binod Paudel</footer>${nav('bnav')}`;
+  bindLang('langTop');
+  $('#themeBtn').onclick=()=>{const dark=matchMedia('(prefers-color-scheme: dark)').matches;const cur=document.documentElement.getAttribute('data-theme')||(dark?'dark':'light');setTheme(cur==='dark'?'light':'dark')};
+  const o=$('#outBtn');if(o)o.onclick=()=>{LS.set('auth','');render()};
+}
+
+function renderLogin(){
+  $('#app').innerHTML=`<div class="loginwrap"><div class="aur a1"></div><div class="aur a2"></div><div class="lg-top">${langSel('langLogin')}</div>
+  <form class="card login" id="lf" autocomplete="on">${hanko('hk big')}
+  <div class="lg-school">RAKU NIHONGO <b>GAKKOU</b></div><div class="lg-jp">楽日本語学校</div>
+  <div class="lg-name"><small>with</small>BINOD PAUDEL</div><div class="lg-ex">${t('allExams')}</div>
+  <div class="field"><label for="uid">ID</label><input id="uid" autocomplete="username" autocapitalize="off" required></div>
+  <div class="field"><label for="upw">${t('pw')}</label><input id="upw" type="password" autocomplete="current-password" required></div>
+  <div class="err" id="lerr" role="alert"></div><button class="btn grad" style="width:100%">${t('loginBtn')}</button>
+  <p class="note" style="margin:14px 0 0;text-align:center">${t('askSir')}</p></form></div>`;
+  bindLang('langLogin');
+  $('#lf').onsubmit=async e=>{e.preventDefault();const id=$('#uid').value.trim();const h=await sha256(SALT+id+'|'+$('#upw').value);
+    if(LOGIN.users.some(u=>u.h===h)){LS.set('auth',h);location.hash='#home';render()}else{$('#lerr').textContent=t('loginErr')}};
+}
+
+const PRICES=[['N5',2000],['N4',2000],['N3',2000],['N2',3000],['N1',3000]];
+const SHOWPRICE=false;
+const priceBox=()=>!SHOWPRICE?'':`<div class="pricebox"><div class="eyebrow">${t('priceT')}</div><div class="prow">${PRICES.map(([k,y])=>`<div class="pr ${k.toLowerCase()===exam()?'sel':''}"><b>JLPT ${k}</b><span>¥${y.toLocaleString('en')}</span></div>`).join('')}</div><p class="muted">${t('priceNote')}</p></div>`;
+function renderUnlock(){
+  if(UNL){shell('home',`<section class="card unlockpage"><h2>✓ ${t('unlocked')}</h2><p><a class="btn" href="#quiz">${t('startP')} →</a></p></section>`);return}
+  shell('home',`<section class="card unlockpage">${hanko('hk')}<h2>🔒 ${t('unlockT')}</h2><p class="muted">${t('freeDemo')} ${t('lockedN',{n:(D.sets||[]).length-(D.free||[]).length})}</p>
+  <form id="uf"><label for="ucode">${t('enterCode')}</label><input id="ucode" placeholder="XXXX-XXXXXXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="16" required>
+  <div class="err" id="uerr" role="alert"></div><button class="btn grad" id="ubtn">🔓 ${t('unlockBtn')}</button></form>
+  ${priceBox()}<p class="note">${t('buyNote')}</p></section>`);
+  $('#uf').onsubmit=async e=>{e.preventDefault();const b=$('#ubtn');b.disabled=true;b.textContent='…';$('#uerr').textContent='';
+    const ok=await unlock($('#ucode').value,false);if(!ok){b.disabled=false;b.textContent='🔓 '+t('unlockBtn');$('#uerr').textContent=t('codeErr')}else{toast(t('unlocked'))}};
+}
+/* ---------- home ---------- */
+const COURSES=[['n5','JLPT N5','入門',0],['n4','JLPT N4','初級',0],['n3','JLPT N3','中級',1],['n2','JLPT N2','中上級',0],['n1','JLPT N1','上級',0],['jft','JFT-Basic','A2',0],['bjt','BJT','Business',1],['ssw','SSW 特定技能','Skills',0],['food','Food 外食','SSW',0],['care','Nursing 介護','SSW',0],['drive','Driving licence','運転免許',1]];
+const exam=()=>LS.get('exam','n3');
+function typeStats(ty){const qs=D.q.filter(q=>q.t===ty);let done=0,ok=0;qs.forEach(q=>{const v=P.res[qid(q)];if(v!=null){done++;ok+=v}});return{total:qs.length,done,ok}}
+function secStats(types){return types.map(typeStats).reduce((a,b)=>({total:a.total+b.total,done:a.done+b.done,ok:a.ok+b.ok}),{total:0,done:0,ok:0})}
+function badges(){const done=Object.keys(P.res).length,st=streak(),k=secStats(KANJI_T),m=secStats(MEAN_T);
+  return[['🔰',t('b1'),done>=1],['💯',t('bq',{n:100}),done>=100],['🏯',t('bq',{n:500}),done>=500],['🌸',t('ball',{n:D.q.length}),done>=D.q.length],
+    ['🔥',t('streakN',{n:3}),st>=3],['⚡',t('streakN',{n:7}),st>=7],['🗻',t('streakN',{n:30}),st>=30],['💮','はなまる (10/10)',P.hana>=1],['漢',t('allK'),k.done>=k.total],['語',t('allM'),m.done>=m.total]]}
+function ring(v,max,label){const p=Math.min(1,max?v/max:0),r=42,c=2*Math.PI*r;return `<svg viewBox="0 0 100 100" class="ring" role="img" aria-label="${label}"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd166"/><stop offset="1" stop-color="#ff3d6e"/></linearGradient></defs><circle cx="50" cy="50" r="${r}" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="9"/><circle cx="50" cy="50" r="${r}" fill="none" stroke="url(#rg)" stroke-width="9" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-p)}" transform="rotate(-90 50 50)"/><text x="50" y="49" text-anchor="middle" class="ring-n">${v}</text><text x="50" y="65" text-anchor="middle" class="ring-l">/ ${max}</text></svg>`}
+function renderHome(){
+  const k=secStats(KANJI_T),m=secStats(MEAN_T);const done=k.done+m.done,ok=k.ok+m.ok;
+  const weak=Object.values(P.res).filter(v=>v===0).length,tcount=P.log[today()]||0;
+  const t1=D.w.filter(w=>w[4]===1);const w=t1[dayNum()%t1.length];
+  const pct=s=>s.total?Math.round(s.done/s.total*100):0;const due=SR.due().length;
+  const bars=ALL_T.map(ty=>{const s=typeStats(ty);const a=s.done?Math.round(s.ok/s.done*100):0;return `<div class="brow"><span>${TL[ty]}<small>${TN(ty)}</small></span><div class="bar"><i style="width:${a}%;background:${!s.done?'var(--line)':a<60?'var(--shu)':a<80?'var(--gold)':'var(--ok)'}"></i></div><b>${s.done?a+'%':'–'}</b></div>`}).join('');
+  const weakest=ALL_T.map(ty=>({ty,s:typeStats(ty)})).filter(x=>x.s.done>=5).sort((a,b)=>a.s.ok/a.s.done-b.s.ok/b.s.done)[0];
+  shell('home',`<section class="courses"><div class="eyebrow">${t('courses')}</div><div class="crow">${COURSES.map(([k,n,sub,on])=>`<button class="course ${on?'on':''} ${exam()===k?'sel':''}" data-exam="${k}" aria-pressed="${exam()===k}"><b>${n}</b><small>${sub}</small><span class="st">${on?t('open'):t('soon')}</span></button>`).join('')}</div>${(COURSES.find(c=>c[0]===exam())||[0,0,0,1])[3]?'':`<div class="card soonnote">${t('soonNote',{c:(COURSES.find(c=>c[0]===exam())||[])[1]})}</div>`}</section>${UNL?'':`<section class="card unlockcard"><div><b>🎁 ${t('freeDemo')}</b><p>${t('lockedN',{n:(D.sets||[]).length-(D.free||[]).length})}${SHOWPRICE?' · N5–N3 ¥2,000 · N2–N1 ¥3,000':''}</p></div><a class="btn grad" href="#unlock">🔓 ${t('unlockBtn')}</a></section>`}<section class="hero2"><div class="h-l"><div class="h-hello">${t('hello')}${me()?', <b>'+esc(me())+'</b>':''} 👋</div>
+   <div class="h-eyebrow">${t('setsInfo',{n:D.total||D.q.length})}</div><h1>${t('goalT',{n:S.goal})}</h1><p>${t('intro')}</p>
+   <div class="row" style="margin-top:18px"><button class="btn light" data-go="kanji">${t('startP')} →</button><a class="btn glass" href="#mock">${t('navMock')}</a></div>
+   <div class="row" style="margin-top:12px;font-size:13px"><label for="goalSel">${t('goalL')}</label><select id="goalSel" class="glass">${[10,20,30,50,100].map(g=>`<option ${g==S.goal?'selected':''}>${g}</option>`).join('')}</select></div></div>
+   <div class="h-r">${ring(tcount,S.goal,t('today'))}<div class="h-rl">${t('todayDone')}${tcount>=S.goal?' · <b>'+t('goalMet')+'</b>':''}</div></div>
+   <div class="h-teacher">${hanko('hk')}<div><small>${t('teacher')} · 先生</small><b>BINOD PAUDEL</b></div></div></section>
+  <div class="stats"><div class="card stat"><i>問</i><b>${done}</b><span>${t('stDone')}</span></div><div class="card stat"><i>的</i><b>${done?Math.round(ok/done*100):0}%</b><span>${t('stAcc')}</span></div>
+  <div class="card stat"><i>続</i><b>${streak()}🔥</b><span>${t('stStreak')}</span></div><a class="card stat" href="#review"><i>誤</i><b>${weak}</b><span>${t('stWeak')}</span></a></div>
+  <div class="grid2">
+   <section class="card wotd"><div class="eyebrow">${t('wotd')} · 今日の単語</div><div class="w">${esc(w[0])}</div><div class="r">${esc(w[1])}</div><div class="mn"><span class="tag">NE</span>${esc(w[2])}</div><div class="mn"><span class="tag">EN</span>${esc(w[3])}</div>
+   <div class="row" style="margin-top:12px"><button class="speak inv" data-say="${esc(w[1])}">▶ ${t('say')}</button><button class="speak inv" data-kanji="${esc(w[0])}">漢 ${t('kcard')}</button></div></section>
+   <a class="card srsbox" href="#srs"><div class="eyebrow">${t('srsT')} · SRS</div><b>${due}</b><span>${t('srsDue')}</span><span class="muted" style="font-size:13px">${t('srsHint')}</span></a>
+  </div>
+  <div class="paths">
+  <div class="card path"><div class="kana">STEP 1 · 漢字</div><h2>${t('kanji')}</h2><p class="muted" style="margin:0">${t('kanjiSub',{n:k.total})}</p><div class="bar"><i style="width:${pct(k)}%"></i></div><div class="muted" style="font-size:13px">${k.done}/${k.total} · ${pct(k)}%</div><button class="btn" data-go="kanji">${t('kanjiGo')}</button></div>
+  <div class="card path"><div class="kana">STEP 2 · 語彙</div><h2>${t('mean')}</h2><p class="muted" style="margin:0">${t('meanSub',{n:m.total})}</p><div class="bar"><i style="width:${pct(m)}%"></i></div><div class="muted" style="font-size:13px">${m.done}/${m.total} · ${pct(m)}%</div><button class="btn" data-go="mean">${t('meanGo')}</button></div>
+  ${[['gram',3,GRAM_T],['read',4,READ_T],['listen',5,LISTEN_T]].map(([k,n,T])=>{const st=secStats(T);if(!st.total)return '';return `<div class="card path"><div class="kana">STEP ${n} · ${SECJ[k]}</div><h2>${t(k)}</h2><p class="muted" style="margin:0">${t(k+'Sub',{n:st.total})}</p><div class="bar"><i style="width:${pct(st)}%"></i></div><div class="muted" style="font-size:13px">${st.done}/${st.total} · ${pct(st)}%</div><button class="btn" data-go="${k}">${t(k+'Go')}</button></div>`}).join('')}
+  </div>
+  <section class="card chart"><div class="eyebrow">${t('chartT')}</div>${bars}
+   <p style="margin:10px 0 0;font-size:14px">${weakest?`${t('weak')} <b style="color:var(--shu)">${TL[weakest.ty]}${TN(weakest.ty)?' ('+TN(weakest.ty)+')':''}</b> · <button class="linkbtn" data-type-go="${weakest.ty}">${t('practiceThis')}</button>`:t('weakHint')}</p></section>
+  <section class="card badges"><div class="eyebrow">${t('badgesT')}</div>${(k.done>=k.total&&k.ok/k.total>=.7)?`<button class="btn red" data-cert="kanji" style="margin:10px 8px 0 0">${t('certK')}</button>`:''}${(m.done>=m.total&&m.ok/m.total>=.7)?`<button class="btn red" data-cert="mean" style="margin:10px 0 0">${t('certM')}</button>`:''}<p class="note" style="margin:8px 0 0">${t('certRule')}</p><div class="bgrid">${badges().map(([i,s,on])=>`<div class="badge ${on?'on':''}" title="${esc(s)}"><span>${i}</span><small>${s}</small></div>`).join('')}</div></section>`);
+  $$('[data-exam]').forEach(b=>b.onclick=()=>{LS.set('exam',b.dataset.exam);render()});
+  $$('[data-go]').forEach(b=>b.onclick=()=>{Object.assign(Q.sel,{sec:b.dataset.go,set:'all',type:'all'});Q.auto=true;if(location.hash==='#quiz')render();else location.hash='#quiz'});
+  $$('[data-type-go]').forEach(b=>b.onclick=()=>{const ty=b.dataset.typeGo;Object.assign(Q.sel,{sec:secOf(ty),set:'all',type:ty,order:'shuffle'});Q.auto=true;location.hash='#quiz'});
+  $$('[data-cert]').forEach(b=>b.onclick=()=>{const st=secStats(b.dataset.cert==='kanji'?KANJI_T:MEAN_T);openCert(b.dataset.cert==='kanji'?'JLPT N3 漢字 Kanji Section':'JLPT N3 語彙 Vocabulary Section','Accuracy '+Math.round(st.ok/st.total*100)+'%')});
+  $('#goalSel').onchange=e=>{S.goal=+e.target.value;saveS();renderHome()};
+  bindCommon();
+}
+
+function bindCommon(){
+  $$('[data-say]').forEach(b=>{if(!('speechSynthesis' in window)){b.hidden=true;return}b.onclick=e=>{e.stopPropagation();try{const u=new SpeechSynthesisUtterance(b.dataset.say);u.lang='ja-JP';u.rate=.9;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(err){b.hidden=true}}});
+  $$('[data-kanji]').forEach(b=>b.onclick=e=>{e.stopPropagation();openKanji(b.dataset.kanji)});
+}
+
+/* ---------- kanji card ---------- */
+async function openKanji(word){
+  const ks=[...new Set((word.match(/[一-龥]/g)||[]))];
+  const m=document.createElement('div');m.className='modal';m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');
+  m.innerHTML=`<div class="sheet card"><button class="iconbtn close" aria-label="${t('close')}">✕</button><div class="muted">${t('loading')}</div></div>`;document.body.appendChild(m);
+  const close=()=>m.parentNode&&m.parentNode.removeChild(m);m.onclick=e=>{if(e.target===m)close()};m.querySelector('.close').onclick=close;
+  document.addEventListener('keydown',function k(e){if(e.key==='Escape'){close();document.removeEventListener('keydown',k)}});
+  if(!KJ){try{KJ=await fetch('kanji.json').then(r=>r.json())}catch(e){m.querySelector('.sheet').innerHTML+=`<p class="err">${t('kFail')}</p>`;return}}
+  const wrow=D.w.find(w=>w[0]===word);
+  const ex=D.q.filter(q=>q.q.includes(word.replace(/[ぁ-ん]+$/,''))&&q.t!=='usage').slice(0,2);
+  const sheet=m.querySelector('.sheet');
+  sheet.innerHTML=`<button class="iconbtn close" aria-label="${t('close')}">✕</button>
+   <div class="kw"><div class="w">${esc(word)}</div>${wrow?`<div>${esc(wrow[1])} · <span class="tag">NE</span> ${esc(wrow[2])} · <span class="tag">EN</span> ${esc(wrow[3])}</div>`:''}</div>
+   ${ks.length?ks.map(c=>{const k=KJ[c]||{on:[],kun:[],en:[],p:[],sc:0};const rel=D.w.filter(w=>w[0].includes(c)&&w[0]!==word).slice(0,6);
+     return `<div class="kcard"><div class="kstroke"><svg viewBox="0 0 109 109" data-c="${esc(c)}">${k.p.map(d=>`<path d="${d}"/>`).join('')}</svg><button class="speak replay">${t('stroke')}</button></div>
+     <div class="kinfo"><div class="kbig">${esc(c)}</div><dl><dt>音読み</dt><dd>${esc(k.on.slice(0,5).join('、')||'–')}</dd><dt>訓読み</dt><dd>${esc(k.kun.slice(0,6).join('、')||'–')}</dd><dt>${t('meaningL')}</dt><dd>${esc(k.en.join(', ')||'–')}</dd><dt>${t('strokes')}</dt><dd>${k.sc||k.p.length}${k.j?` · JLPT N${k.j}`:''}</dd></dl>
+     ${rel.length?`<div class="rel"><b>${t('rel')}</b> ${rel.map(w=>`<button class="chip" data-kanji="${esc(w[0])}">${esc(w[0])} <small>${esc(LI===2?w[2]:w[3])}</small></button>`).join('')}</div>`:''}</div></div>`}).join(''):`<p class="muted">${t('noK')}</p>`}
+   ${ex.length?`<div class="exs"><div class="eyebrow">${t('exs')}</div>${ex.map(q=>`<p>${q.qr} <small class="muted">${t('setN',{n:q.s})} 問${q.n}</small></p>`).join('')}</div>`:''}
+   <p class="attr">Stroke data: KanjiVG (CC BY-SA 3.0) · Readings: KANJIDIC (EDRDG)</p>`;
+  sheet.querySelector('.close').onclick=close;
+  const anim=svg=>{const ps=[...svg.querySelectorAll('path')];let d0=0;ps.forEach(p=>{const L=p.getTotalLength();p.style.transition='none';p.style.strokeDasharray=L;p.style.strokeDashoffset=L;p.getBoundingClientRect();const dur=Math.max(.25,L/90);p.style.transition=`stroke-dashoffset ${dur}s linear ${d0}s`;p.style.strokeDashoffset=0;d0+=dur+.08})};
+  sheet.querySelectorAll('.kcard').forEach(kc=>{const svg=kc.querySelector('svg');anim(svg);kc.querySelector('.replay').onclick=()=>anim(svg)});
+  sheet.querySelectorAll('[data-kanji]').forEach(b=>b.onclick=()=>{close();openKanji(b.dataset.kanji)});
+}
+
+/* ---------- teacher explanations (per language file) ---------- */
+const EX={};
+async function loadEx1(c){if(EX[c]!==undefined)return EX[c];EX[c]=null;try{EX[c]=await fetch('ex-'+c+'.json').then(r=>r.ok?r.json():{})}catch(e){EX[c]={}}return EX[c]}
+async function loadEx(){const c=LANGS[LI][0];if(c!=='en')loadEx1('en').then(()=>{if(typeof Q!=='undefined'&&Q.checked)renderPage()});if(EX[c]!==undefined)return EX[c];EX[c]=null;try{EX[c]=await fetch('ex-'+c+'.json').then(r=>r.ok?r.json():{})}catch(e){EX[c]={}}return EX[c]}
+function explain(q,i,ok,a){const c=LANGS[LI][0],id_=qid(q),e=(EX[c]&&EX[c][id_])||(LX[c]&&LX[c][id_])||(EX.en&&EX.en[id_])||(LX.en&&LX.en[id_]);
+  const head=`<div class="ex-h"><b>${ok?t('right'):t('wrong')}</b><span>${t('ans')} ${C[q.a-1]} <b class="jp">${esc(q.t==='usage'?q.q:q.o[q.a-1].replace(/[【】]/g,''))}</b></span>${a&&!ok?`<span class="muted">${t('youChose',{c:C[a-1]})}</span>`:(!a?`<span class="muted">${t('noAns')}</span>`:'')}</div>`;
+  if(!e)return `<div class="expl ${ok?'ok':'ng'}">${head}${q.m?`<div class="ex-m"><div><span class="tag">NE</span>${esc(q.m[0])}</div><div><span class="tag">EN</span>${esc(q.m[1])}</div></div>`:''}</div>`;
+  return `<div class="expl ${ok?'ok':'ng'}">${head}<div class="ex-sec"><span class="ex-l">${t('explQ')}</span>${esc(e[0])}</div><div class="ex-sec"><span class="ex-l">${t('explWhy')}</span>${esc(e[2])}</div>
+   <div class="ex-sec"><span class="ex-l">${t('explOpts')}</span><ul class="ex-o">${e[1].map((m,j)=>`<li class="${j+1===q.a?'r':a===j+1?'w':''}"><b>${C[j]}</b> <span class="jp">${esc(q.o[j].replace(/[【】]/g,''))}</span> · ${m==='∅'?`<i>${t('noMeaning')}</i>`:esc(m)}</li>`).join('')}</ul></div></div>`}
+
+/* ---------- quiz engine ---------- */
+const Q={sel:{sec:'kanji',set:'all',type:'all',order:'exam'},list:[],page:0,ans:{},checked:false,t0:0,mode:'normal',size:10,limit:0,
+  start(o){o=o||{};this.mode=o.mode||'normal';this.size=10;this.limit=0;
+    if(this.mode==='review'){this.list=D.q.filter(q=>P.res[qid(q)]===0)}
+    else if(this.mode==='mock'){this.part=o.part||1;if(this.part===1)this.mockRes=[];this.list=D.q.filter(q=>q.s==o.set&&!q.ex&&(q.pt||1)===this.part).sort((a,b)=>this.part===3?(a.mo-b.mo)||(a.x-b.x):(a.x||a.n)-(b.x||b.n));this.played={};this.size=this.list.length;this.limit=PART[this.part][1]*60;this.mockSet=o.set;this.hasP2=D.q.some(q=>q.s==o.set&&q.pt===2);this.hasP3=D.q.some(q=>q.s==o.set&&q.pt===3)}
+    else{const s=this.sel;const types=s.type!=='all'?[s.type]:(SECT[s.sec]||KANJI_T);
+      this.list=D.q.filter(q=>types.includes(q.t)&&(s.set==='all'||q.s==+s.set));
+      if(s.order==='shuffle'){this.list=this.list.slice();for(let i=this.list.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[this.list[i],this.list[j]]=[this.list[j],this.list[i]]}}
+      else this.list.sort((a,b)=>a.s-b.s||types.indexOf(a.t)-types.indexOf(b.t)||a.n-b.n);
+      if(s.order==='new'){const nw=this.list.filter(q=>P.res[qid(q)]==null);if(nw.length)this.list=nw}}
+    this.page=0;this.newPage()},
+  newPage(){this.ans={};this.checked=false;this.t0=Date.now();this.inPage=true;renderPage()},
+  cur(){return this.list.slice(this.page*this.size,this.page*this.size+this.size)}};
+
+function renderQuiz(){
+  if(Q.auto){Q.auto=false;return Q.start()}
+  const s=Q.sel;const sets=(D.sets||[...new Set(D.q.map(q=>q.s))]).slice().sort((a,b)=>a-b);if(s.set!=='all'&&isLocked(s.set))s.set='all';
+  const types=SECT[s.sec]||KANJI_T;
+  shell('quiz',`<section class="card qhead" style="display:grid;gap:14px"><h2>${t('choose')}</h2>
+  <div class="chips">${Object.keys(SECT).filter(k=>D.q.some(q=>SECT[k].includes(q.t))).map(k=>[k,SECJ[k]+' '+(LI===0?'':t(k))]).map(([v,x])=>`<button class="chip ${s.sec===v?'on':''}" data-sec="${v}">${x}</button>`).join('')}</div>
+  <div class="chips">${[['all',t('all')]].concat(types.map(ty=>[ty,TL[ty]+(TN(ty)?' · '+TN(ty):'')])).map(([v,x])=>`<button class="chip ${s.type===v?'on':''}" data-type="${v}">${x}</button>`).join('')}</div>
+  <div class="row"><label for="setSel">${t('set')}</label><select id="setSel"><option value="all">${t('allSets')}</option>${sets.map(n=>`<option value="${n}" ${s.set==n?'selected':''}>${isLocked(n)?'🔒 ':''}${t('setN',{n})}${(D.free||[]).includes(n)&&!UNL?' · '+t('freeTag'):''}</option>`).join('')}</select>
+  <label for="ordSel">${t('order')}</label><select id="ordSel"><option value="exam" ${s.order==='exam'?'selected':''}>${t('ordExam')}</option><option value="shuffle" ${s.order==='shuffle'?'selected':''}>${t('ordShuf')}</option><option value="new" ${s.order==='new'?'selected':''}>${t('ordNew')}</option></select></div>
+  <div><button class="btn grad" id="go">${t('start')}</button></div></section>`);
+  $$('[data-sec]').forEach(b=>b.onclick=()=>{s.sec=b.dataset.sec;s.type='all';renderQuiz()});
+  $$('[data-type]').forEach(b=>b.onclick=()=>{s.type=b.dataset.type;renderQuiz()});
+  $('#setSel').onchange=e=>{if(e.target.value!=='all'&&isLocked(e.target.value)){location.hash='#unlock';return}s.set=e.target.value};$('#ordSel').onchange=e=>s.order=e.target.value;
+  $('#go').onclick=()=>Q.start();
+}
+function renderMock(){
+  const sets=(D.sets||[...new Set(D.q.map(q=>q.s))]).slice().sort((a,b)=>a-b);const hist=LS.get('mock',{});
+  shell('mock',`<section class="card qhead" style="display:grid;gap:12px"><div class="eyebrow">模擬試験 · MOCK TEST</div><h2>${t('mockH')}</h2>
+  <p class="muted" style="margin:0">${t('mockD')}</p>
+  <div class="row"><label for="msSel">${t('set')}</label><select id="msSel">${sets.map(n=>`<option value="${n}">${isLocked(n)?'🔒 ':''}${t('setN',{n})}${hist[n]!=null?' · '+t('last',{n:hist[n]}):''}</option>`).join('')}</select>
+</div><div class="card" style="padding:10px 14px;font-size:14px;line-height:1.8"><b>JLPT N3</b><br>${t('part1')} · ${PART[1][0]} · ${t('min',{n:30})} · 35問<br>${t('part2')} · ${PART[2][0]} · ${t('min',{n:70})} · 39問<br>${D.q.some(q=>q.pt===3)?`${t('part3')} · ${PART[3][0]} · ${t('min',{n:40})} · 28問<br>`:''}<span class="muted">${t('mockRule')}</span></div>
+  <div><button class="btn red" id="mgo">${t('startExam')}</button></div></section>`);
+  $('#mgo').onclick=()=>{const n=+$('#msSel').value;if(isLocked(n)){location.hash='#unlock';return}Q.start({mode:'mock',set:n,part:1})};
+}
+const plain=s=>esc(s).replace(/【(.*?)】/g,'<span class="u">$1</span>').replace(/（\s*）|\(\s*\)|＿+/g,'<span class="blank"></span>');
+let tick=null;
+function renderPage(){
+  if(Q.checked&&EX[LANGS[LI][0]]===undefined){loadEx().then(()=>{if(Q.checked)renderPage()})}
+  const qs=Q.cur();const total=Q.list.length;const pages=Math.ceil(total/Q.size);const tab=Q.mode==='review'?'review':Q.mode==='mock'?'mock':'quiz';
+  if(!total){shell(tab,`<div class="card empty" style="margin-top:20px">${Q.mode==='review'?t('noMist'):t('noQs')}</div>`);return}
+  const title=Q.mode==='review'?t('revT'):Q.mode==='mock'?'模試 · '+t('setN',{n:Q.mockSet})+' · '+PART[Q.part][0]:(SECJ[Q.sel.sec]+' '+(LI===0?'':t(Q.sel.sec)))+(Q.sel.set!=='all'?' · '+t('setN',{n:Q.sel.set}):'');
+  let right=0;
+  const body=qs.map((q,i)=>{const a=Q.ans[i];const ok=Q.checked&&a===q.a;if(ok)right++;
+    const LS_=q.t==='listen',hideO=LS_&&q.mo>=3&&!Q.checked;
+    const long=q.t==='usage'||q.o.some(o=>o.length>9);const stem=LS_?`<div class="lsn">${q.pic?`<div class="lpic" aria-hidden="true">${esc(q.pic)}</div>`:''}<button class="btn play" data-play="${i}" ${Q.mode==='mock'&&Q.played&&Q.played[qid(q)]&&!Q.checked?'disabled':''}>${t('play')}</button><span class="muted lst" id="lst${i}">${Q.mode==='mock'&&!Q.checked?t('playOnce'):''}</span>${Q.checked&&q.mo<=2?`<div class="stem">${esc(q.q)}</div>`:''}</div>`:q.t==='usage'?`<div class="stem word">${S.furi?q.qr:esc(q.q)}</div>`:`<div class="stem">${S.furi?q.qr:plain(q.q)}</div>`;
+    const ca=q.o[q.a-1].replace(/[【】]/g,'');
+    const pv=qs[i-1];const mh=q.mo&&(!pv||pv.mo!==q.mo||pv.pt!==q.pt||pv.s!==q.s)&&(Q.mode==='mock'||Q.sel.order!=='shuffle')?`<div class="mondai"><b>問題${q.mo}</b> ${MOJ[q.pt]&&MOJ[q.pt][q.mo]||''}</div>`:'';
+    const psg=q.p?(i===0||qs[i-1].pid!==q.pid?`<div class="passage">${S.furi?q.pr:esc(q.p).replace(/\n/g,'<br>')}</div>`:`<div class="muted psame">↑ ${t('samePsg')}</div>`):'';
+    return `${mh}<article class="card q ${Q.checked?(ok?'is-ok':'is-ng'):''}" id="q${i}"><div class="meta"><span class="num">${q.x||Q.page*Q.size+i+1}${q.pt===3?'番':''}</span><span>${q.mo?'問題'+q.mo+' · ':''}${TL[q.t]}${TN(q.t)?' · '+TN(q.t):''}</span><span>· ${t('setN',{n:q.s})}</span></div>
+    ${Q.checked?`<div class="stamp" aria-label="${ok?t('right'):t('wrong')}">${ok?'〇':'✕'}</div>`:''}
+    ${psg}${stem}<div class="opts ${long?'long':''}">${q.o.map((o,j)=>{let c='';if(Q.checked){if(j+1===q.a)c='right';else if(a===j+1)c='wrong'}else if(a===j+1)c='sel';
+      return `<button class="opt ${c}" data-q="${i}" data-o="${j+1}" ${Q.checked?'disabled':''}><span class="c">${C[j]}</span><span>${hideO?'':S.furi&&q.or?q.or[j]:plain(o)}</span></button>`}).join('')}</div>
+    ${Q.checked&&LS_?scriptBox(q):''}${Q.checked?explain(q,i,ok,a):''}</article>`}).join('');
+  const answered=Object.keys(Q.ans).length;
+  let scoreBox='';
+  if(Q.checked){const sc=Math.round(right/qs.length*60);
+    scoreBox=`<section class="card score">${right===qs.length?hanamaru():''}<div><div class="eyebrow">${t('result')} · 結果</div><div class="big">${right}<span style="font-size:22px;color:var(--muted)"> / ${qs.length}</span></div></div>
+    <div style="flex:1;min-width:180px">${Q.mode==='mock'?mockBox(qs):''}${Q.mode==='mock'?'':right===qs.length?t('perfect'):right>=qs.length*.7?t('good'):t('again')}</div></section>`}
+  shell(tab,`<section class="card qhead"><h2>${title}</h2><span class="muted">${Q.mode==='mock'?t('qN',{n:total}):`${t('pageOf',{a:Q.page+1,b:pages})} · ${t('qN',{n:total})}`}</span>
+   <button class="chip ${S.furi?'on':''}" id="furi" aria-pressed="${S.furi}"><ruby>振<rt>ふ</rt></ruby> ${t('furi')}</button><span class="timer" id="timer"></span></section>
+   ${scoreBox}<div class="qlist">${body}</div>
+   <div class="foot">${Q.checked?(Q.page+1<pages?`<button class="btn grad" id="next">${t('next')}</button>`:`<button class="btn" id="fin">${t('fin')}</button>`):`<span class="muted" id="cnt" style="align-self:center">${t('answered',{a:answered,b:qs.length})}</span><button class="btn red" id="check">${t('check')}</button>`}</div>`);
+  const cb=$('#certBtn');if(cb)cb.onclick=()=>{const r=jlptScore(Q.mockRes);openCert('JLPT N3 模擬試験 · Set '+Q.mockSet,'言語知識 '+r.lk+'/60 · 読解 '+r.rd+'/60'+(r.hasL?' · 聴解 '+r.ls+'/60':''))};const p3=$('#p3go');if(p3)p3.onclick=()=>{Q.start({mode:'mock',set:Q.mockSet,part:3});window.scrollTo(0,0)};const p2=$('#p2go');if(p2)p2.onclick=()=>{Q.start({mode:'mock',set:Q.mockSet,part:2});window.scrollTo(0,0)};
+  TTS.stop();$$('[data-play]').forEach(b=>b.onclick=()=>{const i=+b.dataset.play,q=qs[i],st=$('#lst'+i);
+    if(!TTS.ok()){st.textContent=t('noVoice');return}TTS.load();if(!TTS.v.length)st.textContent=t('noVoice');
+    if(Q.mode==='mock'&&!Q.checked){if(Q.played[qid(q)])return;Q.played[qid(q)]=1;b.disabled=true}
+    $$('[data-play]').forEach(x=>x.classList.remove('on'));b.classList.add('on');if(TTS.v.length)st.textContent=t('playing');TTS.play(q,()=>{b.classList.remove('on');if(TTS.v.length)st.textContent=''})});
+  $('#furi').onclick=()=>{S.furi=!S.furi;saveS();const y=scrollY;clearInterval(tick);renderPage();scrollTo(0,y)};
+  $$('.opt').forEach(b=>b.onclick=()=>{if(Q.checked)return;const i=+b.dataset.q;Q.ans[i]=+b.dataset.o;
+    b.parentNode.querySelectorAll('.opt').forEach(x=>x.classList.toggle('sel',x===b));const s=$('#cnt');if(s)s.textContent=t('answered',{a:Object.keys(Q.ans).length,b:qs.length})});
+  const doCheck=()=>{Q.checked=true;let r=0;qs.forEach((q,i)=>{const ok=Q.ans[i]===q.a;r+=ok;P.mark(qid(q),ok)});if(r===qs.length)P.hana++;
+    if(Q.mode==='mock'){qs.forEach((q,i)=>Q.mockRes.push([q,Q.ans[i]===q.a]));const js=jlptScore(Q.mockRes);const h=LS.get('mock',{});h[Q.mockSet]=js.hasR?js.tot:js.lk;LS.set('mock',h)}
+    P.save();clearInterval(tick);Q.elapsed=Date.now()-Q.t0;renderPage();window.scrollTo({top:0,behavior:'smooth'})};
+  const ch=$('#check');if(ch)ch.onclick=()=>{const un=qs.length-Object.keys(Q.ans).length;
+    if(un&&!ch.dataset.sure){ch.dataset.sure=1;ch.textContent=t('remain',{n:un});return}doCheck()};
+  const nx=$('#next');if(nx)nx.onclick=()=>{Q.page++;Q.newPage();window.scrollTo(0,0)};
+  const fn=$('#fin');if(fn)fn.onclick=()=>{Q.inPage=false;location.hash=Q.mode==='mock'?'#mock':'#quiz';render()};
+  clearInterval(tick);const tm=$('#timer');
+  const upd=()=>{const ms=Q.checked?Q.elapsed:Date.now()-Q.t0;let s=Math.floor(ms/1000);
+    if(Q.limit){const left=Q.limit-s;if(!Q.checked&&left<=0){doCheck();toast(t('timeUp'));return}s=Math.max(0,Q.checked?s:left);tm.classList.toggle('warn',!Q.checked&&left<120)}
+    tm.textContent=(Q.limit&&!Q.checked?'⏳ ':'⏱ ')+String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
+  upd();if(!Q.checked)tick=setInterval(upd,1000);
+}
+function scriptBox(q){const nm={M:'男',F:'女',N:'ナレーター'};const L=[];if(q.in)L.push(['N',q.in]);q.sc.forEach(l=>L.push(l));if(q.mo<=3&&q.q)L.push(['N',q.q]);
+  return `<details class="script" open><summary>${t('script')}</summary>${L.map(([sp,tx])=>`<div><b>${nm[sp]||sp}：</b>${esc(tx)}</div>`).join('')}${q.mo>=3?`<div class="muted" style="margin-top:6px">${q.o.map((o,j)=>C[j]+' '+esc(o)).join('　')}</div>`:''}</details>`}
+function mockBox(qs){const r=jlptScore(Q.mockRes);const mo={};Q.mockRes.filter(([q])=>q.pt===Q.part||!q.pt).forEach(([q,ok])=>{const k=q.mo||0;mo[k]=mo[k]||[0,0];mo[k][1]++;if(ok)mo[k][0]++});
+  const tbl=`<table class="motbl">${Object.keys(mo).map(k=>`<tr><td>問題${k}</td><td>${mo[k][0]} / ${mo[k][1]}</td></tr>`).join('')}</table>`;
+  if(Q.part===1&&Q.hasP2)return `${tbl}<div style="margin-top:8px">${PART[1][0]} ${t('done1')}</div><button class="btn red" id="p2go" style="margin-top:10px">${t('part2')} · ${PART[2][0]} (${t('min',{n:70})}) →</button>`;
+  if(Q.part===2&&Q.hasP3)return `${tbl}<div style="margin-top:8px">${PART[2][0]} ${t('done1')}</div><button class="btn red" id="p3go" style="margin-top:10px">${t('part3')} · ${PART[3][0]} (${t('min',{n:40})}) →</button>`;
+  if(r.hasL)return `${tbl}<table class="motbl sc"><tr><td>言語知識（文字・語彙・文法）</td><td><b>${r.lk}</b> / 60</td></tr><tr><td>読解</td><td><b>${r.rd}</b> / 60</td></tr><tr><td>聴解</td><td><b>${r.ls}</b> / 60</td></tr><tr><td>${t('total180')}</td><td><b>${r.tot}</b> / 180</td></tr></table>
+  <div class="verdict ${r.pass?'ok':'ng'}">${r.pass?'合格 '+t('passY'):'不合格 '+t('passN')}</div><span class="muted" style="font-size:12px">${t('passRule3')}</span>${r.pass?`<br><button class="btn red" id="certBtn" style="margin-top:10px">${t('getCert')}</button>`:''}`;
+  if(!r.hasR)return `${tbl}${t('est')} <b style="font-size:20px">${r.lk} / 60</b><br><span class="muted">${t('passNote')}</span>`;
+  return `${tbl}<table class="motbl sc"><tr><td>言語知識（文字・語彙・文法）</td><td><b>${r.lk}</b> / 60</td></tr><tr><td>読解</td><td><b>${r.rd}</b> / 60</td></tr><tr><td>${t('totalNoL')}</td><td><b>${r.tot}</b> / 120</td></tr></table>
+  <div class="verdict ${r.pass?'ok':'ng'}">${r.pass?'合格 '+t('passY'):'不合格 '+t('passN')}</div><span class="muted" style="font-size:12px">${t('passRule')}</span>${r.pass?`<br><button class="btn red" id="certBtn" style="margin-top:10px">${t('getCert')}</button>`:''}`}
+function hanamaru(){return `<svg class="hanamaru" viewBox="0 0 100 100" role="img" aria-label="はなまる"><g fill="none" stroke="var(--shu)" stroke-width="4" stroke-linecap="round">
+<path d="M50 22c16 0 26 11 26 26s-11 28-27 28-26-12-26-27 12-25 30-25"/><path d="M50 8c4 6 10 6 14 0 2 7 8 10 14 8-1 7 3 12 9 14-4 5-4 11 0 16-6 2-9 8-8 14-7-1-12 3-14 9-5-4-11-4-16 0-2-6-8-10-14-9 1-6-2-12-8-14 4-5 4-11 0-16 6-2 10-7 9-14 6 2 12-1 14-8z" stroke-width="3"/></g></svg>`}
+
+/* ---------- SRS flashcards ---------- */
+const F={q:[],i:0,show:false};
+function renderSRS(){
+  const due=SR.due();const known=Object.keys(SR.c).length;
+  if(!F.q.length||F.done){F.q=due.length?due:SR.fresh(10);F.i=0;F.show=false;F.done=false;F.isNew=!due.length}
+  const w=F.q[F.i];
+  shell('srs',`<section class="card qhead"><h2>${t('srsT')}</h2><span class="muted">${t('srsLeft',{a:Math.max(0,F.q.length-F.i),b:known,c:D.w.length})}</span></section>
+  ${w?`<div class="card flash" id="fc" role="button" tabindex="0" aria-label="${t('flip')}"><div class="eyebrow">${F.isNew?t('newW'):t('revW')} · ${t('setN',{n:w[5]})}</div><div class="w" style="${w[4]===1?'color:var(--shu)':''}">${esc(w[0])}</div>
+   ${F.show?`<div class="back"><div>${esc(w[1])}</div><div class="mn"><span class="tag">NE</span><b>${esc(w[2])}</b></div><div class="mn"><span class="tag">EN</span>${esc(w[3])}</div></div>`:`<div class="muted">${t('recall')}</div>`}
+   <div class="row" style="justify-content:center"><button class="speak" data-say="${esc(w[1])}">▶ ${t('say')}</button><button class="speak" data-kanji="${esc(w[0])}">漢 ${t('kcard')}</button></div></div>
+   ${F.show?`<div class="rate"><button class="btn red" data-r="0">${t('forgot')}<small>${t('againToday')}</small></button><button class="btn" data-r="1">${t('remember')}<small>${t('inDays',{n:IV[Math.min(5,((SR.c[w[0]]||{b:0}).b)+1)]})}</small></button><button class="btn ghost" data-r="2">${t('easy')}<small>${t('inDays',{n:IV[Math.min(5,((SR.c[w[0]]||{b:0}).b)+2)]})}</small></button></div>`:`<div class="foot"><button class="btn grad" id="flip">${t('showM')}</button></div>`}`
+  :`<div class="card empty" style="margin-top:14px">${t('srsDone')}<br><button class="btn" id="more" style="margin-top:12px">${t('learn10')}</button></div>`}`);
+  const flip=()=>{F.show=true;renderSRS()};const fc=$('#fc');if(fc){fc.onclick=e=>{if(e.target.closest('button'))return;if(!F.show)flip()};fc.onkeydown=e=>{if((e.key===' '||e.key==='Enter')&&!F.show){e.preventDefault();flip()}}}
+  const fb=$('#flip');if(fb)fb.onclick=flip;
+  $$('[data-r]').forEach(b=>b.onclick=()=>{const r=+b.dataset.r;SR.rate(w[0],r);if(r===0)F.q.push(w);F.i++;F.show=false;const d=today();P.log[d]=P.log[d]||0;if(F.i>=F.q.length)F.done=true;renderSRS()});
+  const mo=$('#more');if(mo)mo.onclick=()=>{F.q=SR.fresh(10);F.i=0;F.isNew=true;F.done=false;renderSRS()};
+  bindCommon();
+}
+
+/* ---------- words ---------- */
+const W={q:'',tier:0,set:'all'};
+function wordList(){const q=W.q.trim().toLowerCase();return D.w.filter(w=>(!W.tier||w[4]===W.tier)&&(W.set==='all'||w[5]==+W.set)&&(!q||w.slice(0,4).some(x=>x.toLowerCase().includes(q))))}
+function renderWords(){
+  const sets=[...new Set(D.w.map(w=>w[5]))].sort((a,b)=>a-b);
+  shell('words',`<section class="card wtools"><input id="ws" type="search" placeholder="${t('search')}" value="${esc(W.q)}" aria-label="${t('searchL')}">
+   <select id="wset" aria-label="${t('set')}"><option value="all">${t('allSets')}</option>${sets.map(n=>`<option value="${n}" ${W.set==n?'selected':''}>${t('setN',{n})}</option>`).join('')}</select>
+   <div class="chips">${[[0,t('all')],[1,t('t1')],[2,t('t2')],[3,t('t3')]].map(([v,x])=>`<button class="chip ${W.tier===v?'on':''}" data-tier="${v}">${x}</button>`).join('')}</div></section>
+   <div class="legend"><span class="r">${t('legR')}</span><span class="b">${t('legB')}</span><span>${t('legN')}</span><span class="muted">${t('tapHint')}</span><span class="muted" id="wcount"></span></div><div id="wbody"></div>`);
+  $('#ws').oninput=e=>{W.q=e.target.value;drawWords()};$('#wset').onchange=e=>{W.set=e.target.value;drawWords()};
+  $$('[data-tier]').forEach(b=>b.onclick=()=>{W.tier=+b.dataset.tier;renderWords()});
+  drawWords();
+}
+function drawWords(){
+  const L=wordList();$('#wcount').textContent=t('wN',{n:L.length});const box=$('#wbody');
+  if(!L.length){box.innerHTML=`<div class="card empty" style="margin-top:14px">${t('nothing')}</div>`;return}
+  const rows=L.slice(0,400);
+  box.innerHTML=`<div class="tblwrap card"><table><thead><tr><th>#</th><th>${t('colW')}</th><th>${t('colF')}</th><th>${t('colNe')}</th><th>${t('colEn')}</th><th>${t('set')}</th></tr></thead><tbody>${rows.map((w,i)=>`<tr class="t${w[4]}" data-kanji="${esc(w[0])}" tabindex="0"><td class="n">${i+1}</td><td class="w">${esc(w[0])}</td><td>${esc(w[1])}</td><td class="ne">${esc(w[2])}</td><td>${esc(w[3])}</td><td class="n">${w[5]}</td></tr>`).join('')}</tbody></table></div>${L.length>400?`<p class="muted">${t('first400')}</p>`:''}`;
+  bindCommon();box.querySelectorAll('tr[data-kanji]').forEach(r=>r.onkeydown=e=>{if(e.key==='Enter')openKanji(r.dataset.kanji)});
+}
+/* ---------- Driving licence course (○×) ---------- */
+const XC={};let DD=null,DK=null,DUNL=false,XID='drive';const DS={set:1,list:[],page:0,ans:{},checked:false,mock:false};
+function useCourse(id){if(XID!==id){XC[XID]={DD,DK,DUNL};XID=id;const c=XC[id]||{};DD=c.DD||null;DK=c.DK||null;DUNL=c.DUNL||false;DS.inPage=false}}
+const XT={drive:{eb:'運転免許 · DRIVING',title:['運転免許 学科','Driving licence test','ड्राइभिङ लाइसेन्स परीक्षा'],sub:['仮免・本免・外免切替の○×問題','○× questions for provisional, full and foreign-licence conversion tests','अस्थायी, पूर्ण र विदेशी लाइसेन्स परिवर्तन परीक्षाका ○× प्रश्न'],pass:.9},
+ bjt:{eb:'BJT · BUSINESS JAPANESE',title:['BJTビジネス日本語','BJT Business Japanese','BJT व्यापारिक जापानी'],sub:['敬語・ビジネス表現・文書読解','Keigo, business expressions and document reading','आदरार्थी भाषा, व्यापारिक अभिव्यक्ति र कागजात पढाइ'],pass:.7}};
+const DT={title:0,sub:0,
+ start:['練習する','Practise','अभ्यास गर्नुहोस्'],mock:['本番形式','Exam mode','परीक्षा मोड'],
+ tf:['正しいものは○、まちがっているものは×を選んでください。','Choose ○ if the statement is correct and × if it is wrong.','वाक्य सही भए ○, गलत भए × छान्नुहोस्।'],
+ tr:['意味','Meaning','अर्थ'],why:['解説','Explanation','व्याख्या'],ok:['正しい','Correct','सही'],ng:['まちがい','Wrong','गलत'],
+ pass:['合格！','Passed!','पास!'],fail:['不合格。もう一度！','Not passed. Try again!','पास भएन। फेरि प्रयास गर्नुहोस्!'],
+ lockT:['ほかのセットを開く','Unlock the other sets','बाँकी सेट खोल्नुहोस्'],codeNote:['このコース専用のコードを入れてください（ほかのコースのコードとは別です）。','Enter a code for this course (separate from other courses\' codes).','यो कोर्सको छुट्टै code हाल्नुहोस् (अरू कोर्सको code भन्दा फरक)।'],opts:['選択肢','Options','विकल्प'],
+ done:['解答','Answered','उत्तर दिइयो']};
+const dt=k=>{const v=(k in XT[XID])?XT[XID][k]:DT[k];const c=LANGS[LI][0];return c==='ja'?v[0]:c==='ne'?v[2]:v[1]};
+async function loadDrive(){if(DD)return;try{const [d,k]=await Promise.all([fetch(XID+'.json').then(r=>r.json()),fetch(XID+'-keys.json',{cache:'no-store'}).then(r=>r.json())]);DD=d;DK=k;if((d.sets||[]).length&&d.sets.every(n=>(d.free||[]).includes(n)))DUNL=true}catch(e){DD={q:[],sets:[],free:[]};DK=null}
+  const c=LS.get(XID+'code','');if(c)await dunlock(c,true)}
+const dLocked=n=>!DUNL&&!(DD.free||[]).includes(+n);
+async function dunlock(code,silent){code=(code||'').toUpperCase().replace(/[^0-9A-Z]/g,'');const w=DK&&DK.w&&DK.w[code.slice(0,4)];
+  if(code.length!==12||!w){if(silent)LS.set(XID+'code','');return false}
+  try{const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(code),'PBKDF2',false,['deriveKey']);
+    const k=await crypto.subtle.deriveKey({name:'PBKDF2',salt:b64d(w[0]),iterations:DK.it,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['decrypt']);
+    const mk=await crypto.subtle.importKey('raw',await crypto.subtle.decrypt({name:'AES-GCM',iv:b64d(w[1])},k,b64d(w[2])),'AES-GCM',false,['decrypt']);
+    const L=await fetch(XID+'-locked.json').then(r=>r.json());const B=JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:b64d(L.iv)},mk,b64d(L.ct))));
+    if(!DUNL){DD.q=DD.q.concat(B.q);DUNL=true}LS.set(XID+'code',code);return true}catch(e){if(silent)LS.set(XID+'code','');return false}}
+const courseStrip=()=>`<section class="courses"><div class="eyebrow">${t('courses')}</div><div class="crow">${COURSES.map(([k,n,sub,on])=>`<button class="course ${on?'on':''} ${exam()===k?'sel':''}" data-exam="${k}" aria-pressed="${exam()===k}"><b>${n}</b><small>${sub}</small><span class="st">${on?t('open'):t('soon')}</span></button>`).join('')}</div></section>`;
+async function driveRoute(r){useCourse(exam());if(!DD){shell('home','<div class="card empty" style="margin-top:20px">…</div>');await loadDrive()}
+  if(r==='quiz'&&DS.inPage)return dPage();DS.inPage=false;if(r==='mock')return dStart(DS.set,true);dHome(r==='unlock')}
+function dHome(focusUnlock){const res=LS.get(XID+'res',{});
+  const card=n=>{const qs=DD.q.filter(q=>q.s===n),done=Object.keys(res).filter(k=>+k.split('-')[0]===n),ok=done.filter(k=>res[k]).length,lk=dLocked(n);
+    return `<div class="card dset ${lk?'lk':''}"><b>${lk?'🔒 ':''}${t('setN',{n})}${(DD.free||[]).includes(n)&&!DUNL?' · '+t('freeTag'):''}</b><small>${lk?'':`${done.length}/${qs.length} · ✓ ${ok}`}</small>
+    <div class="row"><button class="btn grad" data-ds="${n}">${dt('start')}</button><button class="btn" data-dm="${n}">${dt('mock')}</button></div></div>`};
+  shell('home',`${courseStrip()}<section class="card dhero">${hanko('hk')}<div><div class="eyebrow">${XT[XID].eb}</div><h2>${dt('title')}</h2><p class="muted">${dt('sub')}</p></div></section>
+  <section class="dsets">${DD.sets.map(card).join('')}</section>
+  ${DUNL?'':`<section class="card unlockpage" id="dunl"><h2>🔒 ${dt('lockT')}</h2><p class="muted">${dt('codeNote')}</p><form id="duf"><input id="dcode" placeholder="XXXX-XXXXXXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="16" required aria-label="code"><div class="err" id="duerr" role="alert"></div><button class="btn grad" id="dubtn">🔓 ${t('unlockBtn')}</button></form><p class="note">${t('buyNote')}</p></section>`}`);
+  $$('[data-exam]').forEach(b=>b.onclick=()=>{LS.set('exam',b.dataset.exam);DS.inPage=false;render()});
+  $$('[data-ds]').forEach(b=>b.onclick=()=>{const n=+b.dataset.ds;if(dLocked(n))return $('#dcode').focus();dStart(n,false)});
+  $$('[data-dm]').forEach(b=>b.onclick=()=>{const n=+b.dataset.dm;if(dLocked(n))return $('#dcode').focus();dStart(n,true)});
+  const f=$('#duf');if(f){if(focusUnlock)setTimeout(()=>{$('#dunl').scrollIntoView();$('#dcode').focus()},50);
+    f.onsubmit=async e=>{e.preventDefault();const b=$('#dubtn');b.disabled=true;const ok=await dunlock($('#dcode').value,false);if(ok){toast(t('unlocked'));dHome()}else{b.disabled=false;$('#duerr').textContent=t('codeErr')}}}}
+function dStart(n,mock){DS.set=n;DS.mock=mock;DS.list=DD.q.filter(q=>q.s===n).slice();if(mock){for(let i=DS.list.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[DS.list[i],DS.list[j]]=[DS.list[j],DS.list[i]]}}
+  DS.size=mock?DS.list.length:10;DS.page=0;DS.ans={};DS.checked=false;DS.inPage=true;if(location.hash!=='#quiz')location.hash='#quiz';else dPage()}
+function dPage(){const qs=DS.list.slice(DS.page*DS.size,DS.page*DS.size+DS.size),pages=Math.ceil(DS.list.length/DS.size),c=LANGS[LI][0],lk=c==='ja'||c==='ne'?c:'en';let right=0;
+  const body=qs.map((q,i)=>{const a=DS.ans[i],ok=DS.checked&&a===q.a;if(ok)right++;const e=q.e[lk]||q.e.en;
+    return `<article class="card q ${DS.checked?(ok?'is-ok':'is-ng'):''}"><div class="meta"><span class="num">${DS.page*DS.size+i+1}</span><span>${t('setN',{n:q.s})} 問${q.n}</span></div>${DS.checked?`<div class="stamp">${ok?'〇':'✕'}</div>`:''}
+    ${q.p?`<div class="passage">${S.furi&&q.pr?q.pr:esc(q.p).replace(/\n/g,'<br>')}</div>`:''}<div class="stem">${S.furi?q.qr:plain(q.q)}</div>${q.o?`<div class="opts ${q.o.some(o=>o.length>9)?'long':''}">${q.o.map((o,j)=>{let cl='';if(DS.checked){if(j+1===q.a)cl='right';else if(a===j+1)cl='wrong'}else if(a===j+1)cl='sel';return `<button class="opt ${cl}" data-q="${i}" data-o="${j+1}" ${DS.checked?'disabled':''}><span class="c">${C[j]}</span><span>${S.furi&&q.or?q.or[j]:plain(o)}</span></button>`}).join('')}</div>`:`<div class="opts tf">${['○','×'].map((s,j)=>{let cl='';if(DS.checked){if(j+1===q.a)cl='right';else if(a===j+1)cl='wrong'}else if(a===j+1)cl='sel';return `<button class="opt ${cl}" data-q="${i}" data-o="${j+1}" ${DS.checked?'disabled':''}><span class="c">${s}</span><span>${j?dt('ng'):dt('ok')}</span></button>`}).join('')}</div>`}
+    ${DS.checked?`<div class="expl ${ok?'ok':'ng'}"><div class="ex-h"><b>${ok?t('right'):t('wrong')}</b><span>${t('ans')} <b>${q.o?C[q.a-1]+' '+esc(q.o[q.a-1]):q.a===1?'○':'×'}</b></span></div>${lk!=='ja'||q.o?`<div class="ex-sec"><span class="ex-l">${dt('tr')}</span>${esc(e[0])}</div>`:''}<div class="ex-sec"><span class="ex-l">${dt('why')}</span>${esc(e[1])}</div>${e[2]?`<div class="ex-sec"><span class="ex-l">${dt('opts')}</span><ul class="ex-o">${e[2].map((m,j)=>`<li class="${j+1===q.a?'r':a===j+1?'w':''}"><b>${C[j]}</b> <span class="jp">${esc(q.o[j])}</span> · ${esc(m)}</li>`).join('')}</ul></div>`:''}</div>`:''}</article>`}).join('');
+  const n=Object.keys(DS.ans).length;let score='';
+  if(DS.checked){const pct=right/qs.length;score=`<section class="card score"><div><div class="eyebrow">${t('result')} · 結果</div><div class="big">${right}<span style="font-size:22px;color:var(--muted)"> / ${qs.length}</span></div></div><div style="flex:1;min-width:180px">${DS.mock?(pct>=XT[XID].pass?`<b style="font-size:20px">${dt('pass')}</b>`:dt('fail')):(pct===1?t('perfect'):pct>=.7?t('good'):t('again'))}</div></section>`}
+  shell('quiz',`<section class="card qhead"><h2>${dt('title')} · ${t('setN',{n:DS.set})}</h2><span class="muted">${DS.mock?t('qN',{n:DS.list.length}):`${t('pageOf',{a:DS.page+1,b:pages})} · ${t('qN',{n:DS.list.length})}`}</span><button class="chip ${S.furi?'on':''}" id="furi"><ruby>振<rt>ふ</rt></ruby> ${t('furi')}</button></section>
+  ${DS.list[0]&&DS.list[0].o?'':`<p class="muted">${dt('tf')}</p>`}${score}<div class="qlist">${body}</div>
+  <div class="foot">${DS.checked?(DS.page+1<pages?`<button class="btn grad" id="dnext">${t('next')}</button>`:`<a class="btn" href="#home">${t('fin')}</a>`):`<span class="muted" id="dcnt" style="align-self:center">${t('answered',{a:n,b:qs.length})}</span><button class="btn red" id="dcheck">${t('check')}</button>`}</div>`);
+  $('#furi').onclick=()=>{S.furi=!S.furi;saveS();dPage()};
+  $$('.opt').forEach(b=>b.onclick=()=>{if(DS.checked)return;DS.ans[+b.dataset.q]=+b.dataset.o;b.parentNode.querySelectorAll('.opt').forEach(x=>x.classList.toggle('sel',x===b));const s=$('#dcnt');if(s)s.textContent=t('answered',{a:Object.keys(DS.ans).length,b:qs.length})});
+  const ck=$('#dcheck');if(ck)ck.onclick=()=>{DS.checked=true;const res=LS.get(XID+'res',{});qs.forEach((q,i)=>res[q.s+'-'+q.n]=DS.ans[i]===q.a?1:0);LS.set(XID+'res',res);dPage();scrollTo(0,0)};
+  const nx=$('#dnext');if(nx)nx.onclick=()=>{DS.page++;DS.ans={};DS.checked=false;dPage();scrollTo(0,0)};}
+/* ---------- certificate (name stays on this device only) ---------- */
+async function openCert(course,detail){
+  const m=document.createElement('div');m.className='modal';m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');
+  m.innerHTML=`<div class="sheet card"><button class="iconbtn close" aria-label="${t('close')}">✕</button><div class="eyebrow">${t('certT')}</div>
+  <div class="field" style="margin-top:12px"><label for="cname">${t('certName')}</label><input id="cname" value="${esc(LS.get('cname',''))}" placeholder="Your name"></div>
+  <button class="btn" id="cmake">${t('certMake')}</button><div id="cout"></div></div>`;
+  document.body.appendChild(m);const close=()=>m.parentNode&&m.parentNode.removeChild(m);m.onclick=e=>{if(e.target===m)close()};m.querySelector('.close').onclick=close;
+  m.querySelector('#cmake').onclick=async()=>{const name=m.querySelector('#cname').value.trim()||'Student';LS.set('cname',name);
+    try{await document.fonts.load('900 40px "Zen Maru Gothic"');await document.fonts.load('40px "Kaushan Script"')}catch(e){}
+    const W=1600,H=1130,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+    x.fillStyle='#fbfaf6';x.fillRect(0,0,W,H);
+    x.strokeStyle='#1f3f7a';x.lineWidth=18;x.strokeRect(30,30,W-60,H-60);x.strokeStyle='#c98a00';x.lineWidth=3;x.strokeRect(60,60,W-120,H-120);
+    x.strokeStyle='rgba(31,63,122,.12)';x.lineWidth=2;for(let yy=H-70,r=0;yy>H-260;yy-=22,r++)for(let xx=70;xx<420;xx+=44)for(let q=1;q<=3;q++){x.beginPath();x.arc(xx+(r%2?22:0),yy,q*7,Math.PI,0);x.stroke()}
+    x.textAlign='center';x.fillStyle='#d7263d';x.font='900 40px "Zen Maru Gothic"';x.fillText('修了証書',W/2,170);
+    x.fillStyle='#16233f';x.font='900 74px "Zen Maru Gothic"';x.fillText('CERTIFICATE',W/2,260);
+    x.font='600 26px "Noto Sans JP"';x.fillStyle='#5d6a85';x.fillText('RAKU NIHONGO GAKKOU · 楽日本語学校',W/2,310);
+    x.font='26px "Noto Sans JP"';x.fillText('This certifies that',W/2,400);
+    x.fillStyle='#1f3f7a';x.font='900 80px "Zen Maru Gothic","Noto Sans Devanagari","Noto Sans Myanmar"';x.fillText(name,W/2,500);
+    x.strokeStyle='#c98a00';x.lineWidth=2;x.beginPath();x.moveTo(400,525);x.lineTo(W-400,525);x.stroke();
+    x.fillStyle='#16233f';x.font='28px "Noto Sans JP"';x.fillText('has successfully completed',W/2,590);
+    x.font='700 40px "Noto Sans JP","Noto Sans Devanagari"';x.fillText(course,W/2,650);
+    x.font='600 30px "Noto Sans JP"';x.fillStyle='#d7263d';x.fillText(detail,W/2,705);
+    const d=new Date();x.fillStyle='#5d6a85';x.font='24px "Noto Sans JP"';x.textAlign='left';x.fillText('Date: '+d.getFullYear()+'/'+(d.getMonth()+1)+'/'+d.getDate(),180,900);
+    x.textAlign='center';x.fillStyle='#16233f';x.font='64px "Kaushan Script"';x.fillText('Binod Paudel',W-420,880);
+    x.strokeStyle='#16233f';x.lineWidth=2;x.beginPath();x.moveTo(W-620,905);x.lineTo(W-220,905);x.stroke();
+    x.font='600 22px "Noto Sans JP"';x.fillStyle='#5d6a85';x.fillText('BINOD PAUDEL · Teacher, Raku Nihongo Gakkou',W-420,940);
+    x.save();x.translate(W/2,900);x.rotate(-.12);x.strokeStyle='#d7263d';x.lineWidth=7;x.beginPath();x.arc(0,0,78,0,7);x.stroke();x.fillStyle='#d7263d';x.font='900 92px "Zen Maru Gothic"';x.textBaseline='middle';x.fillText('楽',0,6);x.restore();
+    const url=c.toDataURL('image/png');const out=m.querySelector('#cout');
+    out.innerHTML=`<img class="certimg" alt="Certificate" src="${url}"><p class="note">${t('certHint')}</p><button class="btn ghost" id="csave">${t('save')}</button>`;
+    out.querySelector('#csave').onclick=async()=>{try{const dl=window.claude&&await claude.use('downloads');if(!dl)throw 0;const b=await (await fetch(url)).blob();await dl.save({filename:'Raku-Nihongo-Gakkou-Certificate.png',data:b})}catch(e){toast(t('lp'))}};
+  };
+}
+/* ---------- admin ---------- */
+function renderAdmin(){
+  if(!isOwner){location.hash='#home';return}
+  const ids=Object.keys((KEYS&&KEYS.w)||{});
+  shell('admin',`<section class="card admin"><div class="eyebrow">एडमिन · Binod Paudel मात्र</div><h2 class="ne" style="margin:6px 0 4px">Unlock code</h2>
+  <p class="note">अहिले ${ids.length} वटा code चालु छन्। हरेक विद्यार्थीलाई भुक्तानीपछि एउटा code दिनुहोस्। Code को सूची तपाईंको project files मा छ।</p>
+  <form id="rf" style="margin-top:12px"><h3 class="ne" style="font-size:16px;margin-bottom:10px">Code बन्द गर्नुहोस् (revoke)</h3>
+  <div class="field"><label for="rid">Code को पहिलो ४ अक्षर</label><input id="rid" required maxlength="4" autocapitalize="characters" style="text-transform:uppercase"></div>
+  <div class="err ne" id="aerr" role="alert"></div><button class="btn">बन्द गर्नुहोस्</button></form></section>`);
+  $('#rf').onsubmit=async ev=>{ev.preventDefault();const id=$('#rid').value.trim().toUpperCase();
+    if(!KEYS.w[id]){$('#aerr').textContent='यो code भेटिएन।';return}
+    if(!ART){$('#aerr').textContent='यहाँबाट सेभ गर्न मिलेन। Claude लाई भन्नुहोस्।';return}
+    const w=Object.assign({},KEYS.w);delete w[id];const nk=Object.assign({},KEYS,{w});
+    try{await ART.publish({'keys.json':{content:JSON.stringify(nk),contentType:'application/json'}});KEYS=nk;toast('Code बन्द भयो।');renderAdmin()}
+    catch(err){$('#aerr').textContent=(err&&err.code==='capability_disabled')?'लिंक public भएकाले यहाँबाट सेभ हुँदैन। Claude लाई code को पहिलो ४ अक्षर भन्नुहोस्।':'सेभ भएन ('+(err&&err.code||'error')+')।'}};
+}
+boot();
+})();
+</script>
