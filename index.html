@@ -442,6 +442,17 @@ tr[data-kanji]:hover td{background:var(--ai-soft)}
 @keyframes dive{from{transform:scale(1);opacity:1}to{transform:scale(22);opacity:1}}
 #intro.dive{animation:dfade .5s .55s ease-in forwards}
 @keyframes dfade{to{opacity:0}}
+
+/* v52: home order — model sets first, homework second */
+.hsech{font-size:18px;font-weight:800;margin:22px 2px 10px}
+.hwsec{margin-bottom:18px}
+.hwgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media (max-width:640px){.hwgrid{grid-template-columns:1fr 1fr}}
+.hwc{display:flex;flex-direction:column;gap:4px;text-decoration:none;color:inherit;position:relative;overflow:hidden;border:1px solid var(--line);transition:transform .15s}
+.hwc:hover{transform:translateY(-2px)}
+.hwc i{font:900 30px var(--f-jp);font-style:normal;color:var(--ai)}
+.hwc b{font-size:17px}.hwc span{font-size:13px;color:var(--muted)}.hwc small{font-size:12px;color:var(--ok);font-weight:700}
+.hwc.off{opacity:.55}.hwc.off i{color:var(--muted)}
 </style>
 <div id="app"><div class="loginwrap"><div class="aur a1"></div><div class="aur a2"></div></div></div>
 <div id="toast" class="toast" hidden></div>
@@ -864,7 +875,15 @@ function renderHome(){
   const pct=s=>s.total?Math.round(s.done/s.total*100):0;const due=SR.due().length;
   const bars=ALL_T.map(ty=>{const s=typeStats(ty);const a=s.done?Math.round(s.ok/s.done*100):0;return `<div class="brow"><span>${TL[ty]}<small>${TN(ty)}</small></span><div class="bar"><i style="width:${a}%;background:${!s.done?'var(--line)':a<60?'var(--shu)':a<80?'var(--gold)':'var(--ok)'}"></i></div><b>${s.done?a+'%':'–'}</b></div>`}).join('');
   const weakest=ALL_T.map(ty=>({ty,s:typeStats(ty)})).filter(x=>x.s.done>=5).sort((a,b)=>a.s.ok/a.s.done-b.s.ok/b.s.done)[0];
-  shell('home',`<section class="courses"><div class="eyebrow">${t('courses')}</div><div class="crow">${COURSES.map(([k,n,sub,on])=>`<button class="course ${on?'on':''} ${exam()===k?'sel':''}" data-exam="${k}" aria-pressed="${exam()===k}"><b>${n}</b><small>${sub}</small><span class="st">${on?t('open'):t('soon')}</span></button>`).join('')}</div>${(COURSES.find(c=>c[0]===exam())||[0,0,0,1])[3]?'':`<div class="card soonnote">${t('soonNote',{c:(COURSES.find(c=>c[0]===exam())||[])[1]})}</div>`}</section>${UNL?'':`<section class="card unlockcard"><div><b>🎁 ${t('freeDemo')}</b><p>${t('lockedN',{n:(D.sets||[]).length-(D.free||[]).length})}${SHOWPRICE?' · N5–N3 ¥2,000 · N2–N1 ¥3,000':''}</p></div><a class="btn grad" href="#unlock">🔓 ${t('unlockBtn')}</a></section>`}<section class="hero2"><div class="h-l"><div class="h-hello">${t('hello')}${me()?', <b>'+esc(me())+'</b>':''} 👋</div>
+  shell('home',`<section class="courses"><div class="eyebrow">${t('courses')}</div><div class="crow">${COURSES.map(([k,n,sub,on])=>`<button class="course ${on?'on':''} ${exam()===k?'sel':''}" data-exam="${k}" aria-pressed="${exam()===k}"><b>${n}</b><small>${sub}</small><span class="st">${on?t('open'):t('soon')}</span></button>`).join('')}</div>${(COURSES.find(c=>c[0]===exam())||[0,0,0,1])[3]?'':`<div class="card soonnote">${t('soonNote',{c:(COURSES.find(c=>c[0]===exam())||[])[1]})}</div>`}</section>${UNL?'':`<section class="card unlockcard"><div><b>🎁 ${t('freeDemo')}</b><p>${t('lockedN',{n:(D.sets||[]).length-(D.free||[]).length})}${SHOWPRICE?' · N5–N3 ¥2,000 · N2–N1 ¥3,000':''}</p></div><a class="btn grad" href="#unlock">🔓 ${t('unlockBtn')}</a></section>`}
+  <h2 class="hsech">📘 ${ut('setsH')}</h2>
+  <div class="paths">
+  <div class="card path"><div class="kana">STEP 1 · 漢字</div><h2>${t('kanji')}</h2><p class="muted" style="margin:0">${t('kanjiSub',{n:k.total})}</p><div class="bar"><i style="width:${pct(k)}%"></i></div><div class="muted" style="font-size:13px">${k.done}/${k.total} · ${pct(k)}%</div><button class="btn" data-go="kanji">${t('kanjiGo')}</button></div>
+  <div class="card path"><div class="kana">STEP 2 · 語彙</div><h2>${t('mean')}</h2><p class="muted" style="margin:0">${t('meanSub',{n:m.total})}</p><div class="bar"><i style="width:${pct(m)}%"></i></div><div class="muted" style="font-size:13px">${m.done}/${m.total} · ${pct(m)}%</div><button class="btn" data-go="mean">${t('meanGo')}</button></div>
+  ${[['gram',3,GRAM_T],['read',4,READ_T],['listen',5,LISTEN_T]].map(([k,n,T])=>{const st=secStats(T);if(!st.total)return '';return `<div class="card path"><div class="kana">STEP ${n} · ${SECJ[k]}</div><h2>${t(k)}</h2><p class="muted" style="margin:0">${t(k+'Sub',{n:st.total})}</p><div class="bar"><i style="width:${pct(st)}%"></i></div><div class="muted" style="font-size:13px">${st.done}/${st.total} · ${pct(st)}%</div><button class="btn" data-go="${k}">${t(k+'Go')}</button></div>`}).join('')}
+  </div>
+  ${exam()==='n3'?hwHome():''}
+  <section class="hero2"><div class="h-l"><div class="h-hello">${t('hello')}${me()?', <b>'+esc(me())+'</b>':''} 👋</div>
    <div class="h-eyebrow">${t('setsInfo',{n:D.total||D.q.length})}</div><h1>${t('goalT',{n:S.goal})}</h1><p>${t('intro')}</p>
    <div class="row" style="margin-top:18px"><button class="btn light" data-go="kanji">${t('startP')} →</button><a class="btn glass" href="#mock">${t('navMock')}</a></div>
    <div class="row" style="margin-top:12px;font-size:13px"><label for="goalSel">${t('goalL')}</label><select id="goalSel" class="glass">${[10,20,30,50,100].map(g=>`<option ${g==S.goal?'selected':''}>${g}</option>`).join('')}</select></div></div>
@@ -877,12 +896,6 @@ function renderHome(){
    <div class="row" style="margin-top:12px"><button class="speak inv" data-say="${esc(w[1])}">▶ ${t('say')}</button><button class="speak inv" data-kanji="${esc(w[0])}">漢 ${t('kcard')}</button></div></section>
    <a class="card srsbox" href="#srs"><div class="eyebrow">${t('srsT')} · SRS</div><b>${due}</b><span>${t('srsDue')}</span><span class="muted" style="font-size:13px">${t('srsHint')}</span></a>
   </div>
-  <a class="card uhome" href="#units"><div><div class="eyebrow">宿題 · HOMEWORK</div><b>${ut('title')}</b><p class="muted" style="margin:4px 0 0">${ut('k')} 12 · ${ut('v')} 24 · ${ut('g')} 24 Units · 50問</p></div><span class="btn grad">${ut('start')} →</span></a>
-  <div class="paths">
-  <div class="card path"><div class="kana">STEP 1 · 漢字</div><h2>${t('kanji')}</h2><p class="muted" style="margin:0">${t('kanjiSub',{n:k.total})}</p><div class="bar"><i style="width:${pct(k)}%"></i></div><div class="muted" style="font-size:13px">${k.done}/${k.total} · ${pct(k)}%</div><button class="btn" data-go="kanji">${t('kanjiGo')}</button></div>
-  <div class="card path"><div class="kana">STEP 2 · 語彙</div><h2>${t('mean')}</h2><p class="muted" style="margin:0">${t('meanSub',{n:m.total})}</p><div class="bar"><i style="width:${pct(m)}%"></i></div><div class="muted" style="font-size:13px">${m.done}/${m.total} · ${pct(m)}%</div><button class="btn" data-go="mean">${t('meanGo')}</button></div>
-  ${[['gram',3,GRAM_T],['read',4,READ_T],['listen',5,LISTEN_T]].map(([k,n,T])=>{const st=secStats(T);if(!st.total)return '';return `<div class="card path"><div class="kana">STEP ${n} · ${SECJ[k]}</div><h2>${t(k)}</h2><p class="muted" style="margin:0">${t(k+'Sub',{n:st.total})}</p><div class="bar"><i style="width:${pct(st)}%"></i></div><div class="muted" style="font-size:13px">${st.done}/${st.total} · ${pct(st)}%</div><button class="btn" data-go="${k}">${t(k+'Go')}</button></div>`}).join('')}
-  </div>
   <section class="card chart"><div class="eyebrow">${t('chartT')}</div>${bars}
    <p style="margin:10px 0 0;font-size:14px">${weakest?`${t('weak')} <b style="color:var(--shu)">${TL[weakest.ty]}${TN(weakest.ty)?' ('+TN(weakest.ty)+')':''}</b> · <button class="linkbtn" data-type-go="${weakest.ty}">${t('practiceThis')}</button>`:t('weakHint')}</p></section>
   <section class="card badges"><div class="eyebrow">${t('badgesT')}</div>${(k.done>=k.total&&k.ok/k.total>=.7)?`<button class="btn red" data-cert="kanji" style="margin:10px 8px 0 0">${t('certK')}</button>`:''}${(m.done>=m.total&&m.ok/m.total>=.7)?`<button class="btn red" data-cert="mean" style="margin:10px 0 0">${t('certM')}</button>`:''}<p class="note" style="margin:8px 0 0">${t('certRule')}</p><div class="bgrid">${badges().map(([i,s,on])=>`<div class="badge ${on?'on':''}" title="${esc(s)}"><span>${i}</span><small>${s}</small></div>`).join('')}</div></section>`);
@@ -891,6 +904,7 @@ function renderHome(){
   $$('[data-type-go]').forEach(b=>b.onclick=()=>{const ty=b.dataset.typeGo;Object.assign(Q.sel,{sec:secOf(ty),set:'all',type:ty,order:'shuffle'});Q.auto=true;location.hash='#quiz'});
   $$('[data-cert]').forEach(b=>b.onclick=()=>{const st=secStats(b.dataset.cert==='kanji'?KANJI_T:MEAN_T);openCert(b.dataset.cert==='kanji'?'JLPT N3 漢字 Kanji Section':'JLPT N3 語彙 Vocabulary Section','Accuracy '+Math.round(st.ok/st.total*100)+'%')});
   $('#goalSel').onchange=e=>{S.goal=+e.target.value;saveS();renderHome()};
+  $$('[data-hsec]').forEach(b=>b.onclick=()=>{US.sec=b.dataset.hsec;US.inPage=false});
   bindCommon();
 }
 
@@ -1144,7 +1158,9 @@ const UT={nav:['宿題','Units','युनिट'],title:['ユニット別 宿�
  back:['ユニット一覧へ','Back to units','युनिट सूचीमा'],ans:['正しい答え','Correct answer','सही उत्तर'],exp:['解説','Explanation','व्याख्या'],
  kq:['読み方・書き方','Reading / writing','पढाइ / लेखाइ'],p1:['問題1：（　）に入るものを選ぶ','Part 1: choose what fits （　）','भाग 1: （　）मा मिल्ने छान्नुहोस्'],p2:['問題2：★に入るものを選ぶ','Part 2: choose the word for ★','भाग 2: ★ मा पर्ने शब्द छान्नुहोस्'],
  kh:['【　】の言葉の読み方、または漢字を選んでください。','Choose the reading of the 【】 word, or its kanji.','【】 भित्रको शब्दको सही पढाइ वा सही खान्जी छान्नुहोस्।'],vh:['正しい意味・言葉を選んでください。','Choose the correct meaning or word.','सही अर्थ वा सही शब्द छान्नुहोस्।'],
- done:['回答','Answered','उत्तर दिइयो']};
+ done:['回答','Answered','उत्तर दिइयो'],
+ setsH:['模擬問題セット','Model question sets','मोडल प्रश्न सेट'],hwH:['宿題（ユニット別）','Homework (by unit)','गृहकार्य (युनिट अनुसार)'],
+ l:['聴解','Listening','सुनाइ (Listening)'],ld:['近日公開','Coming soon','छिट्टै आउँदैछ'],units:['ユニット','units','युनिट']};
 const ut=(k,o)=>{const v=UT[k];const c=LANGS[LI][0];let s=c==='ja'?v[0]:c==='ne'?v[2]:v[1];if(o)for(const x in o)s=s.replace('{'+x+'}',o[x]);return s};
 const ulang=()=>{const c=LANGS[LI][0];return c==='ja'||c==='ne'?c:'en'};
 async function loadUnits(){if(UD)return;try{UD=await fetch('units.json').then(r=>r.json())}catch(e){UD={k:[],v:[],g:[]}}}
@@ -1194,6 +1210,11 @@ function uPage(){
   const on=$('#uonly');if(on)on.onclick=()=>{US.only=!US.only;uPage()};
   $$('[data-jump]').forEach(a=>a.onclick=e=>{e.preventDefault();if(US.only===false||true){const el=$('#uq'+a.dataset.jump);if(el)el.scrollIntoView({behavior:'smooth',block:'center'})}});
 }
+
+function hwHome(){const res=LS.get('ures',{});
+  const cnt=s=>Object.keys(res).filter(k=>k[0]===s&&res[k].b>=35).length;
+  const it=(s,n,ic)=>`<a class="card hwc" href="#units" data-hsec="${s}"><i>${ic}</i><b>${ut(s)}</b><span>${n} ${ut('units')} · 50問</span><small>✓ ${cnt(s)}/${n}</small></a>`;
+  return `<section class="hwsec"><h2 class="hsech">📝 ${ut('hwH')}</h2><div class="hwgrid">${it('k',12,'漢')}${it('v',24,'語')}${it('g',24,'文')}<div class="card hwc off"><i>聴</i><b>${ut('l')}</b><span>${ut('ld')}</span></div></div></section>`}
 /* ---------- certificate (name stays on this device only) ---------- */
 async function openCert(course,detail){
   const m=document.createElement('div');m.className='modal';m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');
