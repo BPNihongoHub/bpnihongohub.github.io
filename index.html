@@ -958,7 +958,7 @@ async function openKanji(word){
 const EX={};
 async function loadEx1(c){if(EX[c]!==undefined)return EX[c];EX[c]=null;try{EX[c]=await fetch('ex-'+c+'.json').then(r=>r.ok?r.json():{})}catch(e){EX[c]={}}return EX[c]}
 async function loadEx(){const c=LANGS[LI][0];if(c!=='en')loadEx1('en').then(()=>{if(typeof Q!=='undefined'&&Q.checked)renderPage()});if(EX[c]!==undefined)return EX[c];EX[c]=null;try{EX[c]=await fetch('ex-'+c+'.json').then(r=>r.ok?r.json():{})}catch(e){EX[c]={}}return EX[c]}
-function explain(q,i,ok,a){const c=LANGS[LI][0],id_=qid(q),e=(EX[c]&&EX[c][id_])||(LX[c]&&LX[c][id_])||(EX.en&&EX.en[id_])||(LX.en&&LX.en[id_]);
+function explain(q,i,ok,a){const c=LANGS[LI][0]==='ja'?'en':LANGS[LI][0],id_=qid(q),e=(EX[c]&&EX[c][id_])||(LX[c]&&LX[c][id_])||(EX.en&&EX.en[id_])||(LX.en&&LX.en[id_]);
   const head=`<div class="ex-h"><b>${ok?t('right'):t('wrong')}</b><span>${t('ans')} ${C[q.a-1]} <b class="jp">${esc(q.t==='usage'?q.q:q.o[q.a-1].replace(/[【】]/g,''))}</b></span>${a&&!ok?`<span class="muted">${t('youChose',{c:C[a-1]})}</span>`:(!a?`<span class="muted">${t('noAns')}</span>`:'')}</div>`;
   if(!e)return `<div class="expl ${ok?'ok':'ng'}">${head}${q.m?`<div class="ex-m"><div><span class="tag">NE</span>${esc(q.m[0])}</div><div><span class="tag">EN</span>${esc(q.m[1])}</div></div>`:''}</div>`;
   return `<div class="expl ${ok?'ok':'ng'}">${head}<div class="ex-sec"><span class="ex-l">${t('explQ')}</span>${esc(e[0])}</div><div class="ex-sec"><span class="ex-l">${t('explWhy')}</span>${esc(e[2])}</div>
@@ -1173,12 +1173,12 @@ const UT={nav:['宿題','Units','युनिट'],title:['ユニット別 宿�
  wrongList:['まちがえた問題','Questions you got wrong','गलत भएका प्रश्न'],onlyW:['まちがいだけ表示','Show only mistakes','गलत मात्र देखाउनुहोस्'],showAll:['全部表示','Show all','सबै देखाउनुहोस्'],
  back:['ユニット一覧へ','Back to units','युनिट सूचीमा'],ans:['正しい答え','Correct answer','सही उत्तर'],exp:['解説','Explanation','व्याख्या'],
  kq:['読み方・書き方','Reading / writing','पढाइ / लेखाइ'],p1:['問題1：（　）に入るものを選ぶ','Part 1: choose what fits （　）','भाग 1: （　）मा मिल्ने छान्नुहोस्'],p2:['問題2：★に入るものを選ぶ','Part 2: choose the word for ★','भाग 2: ★ मा पर्ने शब्द छान्नुहोस्'],
- kh:['【　】の言葉の読み方、または漢字を選んでください。','Choose the reading of the 【】 word, or its kanji.','【】 भित्रको शब्दको सही पढाइ वा सही खान्जी छान्नुहोस्।'],vh:['正しい意味・言葉を選んでください。','Choose the correct meaning or word.','सही अर्थ वा सही शब्द छान्नुहोस्।'],
+ kh:['【　】の言葉の読み方、または漢字を選んでください。','Choose the reading of the 【】 word, or its kanji.','【】 भित्रको शब्दको सही पढाइ वा सही खान्जी छान्नुहोस्।'],vh:['（　）に入れるのに最もよいものを選んでください。','Choose the word that best fits （　）.','（　）मा मिल्ने सबैभन्दा राम्रो शब्द छान्नुहोस्।'],
  done:['回答','Answered','उत्तर दिइयो'],
  setsH:['模擬問題セット','Model question sets','मोडल प्रश्न सेट'],hwH:['宿題（ユニット別）','Homework (by unit)','गृहकार्य (युनिट अनुसार)'],
  l:['聴解','Listening','सुनाइ (Listening)'],ld:['近日公開','Coming soon','छिट्टै आउँदैछ'],units:['ユニット','units','युनिट']};
 const ut=(k,o)=>{const v=UT[k];const c=LANGS[LI][0];let s=c==='ja'?v[0]:c==='ne'?v[2]:v[1];if(o)for(const x in o)s=s.replace('{'+x+'}',o[x]);return s};
-const ulang=()=>{const c=LANGS[LI][0];return c==='ja'||c==='ne'?c:'en'};
+const ulang=()=>LANGS[LI][0]==='ne'?'ne':'en';
 async function loadUnits(){if(UD)return;try{UD=await fetch('units.json').then(r=>r.json())}catch(e){UD={k:[],v:[],g:[]}}}
 async function renderUnits(){
   if(!UD){shell('units','<div class="card empty" style="margin-top:20px">…</div>');await loadUnits()}
@@ -1205,7 +1205,7 @@ function uPage(){
       return `<button class="opt ${cl}" data-q="${i}" data-o="${j}" ${US.checked?'disabled':''}><span class="c">${C[j]}</span><span>${S.furi&&q.or?q.or[j]:esc(o)}</span></button>`}).join('');
     const e=q.e[lk]||q.e.ne||'';
     return `${q.k==='★'&&(i===0||L[i-1].k!=='★')?`<h3 class="upart">${ut('p2')}</h3>`:''}${q.k==='文'&&i===0?`<h3 class="upart">${ut('p1')}</h3>`:''}
-    <article class="card q ${US.checked?(ok?'is-ok':'is-ng'):''}" id="uq${i}"><div class="meta"><span class="num">${i+1}</span><span>${q.k==='読'||q.k==='書'?ut('kq'):q.k==='意'||q.k==='語'?ut('v'):ut('g')}</span></div>${US.checked?`<div class="stamp">${ok?'〇':'✕'}</div>`:''}
+    <article class="card q ${US.checked?(ok?'is-ok':'is-ng'):''}" id="uq${i}"><div class="meta"><span class="num">${i+1}</span><span>${q.k==='読'||q.k==='書'?ut('kq'):q.k==='意'||q.k==='語'||q.k==='脈'?ut('v'):ut('g')}</span></div>${US.checked?`<div class="stamp">${ok?'〇':'✕'}</div>`:''}
     <div class="stem">${stem}</div><div class="opts ${q.o.some(o=>o.length>9)?'long':''}">${ops}</div>
     ${US.checked?`<div class="expl ${ok?'ok':'ng'}"><div class="ex-h"><b>${ok?ut('right'):un?ut('blank'):ut('wrong')}</b><span>${ut('ans')}: <b>${C[q.a]} ${esc(q.o[q.a])}</b></span></div><div class="ex-sec"><span class="ex-l">${ut('exp')}</span><span style="white-space:pre-line">${esc(e)}</span></div></div>`:''}</article>`};
   const n=Object.keys(US.ans).length;
