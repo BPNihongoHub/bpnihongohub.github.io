@@ -514,6 +514,14 @@ tr[data-kanji]:hover td{background:var(--ai-soft)}
 .ms-in a{display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none;color:var(--ink);padding:12px 4px;border-radius:14px;background:var(--bg);font-size:12px;text-align:center}
 .ms-in a i{font:900 22px var(--f-jp);font-style:normal;color:var(--ai)}
 .ms-in a.on{background:var(--ai-soft)}
+
+/* v61: book zoom */
+.bzoom{position:sticky;top:64px;z-index:20;display:flex;align-items:center;justify-content:center;gap:10px;margin:0 auto 10px;width:max-content;padding:6px 10px;border-radius:999px;background:var(--paper);box-shadow:var(--shadow)}
+.bzoom .chip{min-width:44px;font-size:18px;font-weight:800}
+.bzoom span{min-width:52px;text-align:center;font-weight:700}
+.bwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px}
+.bwrap .bview{max-width:none}
+@media(min-width:900px){.bwrap .bview[style*="width:100%"]{max-width:900px}}
 </style>
 <div id="app"><div class="loginwrap"><div class="aur a1"></div><div class="aur a2"></div></div></div>
 <div id="toast" class="toast" hidden></div>
@@ -1305,7 +1313,9 @@ async function renderRead(){
   await loadBooks();const b=BK[BS.id];if(!b){location.hash='#books';return}
   shell('books',`<section class="card qhead"><h2>${esc(b.t)}</h2><span class="muted">${b.n} ${bt('pages')}</span><a class="chip" href="#books">← ${bt('back')}</a></section>
   <p class="cpnote">🔒 ${bt('cp')}</p>
-  <div class="bview" id="bview" oncontextmenu="return false">${b.s.map(([f,hs])=>`<div class="bstrip" data-src="books/${f}" style="aspect-ratio:900/${hs.reduce((a,c)=>a+c,0)}"></div>`).join('')}<div class="bwm" aria-hidden="true"></div></div>`);
+  <div class="bzoom"><button class="chip" data-z="-1" aria-label="zoom out">－</button><span id="bzl">${BS.z||100}%</span><button class="chip" data-z="1" aria-label="zoom in">＋</button></div>
+  <div class="bwrap" id="bwrap"><div class="bview" id="bview" style="width:${BS.z||100}%" oncontextmenu="return false">${b.s.map(([f,hs])=>`<div class="bstrip" data-src="books/${f}" style="aspect-ratio:900/${hs.reduce((a,c)=>a+c,0)}"></div>`).join('')}<div class="bwm" aria-hidden="true"></div></div></div>`);
+  const ZS=[100,150,200,250];document.querySelectorAll('[data-z]').forEach(x=>x.onclick=()=>{const i=Math.max(0,Math.min(ZS.length-1,ZS.indexOf(BS.z||100)+Number(x.dataset.z)));BS.z=ZS[i];$('#bview').style.width=BS.z+'%';$('#bzl').textContent=BS.z+'%'});
   const v=$('#bview');['contextmenu','dragstart','selectstart','copy'].forEach(ev=>v.addEventListener(ev,e=>e.preventDefault()));
   const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){const d=e.target;d.style.backgroundImage=`url("${d.dataset.src}")`;io.unobserve(d)}}),{rootMargin:'800px 0px'});
   $$('.bstrip').forEach(d=>io.observe(d));
