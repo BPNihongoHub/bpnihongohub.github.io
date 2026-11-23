@@ -453,6 +453,19 @@ tr[data-kanji]:hover td{background:var(--ai-soft)}
 .hwc i{font:900 30px var(--f-jp);font-style:normal;color:var(--ai)}
 .hwc b{font-size:17px}.hwc span{font-size:13px;color:var(--muted)}.hwc small{font-size:12px;color:var(--ok);font-weight:700}
 .hwc.off{opacity:.55}.hwc.off i{color:var(--muted)}
+
+/* v53: book library (view only) */
+.uhero h1{margin:4px 0 6px;font-size:24px}
+.cpnote{font-size:12.5px;line-height:1.6;color:var(--shu);background:var(--shu-soft);border-radius:12px;padding:10px 12px;margin:10px 0}
+.bsecs{grid-template-columns:repeat(4,1fr)}
+@media (max-width:640px){.bsecs{grid-template-columns:1fr 1fr}}
+.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:12px}
+.bcard{font:inherit;color:inherit;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:3px;border:1px solid var(--line)}
+.bcard b{font-size:15px}.bcard small{color:var(--muted);font-size:12px}.bcard span{color:var(--ai);font-size:12.5px;font-weight:700}
+.bview{position:relative;max-width:900px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:var(--shadow);user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.bstrip{width:100%;background:#f3f3f3 center top/100% auto no-repeat;pointer-events:none}
+.bwm{position:absolute;inset:0;pointer-events:none;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='360' height='260'><text x='20' y='160' transform='rotate(-28 180 130)' font-family='sans-serif' font-weight='800' font-size='18' letter-spacing='3' fill='rgba(200,20,60,0.10)'>© BINOD PAUDEL · VIEW ONLY</text></svg>") repeat}
+@media print{.bview{display:none!important}}
 </style>
 <div id="app"><div class="loginwrap"><div class="aur a1"></div><div class="aur a2"></div></div></div>
 <div id="toast" class="toast" hidden></div>
@@ -814,6 +827,8 @@ function render(){
   if(['drive','bjt'].includes(exam())&&['home','quiz','mock','review','words','srs','unlock'].includes(r))return driveRoute(r);
   const views={home:renderHome,quiz:renderQuiz,mock:renderMock,review:()=>Q.start({mode:'review'}),words:renderWords,srs:renderSRS,admin:renderAdmin,unlock:renderUnlock};
   if(r==='units')return renderUnits();
+  if(r==='books')return renderBooks();
+  if(r==='read')return renderRead();
   if(r==='uquiz')return US.inPage?uPage():renderUnits();
   if(r==='quiz'&&Q.list.length&&Q.inPage&&Q.mode==='normal')return renderPage();
   (views[r]||renderHome)();
@@ -882,7 +897,7 @@ function renderHome(){
   <div class="card path"><div class="kana">STEP 2 · 語彙</div><h2>${t('mean')}</h2><p class="muted" style="margin:0">${t('meanSub',{n:m.total})}</p><div class="bar"><i style="width:${pct(m)}%"></i></div><div class="muted" style="font-size:13px">${m.done}/${m.total} · ${pct(m)}%</div><button class="btn" data-go="mean">${t('meanGo')}</button></div>
   ${[['gram',3,GRAM_T],['read',4,READ_T],['listen',5,LISTEN_T]].map(([k,n,T])=>{const st=secStats(T);if(!st.total)return '';return `<div class="card path"><div class="kana">STEP ${n} · ${SECJ[k]}</div><h2>${t(k)}</h2><p class="muted" style="margin:0">${t(k+'Sub',{n:st.total})}</p><div class="bar"><i style="width:${pct(st)}%"></i></div><div class="muted" style="font-size:13px">${st.done}/${st.total} · ${pct(st)}%</div><button class="btn" data-go="${k}">${t(k+'Go')}</button></div>`}).join('')}
   </div>
-  ${exam()==='n3'?hwHome():''}
+  ${exam()==='n3'?hwHome()+booksHome():''}
   <section class="hero2"><div class="h-l"><div class="h-hello">${t('hello')}${me()?', <b>'+esc(me())+'</b>':''} 👋</div>
    <div class="h-eyebrow">${t('setsInfo',{n:D.total||D.q.length})}</div><h1>${t('goalT',{n:S.goal})}</h1><p>${t('intro')}</p>
    <div class="row" style="margin-top:18px"><button class="btn light" data-go="kanji">${t('startP')} →</button><a class="btn glass" href="#mock">${t('navMock')}</a></div>
@@ -904,6 +919,7 @@ function renderHome(){
   $$('[data-type-go]').forEach(b=>b.onclick=()=>{const ty=b.dataset.typeGo;Object.assign(Q.sel,{sec:secOf(ty),set:'all',type:ty,order:'shuffle'});Q.auto=true;location.hash='#quiz'});
   $$('[data-cert]').forEach(b=>b.onclick=()=>{const st=secStats(b.dataset.cert==='kanji'?KANJI_T:MEAN_T);openCert(b.dataset.cert==='kanji'?'JLPT N3 漢字 Kanji Section':'JLPT N3 語彙 Vocabulary Section','Accuracy '+Math.round(st.ok/st.total*100)+'%')});
   $('#goalSel').onchange=e=>{S.goal=+e.target.value;saveS();renderHome()};
+  $$('[data-bsec]').forEach(b=>b.onclick=()=>{BS.sec=b.dataset.bsec});
   $$('[data-hsec]').forEach(b=>b.onclick=()=>{US.sec=b.dataset.hsec;US.inPage=false});
   bindCommon();
 }
@@ -1215,6 +1231,38 @@ function hwHome(){const res=LS.get('ures',{});
   const cnt=s=>Object.keys(res).filter(k=>k[0]===s&&res[k].b>=35).length;
   const it=(s,n,ic)=>`<a class="card hwc" href="#units" data-hsec="${s}"><i>${ic}</i><b>${ut(s)}</b><span>${n} ${ut('units')} · 50問</span><small>✓ ${cnt(s)}/${n}</small></a>`;
   return `<section class="hwsec"><h2 class="hsech">📝 ${ut('hwH')}</h2><div class="hwgrid">${it('k',12,'漢')}${it('v',24,'語')}${it('g',24,'文')}<div class="card hwc off"><i>聴</i><b>${ut('l')}</b><span>${ut('ld')}</span></div></div></section>`}
+/* ---------- Book library: view-only page images (no PDF files, no download) ---------- */
+let BK=null;const BS={sec:'k',id:null};
+const BT={lib:['教材ライブラリー','Books','किताब'],
+ libS:['先生の教材をここで読めます（閲覧のみ）。','Read the teacher\'s books here (view only).','सरका किताबहरू यहीँ पढ्नुहोस् (हेर्न मात्र)।'],
+ k:['漢字','Kanji','खान्जी'],v:['語彙（意味）','Vocabulary','शब्द (अर्थ)'],g:['文法','Grammar','व्याकरण'],b:['練習問題集','Practice book','अभ्यास किताब'],
+ pages:['ページ','pages','पेज'],read:['読む','Read','पढ्नुहोस्'],back:['一覧へ','Back','सूचीमा फर्कनुहोस्'],
+ cp:['© Binod Paudel。閲覧のみ。ダウンロード・コピー・スクリーンショット・共有は禁止です。違反した場合は著作権法により処罰されることがあります。',
+     '© Binod Paudel. View only. Downloading, copying, screenshots or sharing are not allowed. Doing so may lead to action under copyright law.',
+     '© Binod Paudel. हेर्न मात्र। डाउनलोड, कपी, स्क्रिनसट वा अरूलाई सेयर गर्न पाइँदैन। त्यसो गरेमा प्रतिलिपि अधिकार (copyright) कानुनअनुसार कारबाही हुन सक्छ।'],
+ loading:['読み込み中…','Loading…','लोड हुँदैछ…']};
+const bt=k=>{const v=BT[k];const c=LANGS[LI][0];return c==='ja'?v[0]:c==='ne'?v[2]:v[1]};
+async function loadBooks(){if(BK)return;try{BK=await fetch('books/books.json').then(r=>r.json())}catch(e){BK={}}}
+const BICON={k:'漢',v:'語',g:'文',b:'練'};
+function booksHome(){return `<section class="hwsec"><h2 class="hsech">📚 ${bt('lib')}</h2><div class="hwgrid">${['k','v','g','b'].map(s=>`<a class="card hwc" href="#books" data-bsec="${s}"><i>${BICON[s]}</i><b>${bt(s)}</b><span>${bt('read')} →</span></a>`).join('')}</div></section>`}
+async function renderBooks(){
+  if(!BK){shell('books',`<div class="card empty">${bt('loading')}</div>`);await loadBooks()}
+  const sec=BS.sec,list=Object.entries(BK).filter(([,b])=>b.sec===sec);
+  shell('books',`<section class="card uhero"><div class="eyebrow">LIBRARY · 教材</div><h1>${bt('lib')}</h1><p class="muted">${bt('libS')}</p><p class="cpnote">🔒 ${bt('cp')}</p></section>
+  <div class="usecs bsecs" role="tablist">${['k','v','g','b'].map(s=>`<button role="tab" aria-selected="${s===sec}" class="usec ${s===sec?'on':''}" data-bs="${s}"><b>${BICON[s]} ${bt(s)}</b></button>`).join('')}</div>
+  <div class="bgrid">${list.map(([id,b])=>`<button class="card bcard" data-bid="${id}"><b>${esc(b.t)}</b>${b.sub?`<small>${esc(b.sub)}</small>`:''}<span>${b.n} ${bt('pages')}</span></button>`).join('')}</div>`);
+  $$('[data-bs]').forEach(x=>x.onclick=()=>{BS.sec=x.dataset.bs;renderBooks()});
+  $$('[data-bid]').forEach(x=>x.onclick=()=>{BS.id=x.dataset.bid;location.hash='#read'});
+}
+async function renderRead(){
+  await loadBooks();const b=BK[BS.id];if(!b){location.hash='#books';return}
+  shell('books',`<section class="card qhead"><h2>${esc(b.t)}</h2><span class="muted">${b.n} ${bt('pages')}</span><a class="chip" href="#books">← ${bt('back')}</a></section>
+  <p class="cpnote">🔒 ${bt('cp')}</p>
+  <div class="bview" id="bview" oncontextmenu="return false">${b.s.map(([f,hs])=>`<div class="bstrip" data-src="books/${f}" style="aspect-ratio:900/${hs.reduce((a,c)=>a+c,0)}"></div>`).join('')}<div class="bwm" aria-hidden="true"></div></div>`);
+  const v=$('#bview');['contextmenu','dragstart','selectstart','copy'].forEach(ev=>v.addEventListener(ev,e=>e.preventDefault()));
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){const d=e.target;d.style.backgroundImage=`url("${d.dataset.src}")`;io.unobserve(d)}}),{rootMargin:'800px 0px'});
+  $$('.bstrip').forEach(d=>io.observe(d));
+}
 /* ---------- certificate (name stays on this device only) ---------- */
 async function openCert(course,detail){
   const m=document.createElement('div');m.className='modal';m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');
