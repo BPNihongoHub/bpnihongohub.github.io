@@ -1232,7 +1232,7 @@ async function renderUnits(){
   const res=LS.get('ures',{}),sec=US.sec;
   const card=u=>{const r=res[sec+u.n];const pct=r?Math.round(r.b/u.qs.length*100):null;
     return `<div class="card ucard ${r?(r.b/u.qs.length>=UPASS?'pass':'tried'):''}"><div class="uh"><b>Unit ${u.n}</b>${r?`<span class="ubadge ${r.b/u.qs.length>=UPASS?'ok':'ng'}">${r.b/u.qs.length>=UPASS?'✓ ':''}${ut('best')} ${r.b}/${u.qs.length}</span>`:`<span class="ubadge">${ut('notyet')}</span>`}</div>
-    ${u.title?`<small class="muted">${esc(u.title)}</small>`:''}<div class="bar"><i style="width:${pct||0}%;background:${pct==null?'var(--line)':pct>=70?'var(--ok)':'var(--shu)'}"></i></div>
+    ${u.title?`<small class="muted">${esc(ulang()==='ne'?u.title:(u.te||u.title))}</small>`:''}<div class="bar"><i style="width:${pct||0}%;background:${pct==null?'var(--line)':pct>=70?'var(--ok)':'var(--shu)'}"></i></div>
     <button class="btn ${r?'':'grad'}" data-us="${u.n}">${r?ut('again'):ut('start')} · ${u.qs.length}問</button></div>`};
   shell('units',`<section class="card dhero">${hanko('hk')}<div><div class="eyebrow">JLPT N3 · 宿題 HOMEWORK</div><h2>${ut('title')}</h2><p class="muted">${ut('sub')}</p><p class="note" style="margin:6px 0 0">${ut('rule')}</p></div></section>
   <div class="usecs" role="tablist">${['k','v','g'].map(s=>`<button role="tab" aria-selected="${s===sec}" class="usec ${s===sec?'on':''}" data-sec="${s}"><b>${ut(s)}</b><small>${ut(s+'d')}</small></button>`).join('')}</div>
@@ -1240,7 +1240,7 @@ async function renderUnits(){
   $$('[data-sec]').forEach(b=>b.onclick=()=>{US.sec=b.dataset.sec;renderUnits()});
   $$('[data-us]').forEach(b=>b.onclick=()=>uStart(US.sec,+b.dataset.us));
 }
-function uStart(sec,n){const u=UD[sec].find(x=>x.n===n);US.sec=sec;US.unit=n;US.list=u.qs;US.title=u.title||'';US.ans={};US.checked=false;US.only=false;US.warn=false;US.inPage=true;
+function uStart(sec,n){const u=UD[sec].find(x=>x.n===n);US.sec=sec;US.unit=n;US.list=u.qs;US.title=(ulang()==='ne'?u.title:(u.te||u.title))||'';US.ans={};US.checked=false;US.only=false;US.warn=false;US.inPage=true;
   if(location.hash!=='#uquiz')location.hash='#uquiz';else uPage()}
 function uPage(){
   const L=US.list,lk=ulang();let right=0;const wrongIdx=[];
