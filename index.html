@@ -1,11 +1,11 @@
 <!doctype html><meta charset="utf-8">
-<title>Raku Nihongo Gakkou</title>
+<title>Binod Paudel 日本語</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="theme-color" content="#06071a">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Zen+Maru+Gothic:wght@700;900&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans+Devanagari:wght@400;500;700&family=Noto+Sans+Myanmar:wght@400;700&family=Kaushan+Script&display=swap">
 <style>
-/* Raku Nihongo Gakkou v6: midnight aurora + ink-drawn hanko. Indigo→crimson gradient brand, glass surfaces, kanji-glyph navigation. */
+/* Binod Paudel site v6: midnight aurora + ink-drawn hanko. Indigo→crimson gradient brand, glass surfaces, kanji-glyph navigation. */
 :root{
   --bg:#f4f3fa; --paper:#ffffff; --ink:#111430; --muted:#5f6485; --line:#e3e2ef;
   --ai:#3d3df5; --ai-soft:#ececff; --shu:#e81f55; --shu-soft:#ffe7ee; --ok:#0c9a60; --ok-soft:#dff5ea;
@@ -154,7 +154,7 @@ nav.bnav{display:none}
 
 /* home */
 .hero2{position:relative;overflow:hidden;margin-top:18px;border-radius:28px;padding:26px 24px;background:var(--grad);color:#fff;display:grid;grid-template-columns:1.5fr 1fr;gap:18px 20px;align-items:center;box-shadow:0 20px 50px rgba(53,39,201,.25)}
-.hero2::after{content:"楽";position:absolute;right:-30px;bottom:-110px;font:900 300px/1 var(--f-jp);color:rgba(255,255,255,.07);pointer-events:none}
+.hero2::after{content:"日";position:absolute;right:-30px;bottom:-110px;font:900 300px/1 var(--f-jp);color:rgba(255,255,255,.07);pointer-events:none}
 .hero2>*{position:relative;z-index:1}
 .h-hello{font-size:15px;opacity:.9}
 .h-eyebrow{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;opacity:.8;margin-top:6px}
@@ -383,6 +383,9 @@ tr[data-kanji]:hover td{background:var(--ai-soft)}
 .wchip{min-width:34px;text-align:center;padding:4px 8px;border-radius:10px;background:color-mix(in srgb,var(--shu) 14%,transparent);color:var(--shu);font-weight:700;text-decoration:none}
 .stem .rd{color:var(--muted);font-size:.85em;margin-left:4px}
 @media (max-width:560px){.usecs{grid-template-columns:1fr}.uhome{flex-direction:column;align-items:flex-start}}
+
+.hk text.bp,.sp-hk text.bp{fill:#fff;font:400 52px "Kaushan Script",cursive;stroke:none}
+.h-teacher svg.hk text.bp{fill:#e81f55}
 </style>
 <div id="app"><div class="loginwrap"><div class="aur a1"></div><div class="aur a2"></div></div></div>
 <div id="toast" class="toast" hidden></div>
@@ -668,18 +671,17 @@ setTheme(LS.get('theme',null));
 
 /* ---------- opening screen: ink-drawn 楽 hanko + aurora ---------- */
 const RAKU=["M52.99,11c0.01,1-0.13,1.85-0.49,2.5c-0.96,2.28-4.06,5.8-6.91,8.18","M40.25,22.82c1.02,1.2,1.520,2.13,1.59,3.43c0.18,3.66,0.58,14.52,0.93,21.23c0.1,1.93,0.18,3.01,0.21,3.94","M42.02,23.77c0.46-0.02,19.25-2.12,20.85-2.23c1.68-0.12,2.640,1.22,2.640,2.27c0,1.24-0.89,14.65-1.22,23.45c-0.06,1.57-0.1,2.48-0.14,3.64","M43.41,36.12c3,0,17.27-1.75,20.66-1.75","M44.13,49.6c4.43,0,13.11-1.01,18.85-1.01","M20.22,20c3.89,1.72,10.05,7.07,11.03,9.75","M16.92,54.38c1.46,0.87,2.81,0.38,3.89-0.5c1.05-0.85,7.42-7.56,11.44-11.88","M87.2,17.13c0.02,0.99-0.24,1.86-0.76,2.61c-1.67,2.73-6.03,7.12-9.69,9.26","M77,40.5c5.12,2.03,12,7.25,14.5,11.5","M17.28,67.66c1.48,0.19,5.44,0.92,9.36,0.57c15.23-1.35,38.23-3.6,56.2-4.19c3.93-0.13,6.61-0.04,9.11,0.5","M52.45,54.75c1.05,1,1.63,2.66,1.65,3.74c0.09,4.690,0,25.11-0.12,34.76c-0.03,2.4-0.06,4.12-0.09,4.74","M49.25,66.75c0,1.25-1.14,2.74-1.81,3.63C40.9,79.16,28.88,89.01,18,93.75","M56.76,67.11C62.25,72,82.25,86,88.79,89.82c1.85,1.08,3.38,1.61,5.210,1.93"];
-const hanko=(cls)=>`<svg class="${cls}" viewBox="0 0 109 109" aria-hidden="true"><rect x="3" y="3" width="103" height="103" rx="22"/>${RAKU.map((d,i)=>`<path d="${d}" style="--i:${i}"/>`).join('')}</svg>`;
+const hanko=(cls)=>`<svg class="${cls}" viewBox="0 0 109 109" aria-hidden="true"><rect x="3" y="3" width="103" height="103" rx="22"/><text x="54.5" y="58" text-anchor="middle" dominant-baseline="middle" class="bp">BP</text></svg>`;
 function splash(){
   const first=!LS.get('lang_ok',false);
   if(SS.get('splash')&&!first)return;SS.set('splash','1');
-  const kana='あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん漢字語彙楽学校日本'.split('');
-  const el=document.createElement('div');el.id='splash';el.setAttribute('role','dialog');el.setAttribute('aria-label','Raku Nihongo Gakkou');
+  const kana='あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん漢字語彙日本語先生'.split('');
+  const el=document.createElement('div');el.id='splash';el.setAttribute('role','dialog');el.setAttribute('aria-label','Binod Paudel');
   el.innerHTML=`<div class="aur a1"></div><div class="aur a2"></div><div class="aur a3"></div><div class="sp-grid"></div>
   <div class="sp-kana" aria-hidden="true">${[...Array(26)].map((_,i)=>`<i style="left:${(i*37)%100}%;animation-delay:-${(i*1.7)%14}s;animation-duration:${12+(i%5)*3}s;font-size:${16+(i%4)*10}px">${kana[(i*7)%kana.length]}</i>`).join('')}</div>
   <div class="sp-in">${hanko('sp-hk')}
-   <div class="sp-school"><span>RAKU</span> <span>NIHONGO</span> <span>GAKKOU</span></div>
-   <div class="sp-jp">楽日本語学校</div>
-   <div class="sp-with">with</div><div class="sp-name">BINOD PAUDEL</div>
+   <div class="sp-name">BINOD PAUDEL</div>
+   <div class="sp-with">日本語 · JLPT</div>
    <div class="sp-tag">${t('tagline')}</div><div class="sp-exams">${t('allExams')}</div>
    <div class="sp-langs" role="group" aria-label="Language">${LANGS.map(([c,n],i)=>`<button data-l="${c}" class="${i===LI?'on':''}">${n}</button>`).join('')}</div>
    <button class="sp-go">${t('tap')} →</button></div>
@@ -740,10 +742,10 @@ function shell(active,inner){
   if(exam()==='n3')tabs.splice(1,0,['units','課',ut('nav')]);
   if(isOwner)tabs.push(['admin','管',t('navAdmin')]);
   const nav=cls=>`<nav class="${cls}">${tabs.map(([h,k,s])=>`<a href="#${h}" class="${h===active?'on':''}" ${h===active?'aria-current="page"':''}><i aria-hidden="true">${k}</i><span>${s}</span></a>`).join('')}</nav>`;
-  $('#app').innerHTML=`<header class="top"><div class="in"><a class="brand" href="#home">${hanko('hk')}<div><b>Raku Nihongo <em>Gakkou</em></b><small>with <strong>BINOD PAUDEL</strong></small></div></a>
+  $('#app').innerHTML=`<header class="top"><div class="in"><a class="brand" href="#home">${hanko('hk')}<div><b>Binod <em>Paudel</em></b><small>日本語 · <strong>JLPT</strong></small></div></a>
   <div class="tools">${langSel('langTop')}<button class="iconbtn" id="themeBtn" aria-label="${t('theme')}">◐</button>${UNL?'':`<a class="iconbtn lockbtn" href="#unlock" aria-label="${t('unlockT')}">🔒</a>`}</div>
   ${nav('tabs')}</div></header><main class="wrap">${inner}</main>
-  <footer class="wrap foot-note">© 楽日本語学校 Raku Nihongo Gakkou · Binod Paudel</footer>${nav('bnav')}`;
+  <footer class="wrap foot-note">© Binod Paudel</footer>${nav('bnav')}`;
   bindLang('langTop');
   $('#themeBtn').onclick=()=>{const dark=matchMedia('(prefers-color-scheme: dark)').matches;const cur=document.documentElement.getAttribute('data-theme')||(dark?'dark':'light');setTheme(cur==='dark'?'light':'dark')};
   const o=$('#outBtn');if(o)o.onclick=()=>{LS.set('auth','');render()};
@@ -752,8 +754,7 @@ function shell(active,inner){
 function renderLogin(){
   $('#app').innerHTML=`<div class="loginwrap"><div class="aur a1"></div><div class="aur a2"></div><div class="lg-top">${langSel('langLogin')}</div>
   <form class="card login" id="lf" autocomplete="on">${hanko('hk big')}
-  <div class="lg-school">RAKU NIHONGO <b>GAKKOU</b></div><div class="lg-jp">楽日本語学校</div>
-  <div class="lg-name"><small>with</small>BINOD PAUDEL</div><div class="lg-ex">${t('allExams')}</div>
+  <div class="lg-school">BINOD <b>PAUDEL</b></div><div class="lg-jp">日本語 · JLPT</div><div class="lg-ex">${t('allExams')}</div>
   <div class="field"><label for="uid">ID</label><input id="uid" autocomplete="username" autocapitalize="off" required></div>
   <div class="field"><label for="upw">${t('pw')}</label><input id="upw" type="password" autocomplete="current-password" required></div>
   <div class="err" id="lerr" role="alert"></div><button class="btn grad" style="width:100%">${t('loginBtn')}</button>
@@ -1136,7 +1137,7 @@ async function openCert(course,detail){
     x.strokeStyle='rgba(31,63,122,.12)';x.lineWidth=2;for(let yy=H-70,r=0;yy>H-260;yy-=22,r++)for(let xx=70;xx<420;xx+=44)for(let q=1;q<=3;q++){x.beginPath();x.arc(xx+(r%2?22:0),yy,q*7,Math.PI,0);x.stroke()}
     x.textAlign='center';x.fillStyle='#d7263d';x.font='900 40px "Zen Maru Gothic"';x.fillText('修了証書',W/2,170);
     x.fillStyle='#16233f';x.font='900 74px "Zen Maru Gothic"';x.fillText('CERTIFICATE',W/2,260);
-    x.font='600 26px "Noto Sans JP"';x.fillStyle='#5d6a85';x.fillText('RAKU NIHONGO GAKKOU · 楽日本語学校',W/2,310);
+    x.font='600 26px "Noto Sans JP"';x.fillStyle='#5d6a85';x.fillText('BINOD PAUDEL · 日本語',W/2,310);
     x.font='26px "Noto Sans JP"';x.fillText('This certifies that',W/2,400);
     x.fillStyle='#1f3f7a';x.font='900 80px "Zen Maru Gothic","Noto Sans Devanagari","Noto Sans Myanmar"';x.fillText(name,W/2,500);
     x.strokeStyle='#c98a00';x.lineWidth=2;x.beginPath();x.moveTo(400,525);x.lineTo(W-400,525);x.stroke();
@@ -1146,11 +1147,11 @@ async function openCert(course,detail){
     const d=new Date();x.fillStyle='#5d6a85';x.font='24px "Noto Sans JP"';x.textAlign='left';x.fillText('Date: '+d.getFullYear()+'/'+(d.getMonth()+1)+'/'+d.getDate(),180,900);
     x.textAlign='center';x.fillStyle='#16233f';x.font='64px "Kaushan Script"';x.fillText('Binod Paudel',W-420,880);
     x.strokeStyle='#16233f';x.lineWidth=2;x.beginPath();x.moveTo(W-620,905);x.lineTo(W-220,905);x.stroke();
-    x.font='600 22px "Noto Sans JP"';x.fillStyle='#5d6a85';x.fillText('BINOD PAUDEL · Teacher, Raku Nihongo Gakkou',W-420,940);
-    x.save();x.translate(W/2,900);x.rotate(-.12);x.strokeStyle='#d7263d';x.lineWidth=7;x.beginPath();x.arc(0,0,78,0,7);x.stroke();x.fillStyle='#d7263d';x.font='900 92px "Zen Maru Gothic"';x.textBaseline='middle';x.fillText('楽',0,6);x.restore();
+    x.font='600 22px "Noto Sans JP"';x.fillStyle='#5d6a85';x.fillText('BINOD PAUDEL · Japanese Teacher',W-420,940);
+    x.save();x.translate(W/2,900);x.rotate(-.12);x.strokeStyle='#d7263d';x.lineWidth=7;x.beginPath();x.arc(0,0,78,0,7);x.stroke();x.fillStyle='#d7263d';x.font='900 92px "Zen Maru Gothic"';x.textBaseline='middle';x.fillText('師',0,6);x.restore();
     const url=c.toDataURL('image/png');const out=m.querySelector('#cout');
     out.innerHTML=`<img class="certimg" alt="Certificate" src="${url}"><p class="note">${t('certHint')}</p><button class="btn ghost" id="csave">${t('save')}</button>`;
-    out.querySelector('#csave').onclick=async()=>{try{const dl=window.claude&&await claude.use('downloads');if(!dl)throw 0;const b=await (await fetch(url)).blob();await dl.save({filename:'Raku-Nihongo-Gakkou-Certificate.png',data:b})}catch(e){toast(t('lp'))}};
+    out.querySelector('#csave').onclick=async()=>{try{const dl=window.claude&&await claude.use('downloads');if(!dl)throw 0;const b=await (await fetch(url)).blob();await dl.save({filename:'Binod-Paudel-Certificate.png',data:b})}catch(e){toast(t('lp'))}};
   };
 }
 /* ---------- admin ---------- */
