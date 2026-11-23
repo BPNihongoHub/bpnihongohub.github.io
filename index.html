@@ -824,7 +824,7 @@ const me=()=>isOwner?'Binod Paudel':'';
 function render(){
   if(!D)return;
   const r=(location.hash||'#home').slice(1);
-  if(['drive','bjt'].includes(exam())&&['home','quiz','mock','review','words','srs','unlock'].includes(r))return driveRoute(r);
+  if(false&&['drive','bjt'].includes(exam())&&['home','quiz','mock','review','words','srs','unlock'].includes(r))return driveRoute(r);
   const views={home:renderHome,quiz:renderQuiz,mock:renderMock,review:()=>Q.start({mode:'review'}),words:renderWords,srs:renderSRS,admin:renderAdmin,unlock:renderUnlock};
   if(r==='units')return renderUnits();
   if(r==='books')return renderBooks();
@@ -875,7 +875,7 @@ function renderUnlock(){
     const ok=await unlock($('#ucode').value,false);if(!ok){b.disabled=false;b.textContent='🔓 '+t('unlockBtn');$('#uerr').textContent=t('codeErr')}else{toast(t('unlocked'))}};
 }
 /* ---------- home ---------- */
-const COURSES=[['n5','JLPT N5','入門',0],['n4','JLPT N4','初級',0],['n3','JLPT N3','中級',1],['n2','JLPT N2','中上級',0],['n1','JLPT N1','上級',0],['jft','JFT-Basic','A2',0],['bjt','BJT','Business',1],['ssw','SSW 特定技能','Skills',0],['food','Food 外食','SSW',0],['care','Nursing 介護','SSW',0],['drive','Driving licence','運転免許',1]];
+const COURSES=[['n5','JLPT N5','入門',0],['n4','JLPT N4','初級',0],['n3','JLPT N3','中級',1],['n2','JLPT N2','中上級',0],['n1','JLPT N1','上級',0],['jft','JFT-Basic','A2',0],['bjt','BJT','Business',0],['ssw','SSW 特定技能','Skills',0],['food','Food 外食','SSW',0],['care','Nursing 介護','SSW',0],['drive','Driving licence','運転免許',0]];
 const exam=()=>LS.get('exam','n3');
 function typeStats(ty){const qs=D.q.filter(q=>q.t===ty);let done=0,ok=0;qs.forEach(q=>{const v=P.res[qid(q)];if(v!=null){done++;ok+=v}});return{total:qs.length,done,ok}}
 function secStats(types){return types.map(typeStats).reduce((a,b)=>({total:a.total+b.total,done:a.done+b.done,ok:a.ok+b.ok}),{total:0,done:0,ok:0})}
