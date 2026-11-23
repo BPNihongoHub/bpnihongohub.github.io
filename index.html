@@ -459,13 +459,41 @@ tr[data-kanji]:hover td{background:var(--ai-soft)}
 .cpnote{font-size:12.5px;line-height:1.6;color:var(--shu);background:var(--shu-soft);border-radius:12px;padding:10px 12px;margin:10px 0}
 .bsecs{grid-template-columns:repeat(4,1fr)}
 @media (max-width:640px){.bsecs{grid-template-columns:1fr 1fr}}
-.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:12px}
+.bkgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:12px}
 .bcard{font:inherit;color:inherit;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:3px;border:1px solid var(--line)}
 .bcard b{font-size:15px}.bcard small{color:var(--muted);font-size:12px}.bcard span{color:var(--ai);font-size:12.5px;font-weight:700}
 .bview{position:relative;max-width:900px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:var(--shadow);user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .bstrip{width:100%;background:#f3f3f3 center top/100% auto no-repeat;pointer-events:none}
 .bwm{position:absolute;inset:0;pointer-events:none;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='360' height='260'><text x='20' y='160' transform='rotate(-28 180 130)' font-family='sans-serif' font-weight='800' font-size='18' letter-spacing='3' fill='rgba(200,20,60,0.10)'>© BINOD PAUDEL · VIEW ONLY</text></svg>") repeat}
 @media print{.bview{display:none!important}}
+
+/* v57: pro home — compact dashboard, set tiles, consistent section headers */
+.dash{background:var(--grad);color:#fff;border-radius:24px;padding:20px 20px 0;margin:6px 0 8px;box-shadow:0 18px 40px rgba(53,39,201,.25);overflow:hidden;position:relative}
+.dash:after{content:"日";position:absolute;right:-20px;top:-60px;font:900 220px/1 var(--f-jp);color:rgba(255,255,255,.06);pointer-events:none}
+.d-top{display:flex;gap:16px;align-items:center;justify-content:space-between;position:relative;z-index:1}
+.d-l h1{font-size:clamp(22px,5.6vw,30px);margin:4px 0 14px;line-height:1.2}
+.d-btns{gap:8px;flex-wrap:wrap}.d-btns .btn{padding:10px 16px;font-size:14px}
+.d-r{display:flex;flex-direction:column;align-items:center;gap:8px;flex:none}
+.d-r .ring{width:96px;height:96px}
+.d-goal{font-size:11.5px;opacity:.9;display:flex;align-items:center;gap:6px}.d-goal select{padding:3px 6px;font-size:12px}
+.d-stats{display:grid;grid-template-columns:repeat(4,1fr);margin:18px -20px 0;border-top:1px solid rgba(255,255,255,.18);position:relative;z-index:1}
+.d-stats>*{padding:12px 6px;text-align:center;color:#fff;text-decoration:none;border-right:1px solid rgba(255,255,255,.14)}.d-stats>*:last-child{border-right:0}
+.d-stats b{display:block;font-size:20px;font-weight:800}.d-stats span{font-size:11px;opacity:.85}
+.hsech{display:flex;align-items:center;gap:10px;font-size:19px;font-weight:800;margin:26px 2px 12px}
+.hsech i{font:900 16px var(--f-jp);font-style:normal;width:32px;height:32px;border-radius:10px;display:grid;place-items:center;color:#fff;background:var(--grad);flex:none}
+.hsech small{margin-left:auto;font-size:12px;font-weight:600;color:var(--muted)}
+.setgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+@media (max-width:820px){.setgrid{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:560px){.setgrid{grid-template-columns:1fr 1fr}}
+.setc{font:inherit;color:inherit;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:3px;position:relative;overflow:hidden;border:1px solid var(--line);padding:16px;transition:transform .15s,box-shadow .15s}
+.setc:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(53,39,201,.14)}
+.setc .sg{position:absolute;right:-6px;top:-14px;font:900 64px/1 var(--f-jp);color:var(--ai);opacity:.10}
+.setc small{font-size:10.5px;font-weight:800;letter-spacing:.12em;color:var(--shu)}
+.setc b{font-size:18px;margin-top:2px}.setc .sn{font-size:12.5px;color:var(--muted)}
+.setc .sbar{display:block;height:6px;border-radius:99px;background:var(--line);margin-top:10px;overflow:hidden}.setc .sbar i{display:block;height:100%;background:var(--grad);border-radius:99px}
+.setc .sp{font-size:11.5px;color:var(--muted);margin-top:4px}
+.hwc{padding:16px!important}
+.badges .bgrid{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))}
 </style>
 <div id="app"><div class="loginwrap"><div class="aur a1"></div><div class="aur a2"></div></div></div>
 <div id="toast" class="toast" hidden></div>
@@ -891,21 +919,13 @@ function renderHome(){
   const bars=ALL_T.map(ty=>{const s=typeStats(ty);const a=s.done?Math.round(s.ok/s.done*100):0;return `<div class="brow"><span>${TL[ty]}<small>${TN(ty)}</small></span><div class="bar"><i style="width:${a}%;background:${!s.done?'var(--line)':a<60?'var(--shu)':a<80?'var(--gold)':'var(--ok)'}"></i></div><b>${s.done?a+'%':'–'}</b></div>`}).join('');
   const weakest=ALL_T.map(ty=>({ty,s:typeStats(ty)})).filter(x=>x.s.done>=5).sort((a,b)=>a.s.ok/a.s.done-b.s.ok/b.s.done)[0];
   shell('home',`<section class="courses"><div class="eyebrow">${t('courses')}</div><div class="crow">${COURSES.map(([k,n,sub,on])=>`<button class="course ${on?'on':''} ${exam()===k?'sel':''}" data-exam="${k}" aria-pressed="${exam()===k}"><b>${n}</b><small>${sub}</small><span class="st">${on?t('open'):t('soon')}</span></button>`).join('')}</div>${(COURSES.find(c=>c[0]===exam())||[0,0,0,1])[3]?'':`<div class="card soonnote">${t('soonNote',{c:(COURSES.find(c=>c[0]===exam())||[])[1]})}</div>`}</section>${UNL?'':`<section class="card unlockcard"><div><b>🎁 ${t('freeDemo')}</b><p>${t('lockedN',{n:(D.sets||[]).length-(D.free||[]).length})}${SHOWPRICE?' · N5–N3 ¥2,000 · N2–N1 ¥3,000':''}</p></div><a class="btn grad" href="#unlock">🔓 ${t('unlockBtn')}</a></section>`}
-  <h2 class="hsech">📘 ${ut('setsH')}</h2>
-  <div class="paths">
-  <div class="card path"><div class="kana">STEP 1 · 漢字</div><h2>${t('kanji')}</h2><p class="muted" style="margin:0">${t('kanjiSub',{n:k.total})}</p><div class="bar"><i style="width:${pct(k)}%"></i></div><div class="muted" style="font-size:13px">${k.done}/${k.total} · ${pct(k)}%</div><button class="btn" data-go="kanji">${t('kanjiGo')}</button></div>
-  <div class="card path"><div class="kana">STEP 2 · 語彙</div><h2>${t('mean')}</h2><p class="muted" style="margin:0">${t('meanSub',{n:m.total})}</p><div class="bar"><i style="width:${pct(m)}%"></i></div><div class="muted" style="font-size:13px">${m.done}/${m.total} · ${pct(m)}%</div><button class="btn" data-go="mean">${t('meanGo')}</button></div>
-  ${[['gram',3,GRAM_T],['read',4,READ_T],['listen',5,LISTEN_T]].map(([k,n,T])=>{const st=secStats(T);if(!st.total)return '';return `<div class="card path"><div class="kana">STEP ${n} · ${SECJ[k]}</div><h2>${t(k)}</h2><p class="muted" style="margin:0">${t(k+'Sub',{n:st.total})}</p><div class="bar"><i style="width:${pct(st)}%"></i></div><div class="muted" style="font-size:13px">${st.done}/${st.total} · ${pct(st)}%</div><button class="btn" data-go="${k}">${t(k+'Go')}</button></div>`}).join('')}
-  </div>
+  <section class="dash"><div class="d-top"><div class="d-l"><div class="h-hello">${t('hello')}${me()?', <b>'+esc(me())+'</b>':''} 👋</div><h1>${t('goalT',{n:S.goal})}</h1>
+   <div class="row d-btns"><button class="btn light" data-go="kanji">${t('startP')} →</button><a class="btn glass" href="#mock">${t('navMock')}</a></div></div>
+   <div class="d-r">${ring(tcount,S.goal,t('today'))}<label class="d-goal">${t('goalL')} <select id="goalSel" class="glass">${[10,20,30,50,100].map(g=>`<option ${g==S.goal?'selected':''}>${g}</option>`).join('')}</select></label></div></div>
+   <div class="d-stats"><div><b>${done}</b><span>${t('stDone')}</span></div><div><b>${done?Math.round(ok/done*100):0}%</b><span>${t('stAcc')}</span></div><div><b>${streak()}🔥</b><span>${t('stStreak')}</span></div><a href="#review"><b>${weak}</b><span>${t('stWeak')}</span></a></div></section>
+  <h2 class="hsech"><i>試</i>${ut('setsH')}<small>${D.total||D.q.length} 問</small></h2>
+  <div class="setgrid">${[['kanji','漢','STEP 1',t('kanji'),k],['mean','語','STEP 2',t('mean'),m],...[['gram','文',GRAM_T],['read','読',READ_T],['listen','聴',LISTEN_T]].map(([kk,g,T],x)=>[kk,g,'STEP '+(x+3),t(kk),secStats(T)])].filter(r=>r[4].total).map(([kk,g,st,ti,s])=>`<button class="card setc" data-go="${kk}"><span class="sg">${g}</span><small>${st}</small><b>${ti}</b><span class="sn">${s.total} 問</span><span class="sbar"><i style="width:${pct(s)}%"></i></span><span class="sp">${s.done}/${s.total} · ${pct(s)}%</span></button>`).join('')}</div>
   ${exam()==='n3'?hwHome()+booksHome():''}
-  <section class="hero2"><div class="h-l"><div class="h-hello">${t('hello')}${me()?', <b>'+esc(me())+'</b>':''} 👋</div>
-   <div class="h-eyebrow">${t('setsInfo',{n:D.total||D.q.length})}</div><h1>${t('goalT',{n:S.goal})}</h1><p>${t('intro')}</p>
-   <div class="row" style="margin-top:18px"><button class="btn light" data-go="kanji">${t('startP')} →</button><a class="btn glass" href="#mock">${t('navMock')}</a></div>
-   <div class="row" style="margin-top:12px;font-size:13px"><label for="goalSel">${t('goalL')}</label><select id="goalSel" class="glass">${[10,20,30,50,100].map(g=>`<option ${g==S.goal?'selected':''}>${g}</option>`).join('')}</select></div></div>
-   <div class="h-r">${ring(tcount,S.goal,t('today'))}<div class="h-rl">${t('todayDone')}${tcount>=S.goal?' · <b>'+t('goalMet')+'</b>':''}</div></div>
-   <div class="h-teacher">${hanko('hk')}<div><small>${t('teacher')} · 先生</small><b>BINOD PAUDEL</b></div></div></section>
-  <div class="stats"><div class="card stat"><i>問</i><b>${done}</b><span>${t('stDone')}</span></div><div class="card stat"><i>的</i><b>${done?Math.round(ok/done*100):0}%</b><span>${t('stAcc')}</span></div>
-  <div class="card stat"><i>続</i><b>${streak()}🔥</b><span>${t('stStreak')}</span></div><a class="card stat" href="#review"><i>誤</i><b>${weak}</b><span>${t('stWeak')}</span></a></div>
   <div class="grid2">
    <section class="card wotd"><div class="eyebrow">${t('wotd')} · 今日の単語</div><div class="w">${esc(w[0])}</div><div class="r">${esc(w[1])}</div><div class="mn"><span class="tag">NE</span>${esc(w[2])}</div><div class="mn"><span class="tag">EN</span>${esc(w[3])}</div>
    <div class="row" style="margin-top:12px"><button class="speak inv" data-say="${esc(w[1])}">▶ ${t('say')}</button><button class="speak inv" data-kanji="${esc(w[0])}">漢 ${t('kcard')}</button></div></section>
@@ -1230,7 +1250,7 @@ function uPage(){
 function hwHome(){const res=LS.get('ures',{});
   const cnt=s=>Object.keys(res).filter(k=>k[0]===s&&res[k].b>=35).length;
   const it=(s,n,ic)=>`<a class="card hwc" href="#units" data-hsec="${s}"><i>${ic}</i><b>${ut(s)}</b><span>${n} ${ut('units')} · 50問</span><small>✓ ${cnt(s)}/${n}</small></a>`;
-  return `<section class="hwsec"><h2 class="hsech">📝 ${ut('hwH')}</h2><div class="hwgrid">${it('k',12,'漢')}${it('v',24,'語')}${it('g',24,'文')}<div class="card hwc off"><i>聴</i><b>${ut('l')}</b><span>${ut('ld')}</span></div></div></section>`}
+  return `<section class="hwsec"><h2 class="hsech"><i>課</i>${ut('hwH')}</h2><div class="hwgrid">${it('k',12,'漢')}${it('v',24,'語')}${it('g',24,'文')}<div class="card hwc off"><i>聴</i><b>${ut('l')}</b><span>${ut('ld')}</span></div></div></section>`}
 /* ---------- Book library: view-only page images (no PDF files, no download) ---------- */
 let BK=null;const BS={sec:'k',id:null};
 const BT={lib:['教材ライブラリー','Books','किताब'],
@@ -1244,13 +1264,13 @@ const BT={lib:['教材ライブラリー','Books','किताब'],
 const bt=k=>{const v=BT[k];const c=LANGS[LI][0];return c==='ja'?v[0]:c==='ne'?v[2]:v[1]};
 async function loadBooks(){if(BK)return;try{BK=await fetch('books/books.json').then(r=>r.json())}catch(e){BK={}}}
 const BICON={k:'漢',v:'語',g:'文',b:'練'};
-function booksHome(){return `<section class="hwsec"><h2 class="hsech">📚 ${bt('lib')}</h2><div class="hwgrid">${['k','v','g','b'].map(s=>`<a class="card hwc" href="#books" data-bsec="${s}"><i>${BICON[s]}</i><b>${bt(s)}</b><span>${bt('read')} →</span></a>`).join('')}</div></section>`}
+function booksHome(){return `<section class="hwsec"><h2 class="hsech"><i>本</i>${bt('lib')}</h2><div class="hwgrid">${['k','v','g','b'].map(s=>`<a class="card hwc" href="#books" data-bsec="${s}"><i>${BICON[s]}</i><b>${bt(s)}</b><span>${bt('read')} →</span></a>`).join('')}</div></section>`}
 async function renderBooks(){
   if(!BK){shell('books',`<div class="card empty">${bt('loading')}</div>`);await loadBooks()}
   const sec=BS.sec,list=Object.entries(BK).filter(([,b])=>b.sec===sec);
   shell('books',`<section class="card uhero"><div class="eyebrow">LIBRARY · 教材</div><h1>${bt('lib')}</h1><p class="muted">${bt('libS')}</p><p class="cpnote">🔒 ${bt('cp')}</p></section>
   <div class="usecs bsecs" role="tablist">${['k','v','g','b'].map(s=>`<button role="tab" aria-selected="${s===sec}" class="usec ${s===sec?'on':''}" data-bs="${s}"><b>${BICON[s]} ${bt(s)}</b></button>`).join('')}</div>
-  <div class="bgrid">${list.map(([id,b])=>`<button class="card bcard" data-bid="${id}"><b>${esc(b.t)}</b>${b.sub?`<small>${esc(b.sub)}</small>`:''}<span>${b.n} ${bt('pages')}</span></button>`).join('')}</div>`);
+  <div class="bkgrid">${list.map(([id,b])=>`<button class="card bcard" data-bid="${id}"><b>${esc(b.t)}</b>${b.sub?`<small>${esc(b.sub)}</small>`:''}<span>${b.n} ${bt('pages')}</span></button>`).join('')}</div>`);
   $$('[data-bs]').forEach(x=>x.onclick=()=>{BS.sec=x.dataset.bs;renderBooks()});
   $$('[data-bid]').forEach(x=>x.onclick=()=>{BS.id=x.dataset.bid;location.hash='#read'});
 }
