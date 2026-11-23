@@ -522,6 +522,39 @@ tr[data-kanji]:hover td{background:var(--ai-soft)}
 .bwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px}
 .bwrap .bview{max-width:none}
 @media(min-width:900px){.bwrap .bview[style*="width:100%"]{max-width:900px}}
+
+/* v62: accounts, payment, teacher dashboard, reviews */
+.accbtn{font:800 15px var(--f-jp);text-decoration:none;display:grid;place-items:center}
+.accbtn.in{background:var(--grad);color:#fff}
+.accbox{display:grid;gap:12px;max-width:560px;margin:0 auto 14px}
+.accbox h3{margin:0}
+.gbtn{background:#fff;color:#222;border:1px solid var(--line);display:flex;gap:10px;justify-content:center;align-items:center}
+.gbtn b{font:900 18px Arial,sans-serif;color:#4285f4}
+.or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px}.or:before,.or:after{content:"";flex:1;border-top:1px solid var(--line)}
+.eform{display:grid;gap:10px}.eform label{display:grid;gap:4px;font-size:13px;color:var(--muted)}
+.eform input,.eform select,.accbox textarea{font:inherit;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:100%;box-sizing:border-box}
+.erow{display:flex;gap:10px;flex-wrap:wrap}.erow .btn{flex:1}
+.plan{padding:12px 14px;border-radius:12px;background:var(--bg);font-weight:700;text-align:center}.plan.ok{background:var(--ok-soft,#e5f7ec);color:var(--ok)}
+.astats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}.astats b{display:block;font-size:24px}.astats span{font-size:12px;color:var(--muted)}
+.qrbox{display:grid;place-items:center;padding:10px;background:#fff;border-radius:14px}.qrbox img{max-width:260px;width:100%}
+.pyprev{max-width:180px;border-radius:10px}
+.starpick{display:flex;gap:6px;justify-content:center}.starpick button{font-size:36px;background:none;border:0;color:var(--line);cursor:pointer;padding:0 2px}.starpick button.on{color:#f5b301}
+.revrow{display:flex;gap:12px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x mandatory}
+.revc{min-width:240px;max-width:280px;scroll-snap-align:start;display:grid;gap:6px;align-content:start}.revc p{margin:0;font-size:14px}.revc b{font-size:13px;color:var(--muted)}
+.st{color:#f5b301;letter-spacing:1px}
+.tstats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:8px}@media(min-width:760px){.tstats{grid-template-columns:repeat(6,1fr)}}
+.ts{text-align:center;padding:14px 8px}.ts b{display:block;font-size:26px}.ts span{font-size:12px;color:var(--muted)}
+.tpay{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;margin-bottom:10px}.tpay>div:first-child{display:grid;gap:2px}.tpay small{color:var(--muted);font-size:12px}
+.tpay img{width:84px;height:84px;object-fit:cover;border-radius:10px}.tbtn{grid-column:1/-1;display:flex;gap:8px}.tbtn .btn{flex:1}
+.ttools{display:flex;gap:8px;margin-bottom:8px}.ttools input{flex:1}.ttools input,.ttools select{font:inherit;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--paper);color:var(--ink)}
+.tscroll{overflow-x:auto;border-radius:14px;background:var(--paper);box-shadow:var(--shadow);margin-bottom:10px}
+.ttab{border-collapse:collapse;width:100%;min-width:640px;font-size:13px}.ttab th,.ttab td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+.ttab td small{display:block;color:var(--muted);font-size:11px}.ttab th{font-size:12px;color:var(--muted)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#bbb;margin-right:6px}.dot.on{background:var(--ok)}
+.paidtag{color:var(--ok);font-weight:800;margin-right:6px}
+.trev{display:flex;gap:10px;justify-content:space-between;align-items:flex-start;margin-bottom:10px}.trev p{margin:4px 0}.trev small{color:var(--muted)}
+.imgzoom{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.8);display:grid;place-items:center;padding:16px}.imgzoom img{max-width:100%;max-height:100%}
+@media(max-width:480px){.tools{margin-left:auto;gap:4px}.tools .langsel{padding-left:6px}.tools .langsel select{max-width:78px}.tools .iconbtn{padding:6px 9px}.accbtn{width:32px;height:32px;padding:0!important}.brand small{white-space:nowrap}}
 </style>
 <div id="app"><div class="loginwrap"><div class="aur a1"></div><div class="aur a2"></div></div></div>
 <div id="toast" class="toast" hidden></div>
@@ -851,7 +884,7 @@ async function boot(){
   splash();
   try{const [d,k]=await Promise.all([fetch('data.json').then(r=>r.json()),fetch('keys.json',{cache:'no-store'}).then(r=>r.json())]);D=d;KEYS=k;if((d.sets||[]).length&&d.sets.every(n=>(d.free||[]).includes(n)))UNL=true}
   catch(e){$('#app').innerHTML=`<div class="wrap"><div class="empty card" style="margin-top:30px">${t('loadFail')}</div></div>`;return}
-  render();
+  render();beInit();
   {const c=LS.get('code','');if(c)unlock(c,true)}
   try{if(window.claude&&claude.use){const u=await claude.use('user');isOwner=u?await u.isOwner():false;ART=await claude.use('artifact');if(isOwner)render()}}catch(e){}
 }
@@ -866,7 +899,7 @@ async function unlock(code,silent){
   try{const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(code),'PBKDF2',false,['deriveKey']);
     const k=await crypto.subtle.deriveKey({name:'PBKDF2',salt:b64d(w[0]),iterations:KEYS.it,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['decrypt']);
     const raw=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64d(w[1])},k,b64d(w[2]));
-    mk=await crypto.subtle.importKey('raw',raw,'AES-GCM',false,['decrypt'])}
+    mk=await crypto.subtle.importKey('raw',raw,'AES-GCM',false,['decrypt']);window.MK=mk}
   catch(e){if(silent)LS.set('code','');return false}
   try{const L=await fetch('locked.json').then(r=>r.json());
     const raw=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64d(L.iv)},mk,b64d(L.ct));
@@ -882,6 +915,7 @@ function render(){
   const r=(location.hash||'#home').slice(1);
   if(false&&['drive','bjt'].includes(exam())&&['home','quiz','mock','review','words','srs','unlock'].includes(r))return driveRoute(r);
   const views={home:renderHome,quiz:renderQuiz,mock:renderMock,review:()=>Q.start({mode:'review'}),words:renderWords,srs:renderSRS,admin:renderAdmin,unlock:renderUnlock};
+  if(r==='acc')return renderAccount();if(r==='pay')return renderPay();if(r==='rate')return renderReview();if(r==='teacher')return renderTeacher();
   if(r==='units')return renderUnits();
   if(r==='books')return renderBooks();
   if(r==='read')return renderRead();
@@ -897,13 +931,14 @@ function shell(active,inner){
   const tabs=[['home','家',t('navHome')],['quiz','練',t('navQuiz')],['mock','試',t('navMock')],['srs','札',t('navSrs')],['review','誤',t('navRev')],['words','辞',t('navWords')]];
   if(exam()==='n3')tabs.splice(1,0,['units','課',ut('nav')]);
   if(exam()==='n3')tabs.push(['books','本',bt('lib')]);
+  if(BE.admin)tabs.push(['teacher','師',at('tT')]);
   if(isOwner)tabs.push(['admin','管',t('navAdmin')]);
   const lnk=([h,k,s])=>`<a href="#${h}" class="${h===active?'on':''}" ${h===active?'aria-current="page"':''}><i aria-hidden="true">${k}</i><span>${s}</span></a>`;
   const nav=cls=>`<nav class="${cls}">${tabs.map(lnk).join('')}</nav>`;
   const mainT=tabs.filter(x=>['home','units','quiz','mock'].includes(x[0])),moreT=tabs.filter(x=>!mainT.includes(x));
   const bnav=`<nav class="bnav">${mainT.map(lnk).join('')}<button class="${moreT.some(x=>x[0]===active)?'on':''}" id="moreBtn" aria-expanded="false"><i aria-hidden="true">⋯</i><span>${MORE[LANGS[LI][0]]||'More'}</span></button></nav><div class="moresheet" id="moreSheet" hidden><div class="ms-in">${moreT.map(lnk).join('')}</div></div>`;
   $('#app').innerHTML=`<header class="top"><div class="in"><a class="brand" href="#home">${hanko('hk')}<div><b>Binod <em>Paudel</em></b><small>日本語 · <strong>JLPT</strong></small></div></a>
-  <div class="tools">${langSel('langTop')}<button class="iconbtn" id="themeBtn" aria-label="${t('theme')}">◐</button>${UNL?'':`<a class="iconbtn lockbtn" href="#unlock" aria-label="${t('unlockT')}">🔒</a>`}</div>
+  <div class="tools">${langSel('langTop')}<button class="iconbtn" id="themeBtn" aria-label="${t('theme')}">◐</button><a class="iconbtn accbtn ${BE.user?'in':''}" href="#acc" aria-label="${at('acc')}">${BE.user?esc(((BE.prof&&BE.prof.name)||BE.user.email||'?').trim().charAt(0).toUpperCase()||'人'):'人'}</a>${UNL?'':`<a class="iconbtn lockbtn" href="#unlock" aria-label="${t('unlockT')}">🔒</a>`}</div>
   ${nav('tabs')}</div></header><main class="wrap">${inner}</main>
   <footer class="wrap foot-note">© Binod Paudel</footer>${bnav}`;
   bindLang('langTop');
@@ -961,6 +996,7 @@ function renderHome(){
   <h2 class="hsech"><i>試</i>${ut('setsH')}<small>${D.total||D.q.length} 問</small></h2>
   <div class="setgrid">${[['kanji','漢','STEP 1',t('kanji'),k],['mean','語','STEP 2',t('mean'),m],...[['gram','文',GRAM_T],['read','読',READ_T],['listen','聴',LISTEN_T]].map(([kk,g,T],x)=>[kk,g,'STEP '+(x+3),t(kk),secStats(T)])].filter(r=>r[4].total).map(([kk,g,st,ti,s])=>`<button class="card setc" data-go="${kk}"><span class="sg">${g}</span><small>${st}</small><b>${ti}</b><span class="sn">${s.total} 問</span><span class="sbar"><i style="width:${pct(s)}%"></i></span><span class="sp">${s.done}/${s.total} · ${pct(s)}%</span></button>`).join('')}</div>
   ${exam()==='n3'?hwHome()+booksHome():''}
+  <section id="revHome" class="revhome"></section>
   <div class="grid2">
    <section class="card wotd"><div class="eyebrow">${t('wotd')} · 今日の単語</div><div class="w">${esc(w[0])}</div><div class="r">${esc(w[1])}</div><div class="mn"><span class="tag">NE</span>${esc(w[2])}</div><div class="mn"><span class="tag">EN</span>${esc(w[3])}</div>
    <div class="row" style="margin-top:12px"><button class="speak inv" data-say="${esc(w[1])}">▶ ${t('say')}</button><button class="speak inv" data-kanji="${esc(w[0])}">漢 ${t('kcard')}</button></div></section>
@@ -976,7 +1012,7 @@ function renderHome(){
   $('#goalSel').onchange=e=>{S.goal=+e.target.value;saveS();renderHome()};
   $$('[data-bsec]').forEach(b=>b.onclick=()=>{BS.sec=b.dataset.bsec});
   $$('[data-hsec]').forEach(b=>b.onclick=()=>{US.sec=b.dataset.hsec;US.inPage=false});
-  bindCommon();
+  bindCommon();reviewsHome();
 }
 
 function bindCommon(){
@@ -1311,14 +1347,246 @@ async function renderBooks(){
 }
 async function renderRead(){
   await loadBooks();const b=BK[BS.id];if(!b){location.hash='#books';return}
+  if(b.e&&!window.MK){shell('books',`<section class="card emptyx"><div class="ex-ic">🔒</div><h2>${esc(b.t)}</h2><p>${at('payS')}</p><a class="btn grad" href="#acc">${at('acc')} →</a> <a class="chip" href="#books">← ${bt('back')}</a></section>`);return}
   shell('books',`<section class="card qhead"><h2>${esc(b.t)}</h2><span class="muted">${b.n} ${bt('pages')}</span><a class="chip" href="#books">← ${bt('back')}</a></section>
   <p class="cpnote">🔒 ${bt('cp')}</p>
   <div class="bzoom"><button class="chip" data-z="-1" aria-label="zoom out">－</button><span id="bzl">${BS.z||100}%</span><button class="chip" data-z="1" aria-label="zoom in">＋</button></div>
   <div class="bwrap" id="bwrap"><div class="bview" id="bview" style="width:${BS.z||100}%" oncontextmenu="return false">${b.s.map(([f,hs])=>`<div class="bstrip" data-src="books/${f}" style="aspect-ratio:900/${hs.reduce((a,c)=>a+c,0)}"></div>`).join('')}<div class="bwm" aria-hidden="true"></div></div></div>`);
   const ZS=[100,150,200,250];document.querySelectorAll('[data-z]').forEach(x=>x.onclick=()=>{const i=Math.max(0,Math.min(ZS.length-1,ZS.indexOf(BS.z||100)+Number(x.dataset.z)));BS.z=ZS[i];$('#bview').style.width=BS.z+'%';$('#bzl').textContent=BS.z+'%'});
   const v=$('#bview');['contextmenu','dragstart','selectstart','copy'].forEach(ev=>v.addEventListener(ev,e=>e.preventDefault()));
-  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){const d=e.target;d.style.backgroundImage=`url("${d.dataset.src}")`;io.unobserve(d)}}),{rootMargin:'800px 0px'});
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){const d=e.target;io.unobserve(d);if(b.e)decStrip(d.dataset.src).then(u=>d.style.backgroundImage=`url("${u}")`).catch(()=>{});else d.style.backgroundImage=`url("${d.dataset.src}")`}}),{rootMargin:'800px 0px'});
   $$('.bstrip').forEach(d=>io.observe(d));
+}
+
+/* encrypted strips (.bin = 12-byte IV + AES-GCM ciphertext, same course key as locked sets) */
+async function decStrip(src){const buf=new Uint8Array(await fetch(src).then(r=>r.arrayBuffer()));
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:buf.slice(0,12)},window.MK,buf.slice(12));return URL.createObjectURL(new Blob([pt],{type:'image/jpeg'}))}
+/* ---------- Accounts, payment, teacher dashboard, reviews (Firebase) ----------
+   FBCONF stays null until Binod creates his Firebase project; then paste the config here.
+   PAY.on stays false until Binod confirms price + free rules (locks are OFF meanwhile). */
+const FBCONF=null;
+const PAY={on:false,price:2000,cur:'¥',course:'JLPT N3',qr:'pay/qr.png'};
+const FBV='10.12.5';
+const AT={
+ acc:['アカウント','Account','मेरो खाता'],
+ login:['ログイン','Sign in','लगइन'],signup:['新規登録','Create account','नयाँ खाता'],
+ google:['Googleでログイン','Sign in with Google','Google बाट लगइन'],
+ email:['メール','Email','इमेल'],pw:['パスワード（6文字以上）','Password (6+ characters)','पासवर्ड (६ अक्षरभन्दा बढी)'],
+ name:['名前','Name','नाम'],phone:['電話番号','Phone','फोन नम्बर'],save:['保存','Save','सेभ'],logout:['ログアウト','Sign out','लगआउट'],
+ why:['ログインすると、成績が保存され、先生が進み具合を確認できます。','Sign in so your scores are saved and your teacher can follow your progress.','लगइन गर्नुभयो भने तपाईंको नतिजा सेभ हुन्छ र गुरुले तपाईंको प्रगति हेर्न सक्नुहुन्छ।'],
+ soon:['ログイン機能は準備中です。','Accounts are being set up. Coming soon.','लगइन सुविधा तयार हुँदैछ। छिट्टै आउँछ।'],
+ paid:['✓ 購入済み（すべて利用可）','✓ Paid: everything is open','✓ तिरिसक्नुभयो: सबै खुला छ'],
+ free:['無料プラン','Free plan','Free plan'],
+ pending:['⏳ 支払い確認中','⏳ Payment being checked','⏳ पैसा जाँच हुँदैछ'],
+ payT:['お支払い','Payment','पैसा तिर्ने'],
+ payS:['1. QRコードで支払う → 2. スクリーンショットか取引番号を送る → 3. 先生が確認するとすべて開きます。','1. Pay with the QR code → 2. send the screenshot or transaction ID → 3. once the teacher checks it, everything opens.','१. QR बाट पैसा पठाउनुहोस् → २. screenshot वा transaction ID पठाउनुहोस् → ३. गुरुले जाँचेपछि सबै खुल्छ।'],
+ method:['支払い方法','Payment method','तिर्ने तरिका'],txn:['取引番号（任意）','Transaction ID (optional)','Transaction ID (नभए पनि हुन्छ)'],
+ shot:['スクリーンショット','Screenshot','Screenshot'],note:['メモ（任意）','Note (optional)','केही भन्नु छ? (नभए पनि हुन्छ)'],
+ send:['送信','Send','पठाउनुहोस्'],sent:['送信しました。先生の確認をお待ちください。','Sent. Please wait for the teacher to check it.','पठाइयो। गुरुले जाँच्नुहुन्छ, अलि पर्खनुहोस्।'],
+ needShot:['スクリーンショットか取引番号を入れてください。','Add a screenshot or a transaction ID.','Screenshot वा transaction ID राख्नुहोस्।'],
+ noqr:['QRコードは準備中です。先生に聞いてください。','QR code coming soon. Please ask the teacher.','QR छिट्टै राखिन्छ। गुरुलाई सोध्नुहोस्।'],
+ rev:['レビュー','Review','Review'],revT:['このサイトはどうですか？','How do you like this site?','यो website कस्तो लाग्यो?'],
+ revPh:['感想を書いてください','Write your thoughts','आफ्नो विचार लेख्नुहोस्'],revOk:['ありがとうございます！','Thank you!','धन्यवाद!'],
+ revH:['学生の声','What students say','विद्यार्थीको विचार'],
+ prog:['私の進み具合','My progress','मेरो प्रगति'],
+ tT:['先生のページ','Teacher dashboard','गुरुको पेज'],
+ total:['登録者','Signed up','जम्मा join'],active:['アクティブ（7日）','Active (7 days)','Active (७ दिन)'],inactive:['非アクティブ','Inactive','Inactive'],
+ paidN:['購入者','Paid','तिरेका'],pendN:['確認待ち','Waiting','जाँच्न बाँकी'],avg:['平均評価','Average rating','औसत review'],
+ students:['学生一覧','Students','विद्यार्थीहरू'],pays:['支払い確認','Payments to check','जाँच्न बाँकी payment'],revs:['レビュー','Reviews','Reviews'],
+ approve:['承認','Approve','Approve'],reject:['却下','Reject','Reject'],show:['表示','Show','देखाउने'],hide:['非表示','Hide','लुकाउने'],
+ last:['最終利用','Last active','अन्तिम पटक'],joined:['登録日','Joined','Join मिति'],done:['解いた問題','Answered','गरेका प्रश्न'],acc2:['正答率','Accuracy','सही %'],hw:['宿題','Homework','Homework'],
+ search:['検索','Search','खोज्नुहोस्'],none:['まだありません','Nothing yet','अहिलेसम्म छैन'],
+ days:['日前','days ago','दिन अगाडि'],today:['今日','today','आज'],
+ setupT:['設定が必要です','Setup needed','Setup बाँकी छ'],
+ err:['エラーが発生しました。もう一度試してください。','Something went wrong. Please try again.','केही गडबड भयो। फेरि प्रयास गर्नुहोस्।'],
+ keyT:['ロックの鍵を設定','Set the lock key (one time)','Lock को साँचो राख्ने (एक पटक मात्र)'],keyS:['private フォルダーのコードを1つ貼り付けてください。支払い済みの学生はこれで開きます。','Paste one code from the private file. Paid students open the locked content with it.','private file बाट एउटा code paste गर्नुहोस्। तिरेका विद्यार्थीको सबै यसैले खुल्छ।'],
+ givePaid:['有料にする','Mark paid','तिरेको बनाउने'],takePaid:['無料に戻す','Mark unpaid','free मा फर्काउने']
+};
+const at=k=>{const v=AT[k];if(!v)return k;const c=LANGS[LI][0];return c==='ja'?v[0]:c==='ne'?v[2]:v[1]};
+
+/* ---- backend wrapper: Firebase when configured; a local mock only on localhost for testing ---- */
+const BE={ok:false,user:null,prof:null,admin:false,ready:false,_l:[]};
+function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s)})}
+async function beInit(){
+  const mock=!FBCONF&&/^(localhost|127\.0\.0\.1)$/.test(location.hostname)&&new URLSearchParams(location.search).has('mock');
+  if(mock){BE.api=mockApi();BE.ok=true}
+  else if(FBCONF&&!/claude\.ai|claudeusercontent/.test(location.hostname)){
+    try{const b=`https://www.gstatic.com/firebasejs/${FBV}/`;await loadScript(b+'firebase-app-compat.js');await Promise.all([loadScript(b+'firebase-auth-compat.js'),loadScript(b+'firebase-firestore-compat.js')]);
+      firebase.initializeApp(FBCONF);BE.api=fbApi();BE.ok=true}catch(e){BE.ok=false}}
+  if(!BE.ok){BE.ready=true;return}
+  BE.api.onAuth(async u=>{BE.user=u;BE.prof=null;BE.admin=false;
+    if(u){try{BE.prof=await BE.api.touch(u)}catch(e){}try{BE.admin=await BE.api.isAdmin()}catch(e){}
+      if(BE.prof&&BE.prof.paid)beKey()}
+    BE.ready=true;render()});
+}
+async function beKey(){/* paid account: fetch the course unlock code (readable only by paid users) and open locked sets */
+  if(window.MK)return;try{const c=await BE.api.key();if(c)await unlock(c,true)}catch(e){}}
+let _syncT=0;
+function beSync(force){/* push a small progress summary, at most once a minute */
+  if(!BE.ok||!BE.user)return;const now=Date.now();if(!force&&now-_syncT<60000)return;_syncT=now;
+  const res=P.res,vals=Object.values(res),ures=LS.get('ures',{});
+  const sum={done:vals.length,ok:vals.filter(v=>v===1).length,days:(P.days||[]).length,hw:Object.fromEntries(Object.entries(ures).map(([k,v])=>[k,v.b||0]))};
+  BE.api.progress(BE.user.uid,sum).catch(()=>{});
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')beSync(true)});
+window.addEventListener('hashchange',()=>beSync(false));
+
+function fbApi(){
+  const A=firebase.auth(),F=firebase.firestore(),TS=()=>firebase.firestore.FieldValue.serverTimestamp(),day=()=>new Date().toISOString().slice(0,10);
+  const toMs=v=>v&&v.toMillis?v.toMillis():(typeof v==='number'?v:0);
+  const norm=d=>{const x=d.data();Object.keys(x).forEach(k=>{if(x[k]&&x[k].toMillis)x[k]=x[k].toMillis()});x.id=d.id;return x};
+  return{
+    onAuth:f=>A.onAuthStateChanged(f),
+    google:()=>A.signInWithPopup(new firebase.auth.GoogleAuthProvider()),
+    signin:(e,p)=>A.signInWithEmailAndPassword(e,p),
+    signup:async(e,p,n)=>{const c=await A.createUserWithEmailAndPassword(e,p);if(n)await c.user.updateProfile({displayName:n});return c},
+    out:()=>A.signOut(),
+    async touch(u){const r=F.doc('users/'+u.uid),s=await r.get();
+      if(!s.exists){const p={name:u.displayName||'',email:u.email||'',phone:'',created:TS(),last:TS(),lastDay:day(),paid:false,prog:{}};await r.set(p);return Object.assign(p,{created:Date.now(),last:Date.now()})}
+      const p=norm(s);if(p.lastDay!==day()){await r.update({last:TS(),lastDay:day()});p.last=Date.now()}return p},
+    saveProf:(uid,o)=>F.doc('users/'+uid).update({name:o.name,phone:o.phone}),
+    progress:(uid,sum)=>F.doc('users/'+uid).update({prog:sum,last:TS(),lastDay:day()}),
+    async isAdmin(){try{await F.doc('config/admin').get();return true}catch(e){return false}},/* rules let only the teacher read config/* */
+    async hasKey(){const s=await F.doc('secret/n3').get();return s.exists},setKey:c=>F.doc('secret/n3').set({code:c}),
+    async key(){const s=await F.doc('secret/n3').get();return s.exists?s.data().code:null},
+    pay:(uid,o)=>F.collection('pay').add(Object.assign({uid,status:'pending',created:TS()},o)),
+    async myPay(uid){const q=await F.collection('pay').where('uid','==',uid).get();return q.docs.map(norm).sort((a,b)=>b.created-a.created)},
+    review:(uid,o)=>F.doc('reviews/'+uid).set(Object.assign({uid,show:false,created:TS()},o)),
+    async reviews(all){const q=all?await F.collection('reviews').get():await F.collection('reviews').where('show','==',true).get();return q.docs.map(norm).sort((a,b)=>b.created-a.created)},
+    async users(){const q=await F.collection('users').get();return q.docs.map(norm)},
+    async pays(){const q=await F.collection('pay').where('status','==','pending').get();return q.docs.map(norm)},
+    async decide(p,ok){const b=F.batch();b.update(F.doc('pay/'+p.id),{status:ok?'approved':'rejected',decided:TS()});if(ok)b.update(F.doc('users/'+p.uid),{paid:true,paidAt:TS()});await b.commit()},
+    setPaid:(uid,v)=>F.doc('users/'+uid).update({paid:v}),
+    showReview:(id,v)=>F.doc('reviews/'+id).update({show:v}),
+    reviewsPublic:async()=>{try{const q=await F.collection('reviews').where('show','==',true).get();return q.docs.map(norm)}catch(e){return[]}},
+    toMs
+  };
+}
+function mockApi(){/* localhost test double with the same shape as fbApi */
+  const K='bemock',db=()=>LS.get(K,{users:{},pay:{},reviews:{},me:null}),put=d=>LS.set(K,d);let cb=null;
+  const fire=()=>{const d=db();cb&&cb(d.me?{uid:d.me,email:d.users[d.me].email,displayName:d.users[d.me].name}:null)};
+  const login=(e,n)=>{const d=db();const id='u_'+e.replace(/\W/g,'');if(!d.users[id])d.users[id]={name:n||e.split('@')[0],email:e,phone:'',created:Date.now(),last:Date.now(),paid:false,prog:{}};d.me=id;put(d);fire()};
+  return{onAuth:f=>{cb=f;setTimeout(fire,0)},google:async()=>login('google.student@example.com','Google Student'),signin:async e=>login(e),signup:async(e,p,n)=>login(e,n),
+    out:async()=>{const d=db();d.me=null;put(d);fire()},
+    async touch(u){const d=db();d.users[u.uid].last=Date.now();put(d);return Object.assign({},d.users[u.uid])},
+    async saveProf(uid,o){const d=db();Object.assign(d.users[uid],o);put(d)},
+    async progress(uid,s){const d=db();d.users[uid].prog=s;d.users[uid].last=Date.now();put(d)},
+    async isAdmin(){return(db().users[db().me]||{}).email==='teacher@example.com'},
+    async key(){return LS.get('mockcode',null)},async hasKey(){return !!LS.get('mockcode',null)},async setKey(c){LS.set('mockcode',c)},
+    async pay(uid,o){const d=db();const id='p'+Date.now();d.pay[id]=Object.assign({uid,status:'pending',created:Date.now()},o);put(d)},
+    async myPay(uid){return Object.entries(db().pay).filter(([,p])=>p.uid===uid).map(([id,p])=>Object.assign({id},p))},
+    async review(uid,o){const d=db();d.reviews[uid]=Object.assign({uid,show:false,created:Date.now()},o);put(d)},
+    async reviews(all){return Object.entries(db().reviews).map(([id,r])=>Object.assign({id},r)).filter(r=>all||r.show)},
+    async users(){return Object.entries(db().users).map(([id,u])=>Object.assign({id},u))},
+    async pays(){return Object.entries(db().pay).map(([id,p])=>Object.assign({id},p)).filter(p=>p.status==='pending')},
+    async decide(p,ok){const d=db();d.pay[p.id].status=ok?'approved':'rejected';if(ok)d.users[p.uid].paid=true;put(d)},
+    async setPaid(uid,v){const d=db();d.users[uid].paid=v;put(d)},
+    async showReview(id,v){const d=db();d.reviews[id].show=v;put(d)},
+    async reviewsPublic(){return Object.values(db().reviews).filter(r=>r.show)},
+    toMs:v=>v||0};
+}
+
+/* ---- helpers ---- */
+const ago=ms=>{if(!ms)return'—';const d=Math.floor((Date.now()-ms)/864e5);return d<=0?at('today'):d+' '+at('days')};
+const fdate=ms=>ms?new Date(ms).toISOString().slice(0,10):'—';
+function shrinkImg(file,max=1100,q=.6){return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>{const im=new Image();im.onload=()=>{const s=Math.min(1,max/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);let u=c.toDataURL('image/jpeg',q);if(u.length>700000)u=c.toDataURL('image/jpeg',.4);res(u)};im.onerror=rej;im.src=fr.result};fr.onerror=rej;fr.readAsDataURL(file)})}
+const stars=n=>'★★★★★'.slice(0,n)+'☆☆☆☆☆'.slice(0,5-n);
+
+/* ---- account page ---- */
+async function renderAccount(){
+  if(!BE.ok){shell('acc',`${ph('人',at('acc'),'')}<div class="card emptyx"><div class="ex-ic">🔐</div><p>${at('soon')}</p></div>`);return}
+  if(!BE.ready){shell('acc',`<div class="card empty">…</div>`);return}
+  if(!BE.user){
+    shell('acc',`${ph('人',at('acc'),at('why'))}<section class="card accbox">
+      <button class="btn gbtn" id="gIn"><b>G</b> ${at('google')}</button><div class="or"><span>or</span></div>
+      <form id="eForm" class="eform"><input id="eName" placeholder="${at('name')}" autocomplete="name">
+      <input id="eMail" type="email" placeholder="${at('email')}" autocomplete="email" required>
+      <input id="ePw" type="password" placeholder="${at('pw')}" minlength="6" autocomplete="current-password" required>
+      <div class="err" id="eErr" role="alert"></div>
+      <div class="erow"><button class="btn grad" data-m="in">${at('login')}</button><button class="btn ghost" data-m="up">${at('signup')}</button></div></form></section>`);
+    $('#gIn').onclick=()=>BE.api.google().catch(e=>{$('#eErr').textContent=at('err')});
+    let mode='in';$$('#eForm [data-m]').forEach(b=>b.onclick=()=>mode=b.dataset.m);
+    $('#eForm').onsubmit=async e=>{e.preventDefault();$('#eErr').textContent='';
+      try{mode==='up'?await BE.api.signup($('#eMail').value.trim(),$('#ePw').value,$('#eName').value.trim()):await BE.api.signin($('#eMail').value.trim(),$('#ePw').value)}
+      catch(x){$('#eErr').textContent=(x&&x.message)||at('err')}};
+    return}
+  const p=BE.prof||{},sum=p.prog||{};let mine=[];try{mine=await BE.api.myPay(BE.user.uid)}catch(e){}
+  const pend=mine.some(x=>x.status==='pending');
+  const vals=Object.values(P.res),done=vals.length,ok=vals.filter(v=>v===1).length,ures=LS.get('ures',{}),hwp=Object.values(ures).filter(v=>(v.b||0)>=35).length;
+  shell('acc',`${ph('人',at('acc'),esc(p.email||BE.user.email||''))}
+  <section class="card accbox"><div class="plan ${p.paid?'ok':''}">${p.paid?at('paid'):pend?at('pending'):at('free')}</div>
+   ${!p.paid&&PAY.on&&!pend?`<a class="btn grad" href="#pay">💳 ${at('payT')} · ${PAY.cur}${PAY.price.toLocaleString('en')}</a>`:''}
+   <form id="pForm" class="eform"><label>${at('name')}<input id="pName" value="${esc(p.name||'')}"></label><label>${at('phone')}<input id="pPhone" type="tel" value="${esc(p.phone||'')}"></label>
+   <button class="btn ghost">${at('save')}</button></form></section>
+  <section class="card accbox"><h3>${at('prog')}</h3><div class="astats"><div><b>${done}</b><span>${at('done')}</span></div><div><b>${done?Math.round(ok*100/done):0}%</b><span>${at('acc2')}</span></div><div><b>${hwp}</b><span>${at('hw')} ✓</span></div></div></section>
+  <div class="erow" style="justify-content:center;margin:14px 0"><a class="btn ghost" href="#rate">★ ${at('rev')}</a>${BE.admin?`<a class="btn ghost" href="#teacher">師 ${at('tT')}</a>`:''}<button class="btn ghost" id="outB">${at('logout')}</button></div>`);
+  $('#pForm').onsubmit=async e=>{e.preventDefault();const o={name:$('#pName').value.trim().slice(0,60),phone:$('#pPhone').value.trim().slice(0,30)};try{await BE.api.saveProf(BE.user.uid,o);Object.assign(BE.prof,o);toast('✓')}catch(x){toast(at('err'))}};
+  $('#outB').onclick=()=>BE.api.out();
+  beSync(true);
+}
+
+/* ---- payment page ---- */
+function renderPay(){
+  if(!BE.ok||!BE.user){location.hash='#acc';return}
+  shell('acc',`${ph('¥',at('payT'),PAY.course+' · '+PAY.cur+PAY.price.toLocaleString('en'))}
+  <section class="card accbox"><p>${at('payS')}</p><div class="qrbox"><img src="${PAY.qr}" alt="QR" onerror="this.replaceWith(Object.assign(document.createElement('p'),{className:'muted',textContent:'${at('noqr')}'}))"></div>
+  <form id="payF" class="eform"><label>${at('method')}<select id="pyM"><option>PayPay</option><option>Bank transfer</option><option>eSewa / Khalti</option><option>Cash</option></select></label>
+  <label>${at('txn')}<input id="pyT" maxlength="80"></label><label>${at('shot')}<input id="pyS" type="file" accept="image/*"></label><img id="pyPrev" class="pyprev" hidden alt="">
+  <label>${at('note')}<input id="pyN" maxlength="200"></label><div class="err" id="pyE" role="alert"></div><button class="btn grad" id="pyB">${at('send')}</button></form></section>`);
+  let img='';$('#pyS').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{img=await shrinkImg(f);const pv=$('#pyPrev');pv.src=img;pv.hidden=false}catch(x){img=''}};
+  $('#payF').onsubmit=async e=>{e.preventDefault();const txn=$('#pyT').value.trim();if(!img&&!txn){$('#pyE').textContent=at('needShot');return}
+    const b=$('#pyB');b.disabled=true;try{await BE.api.pay(BE.user.uid,{name:(BE.prof&&BE.prof.name)||'',email:BE.user.email||'',method:$('#pyM').value,txn,note:$('#pyN').value.trim(),img,amount:PAY.price});toast(at('sent'));location.hash='#acc'}
+    catch(x){b.disabled=false;$('#pyE').textContent=at('err')}};
+}
+
+/* ---- review page ---- */
+function renderReview(){
+  if(!BE.ok||!BE.user){location.hash='#acc';return}
+  let s=5;shell('acc',`${ph('★',at('rev'),'')}<section class="card accbox"><h3>${at('revT')}</h3><div class="starpick" role="radiogroup">${[1,2,3,4,5].map(i=>`<button type="button" data-s="${i}" aria-label="${i}">★</button>`).join('')}</div>
+  <textarea id="rvT" rows="4" maxlength="500" placeholder="${at('revPh')}"></textarea><button class="btn grad" id="rvB">${at('send')}</button></section>`);
+  const paint=()=>$$('[data-s]').forEach(b=>b.classList.toggle('on',+b.dataset.s<=s));paint();
+  $$('[data-s]').forEach(b=>b.onclick=()=>{s=+b.dataset.s;paint()});
+  $('#rvB').onclick=async()=>{try{await BE.api.review(BE.user.uid,{name:(BE.prof&&BE.prof.name)||'',stars:s,text:$('#rvT').value.trim()});toast(at('revOk'));location.hash='#acc'}catch(x){toast(at('err'))}};
+}
+async function reviewsHome(){/* approved reviews block on the home page */
+  const el=$('#revHome');if(!el||!BE.ok)return;let r=[];try{r=await BE.api.reviewsPublic()}catch(e){}
+  if(!r.length){el.remove();return}
+  el.innerHTML=`<h2 class="hsech"><i>声</i>${at('revH')}</h2><div class="revrow">${r.slice(0,10).map(x=>`<div class="card revc"><div class="st">${stars(x.stars||5)}</div><p>${esc(x.text||'')}</p><b>${esc(x.name||'')}</b></div>`).join('')}</div>`;
+}
+
+/* ---- teacher dashboard ---- */
+const TD={q:'',sort:'last'};
+async function renderTeacher(){
+  if(!BE.ok||!BE.admin){location.hash='#acc';return}
+  shell('teacher',`${ph('師',at('tT'),'')}<div class="card empty">…</div>`);
+  let U=[],PY=[],RV=[];try{[U,PY,RV]=await Promise.all([BE.api.users(),BE.api.pays(),BE.api.reviews(true)])}catch(e){shell('teacher',`${ph('師',at('tT'),'')}<div class="card empty">${at('err')}</div>`);return}
+  const wk=Date.now()-7*864e5,act=U.filter(u=>(u.last||0)>=wk).length,paid=U.filter(u=>u.paid).length,avg=RV.length?(RV.reduce((a,r)=>a+(r.stars||0),0)/RV.length).toFixed(1):'—';
+  const q=TD.q.toLowerCase(),L=U.filter(u=>!q||(u.name+' '+u.email+' '+u.phone).toLowerCase().includes(q))
+    .sort((a,b)=>TD.sort==='name'?String(a.name).localeCompare(b.name):TD.sort==='done'?((b.prog||{}).done||0)-((a.prog||{}).done||0):TD.sort==='joined'?(b.created||0)-(a.created||0):(b.last||0)-(a.last||0));
+  const pr=u=>{const g=u.prog||{};return{d:g.done||0,a:g.done?Math.round((g.ok||0)*100/g.done):0,h:Object.values(g.hw||{}).filter(v=>v>=35).length}};
+  let hk=true;try{hk=await BE.api.hasKey()}catch(e){}
+  shell('teacher',`${ph('師',at('tT'),new Date().toISOString().slice(0,10))}
+  ${hk?'':`<section class="card accbox"><b>🔑 ${at('keyT')}</b><p class="muted" style="margin:0">${at('keyS')}</p><form id="kF" class="erow"><input id="kC" placeholder="XXXX-XXXXXXXX" autocomplete="off" style="flex:2"><button class="btn grad">${at('save')}</button></form></section>`}
+  <section class="tstats">${[[at('total'),U.length],[at('active'),act],[at('inactive'),U.length-act],[at('paidN'),paid],[at('pendN'),PY.length],[at('avg'),avg+(RV.length?' ★':'')]].map(([l,v])=>`<div class="card ts"><b>${v}</b><span>${l}</span></div>`).join('')}</section>
+  <h2 class="hsech"><i>¥</i>${at('pays')} (${PY.length})</h2>
+  ${PY.length?PY.map(p=>`<div class="card tpay"><div><b>${esc(p.name||p.email||'')}</b><small>${esc(p.email||'')} · ${esc(p.method||'')} · ${PAY.cur}${esc(p.amount||'')}</small>${p.txn?`<small>ID: ${esc(p.txn)}</small>`:''}${p.note?`<small>${esc(p.note)}</small>`:''}<small>${fdate(p.created)}</small></div>
+    ${p.img&&/^data:image\/jpeg;base64,/.test(p.img)?`<a href="#" data-img="${p.id}"><img src="${p.img}" alt="screenshot"></a>`:''}<div class="tbtn"><button class="btn grad" data-ok="${p.id}">✓ ${at('approve')}</button><button class="btn ghost" data-no="${p.id}">✕ ${at('reject')}</button></div></div>`).join(''):`<p class="muted">${at('none')}</p>`}
+  <h2 class="hsech"><i>人</i>${at('students')} (${U.length})</h2>
+  <div class="ttools"><input id="tq" placeholder="${at('search')}" value="${esc(TD.q)}"><select id="tsort">${[['last',at('last')],['joined',at('joined')],['done',at('done')],['name',at('name')]].map(([k,l])=>`<option value="${k}" ${TD.sort===k?'selected':''}>${l}</option>`).join('')}</select></div>
+  <div class="tscroll"><table class="ttab"><thead><tr><th>${at('name')}</th><th>${at('last')}</th><th>${at('done')}</th><th>${at('acc2')}</th><th>${at('hw')} ✓</th><th>${at('joined')}</th><th></th></tr></thead><tbody>
+  ${L.map(u=>{const x=pr(u),on=(u.last||0)>=wk;return `<tr><td><b>${esc(u.name||'—')}</b><small>${esc(u.email||'')}${u.phone?' · '+esc(u.phone):''}</small></td><td><span class="dot ${on?'on':''}"></span>${ago(u.last)}</td><td>${x.d}</td><td>${x.a}%</td><td>${x.h}</td><td>${fdate(u.created)}</td><td>${u.paid?'<span class="paidtag">¥ ✓</span>':''}<button class="chip" data-pd="${u.id}" data-v="${u.paid?0:1}">${u.paid?at('takePaid'):at('givePaid')}</button></td></tr>`}).join('')||`<tr><td colspan="7" class="muted">${at('none')}</td></tr>`}
+  </tbody></table></div>
+  <h2 class="hsech"><i>★</i>${at('revs')} (${RV.length})</h2>
+  ${RV.map(r=>`<div class="card trev"><div><span class="st">${stars(r.stars||0)}</span> <b>${esc(r.name||'')}</b><p>${esc(r.text||'')}</p><small>${fdate(r.created)}</small></div><button class="chip ${r.show?'on':''}" data-rv="${r.id}" data-v="${r.show?0:1}">${r.show?at('hide'):at('show')}</button></div>`).join('')||`<p class="muted">${at('none')}</p>`}`);
+  $('#tq').oninput=e=>{TD.q=e.target.value;clearTimeout(TD.t);TD.t=setTimeout(()=>{renderTeacher().then(()=>{const i=$('#tq');i.focus();i.setSelectionRange(i.value.length,i.value.length)})},350)};
+  const kf=$('#kF');if(kf)kf.onsubmit=async e=>{e.preventDefault();const c=$('#kC').value.toUpperCase().replace(/[^0-9A-Z]/g,'');if(c.length!==12){toast(at('err'));return}try{await BE.api.setKey(c);toast('✓');renderTeacher()}catch(x){toast(at('err'))}};
+  $('#tsort').onchange=e=>{TD.sort=e.target.value;renderTeacher()};
+  const byId=id=>PY.find(p=>p.id===id);
+  $$('[data-ok]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await BE.api.decide(byId(b.dataset.ok),true);toast('✓')}catch(e){toast(at('err'))}renderTeacher()});
+  $$('[data-no]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await BE.api.decide(byId(b.dataset.no),false)}catch(e){toast(at('err'))}renderTeacher()});
+  $$('[data-pd]').forEach(b=>b.onclick=async()=>{try{await BE.api.setPaid(b.dataset.pd,b.dataset.v==='1')}catch(e){toast(at('err'))}renderTeacher()});
+  $$('[data-rv]').forEach(b=>b.onclick=async()=>{try{await BE.api.showReview(b.dataset.rv,b.dataset.v==='1')}catch(e){toast(at('err'))}renderTeacher()});
+  $$('[data-img]').forEach(a=>a.onclick=e=>{e.preventDefault();const im=a.querySelector('img');const w=document.createElement('div');w.className='imgzoom';w.innerHTML=`<img src="${im.src}" alt="">`;w.onclick=()=>w.remove();document.body.appendChild(w)});
 }
 /* ---------- certificate (name stays on this device only) ---------- */
 async function openCert(course,detail){
