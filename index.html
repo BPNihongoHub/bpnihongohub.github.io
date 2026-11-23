@@ -1,6 +1,4 @@
-<!doctype html>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!doctype html><meta charset="utf-8">
 <title>Raku Nihongo Gakkou</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="theme-color" content="#06071a">
@@ -366,6 +364,25 @@ tr[data-kanji]:hover td{background:var(--ai-soft)}
 .lsn .lst{font-size:13px}
 .script{margin:10px 0;padding:10px 12px;border-radius:12px;background:var(--soft,rgba(127,127,127,.08));font-size:14px;line-height:1.8}
 .script summary{cursor:pointer;font-weight:700;margin-bottom:4px}
+
+.uhome{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;text-decoration:none;color:inherit;background:linear-gradient(135deg,color-mix(in srgb,var(--ai) 10%,var(--card)),color-mix(in srgb,var(--shu) 10%,var(--card)))}
+.uhome b{font-size:18px}
+.usecs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.usec{border:1px solid var(--line);background:var(--card);border-radius:14px;padding:10px;text-align:left;cursor:pointer;color:inherit;display:grid;gap:2px}
+.usec b{font-size:16px}.usec small{color:var(--muted);font-size:12px}
+.usec.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}.usec.on small{color:inherit;opacity:.8}
+.ugrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-top:14px}
+.ucard{display:grid;gap:8px;align-content:start}.ucard .uh{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.ucard.pass{border-color:var(--ok)}
+.ubadge{font-size:12px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--line);color:var(--muted)}
+.ubadge.ok{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}.ubadge.ng{background:color-mix(in srgb,var(--shu) 15%,transparent);color:var(--shu)}
+.upart{margin:18px 0 6px;font-size:16px}
+.uscore .ures{font-size:26px}.uscore .ures.ok{color:var(--ok)}.uscore .ures.ng{color:var(--shu)}
+.uscore.pass{border:2px solid var(--ok)}.uscore.fail{border:2px solid var(--shu)}
+.wchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.wchip{min-width:34px;text-align:center;padding:4px 8px;border-radius:10px;background:color-mix(in srgb,var(--shu) 14%,transparent);color:var(--shu);font-weight:700;text-decoration:none}
+.stem .rd{color:var(--muted);font-size:.85em;margin-left:4px}
+@media (max-width:560px){.usecs{grid-template-columns:1fr}.uhome{flex-direction:column;align-items:flex-start}}
 </style>
 <div id="app"><div class="loginwrap"><div class="aur a1"></div><div class="aur a2"></div></div></div>
 <div id="toast" class="toast" hidden></div>
@@ -711,6 +728,8 @@ function render(){
   const r=(location.hash||'#home').slice(1);
   if(['drive','bjt'].includes(exam())&&['home','quiz','mock','review','words','srs','unlock'].includes(r))return driveRoute(r);
   const views={home:renderHome,quiz:renderQuiz,mock:renderMock,review:()=>Q.start({mode:'review'}),words:renderWords,srs:renderSRS,admin:renderAdmin,unlock:renderUnlock};
+  if(r==='units')return renderUnits();
+  if(r==='uquiz')return US.inPage?uPage():renderUnits();
   if(r==='quiz'&&Q.list.length&&Q.inPage&&Q.mode==='normal')return renderPage();
   (views[r]||renderHome)();
 }
@@ -718,6 +737,7 @@ window.addEventListener('hashchange',()=>{Q.inPage=false;window.scrollTo(0,0);re
 
 function shell(active,inner){
   const tabs=[['home','家',t('navHome')],['quiz','練',t('navQuiz')],['mock','試',t('navMock')],['srs','札',t('navSrs')],['review','誤',t('navRev')],['words','辞',t('navWords')]];
+  if(exam()==='n3')tabs.splice(1,0,['units','課',ut('nav')]);
   if(isOwner)tabs.push(['admin','管',t('navAdmin')]);
   const nav=cls=>`<nav class="${cls}">${tabs.map(([h,k,s])=>`<a href="#${h}" class="${h===active?'on':''}" ${h===active?'aria-current="page"':''}><i aria-hidden="true">${k}</i><span>${s}</span></a>`).join('')}</nav>`;
   $('#app').innerHTML=`<header class="top"><div class="in"><a class="brand" href="#home">${hanko('hk')}<div><b>Raku Nihongo <em>Gakkou</em></b><small>with <strong>BINOD PAUDEL</strong></small></div></a>
@@ -784,6 +804,7 @@ function renderHome(){
    <div class="row" style="margin-top:12px"><button class="speak inv" data-say="${esc(w[1])}">▶ ${t('say')}</button><button class="speak inv" data-kanji="${esc(w[0])}">漢 ${t('kcard')}</button></div></section>
    <a class="card srsbox" href="#srs"><div class="eyebrow">${t('srsT')} · SRS</div><b>${due}</b><span>${t('srsDue')}</span><span class="muted" style="font-size:13px">${t('srsHint')}</span></a>
   </div>
+  <a class="card uhome" href="#units"><div><div class="eyebrow">宿題 · HOMEWORK</div><b>${ut('title')}</b><p class="muted" style="margin:4px 0 0">${ut('k')} 12 · ${ut('v')} 24 · ${ut('g')} 24 Units · 50問</p></div><span class="btn grad">${ut('start')} →</span></a>
   <div class="paths">
   <div class="card path"><div class="kana">STEP 1 · 漢字</div><h2>${t('kanji')}</h2><p class="muted" style="margin:0">${t('kanjiSub',{n:k.total})}</p><div class="bar"><i style="width:${pct(k)}%"></i></div><div class="muted" style="font-size:13px">${k.done}/${k.total} · ${pct(k)}%</div><button class="btn" data-go="kanji">${t('kanjiGo')}</button></div>
   <div class="card path"><div class="kana">STEP 2 · 語彙</div><h2>${t('mean')}</h2><p class="muted" style="margin:0">${t('meanSub',{n:m.total})}</p><div class="bar"><i style="width:${pct(m)}%"></i></div><div class="muted" style="font-size:13px">${m.done}/${m.total} · ${pct(m)}%</div><button class="btn" data-go="mean">${t('meanGo')}</button></div>
@@ -1034,6 +1055,72 @@ function dPage(){const qs=DS.list.slice(DS.page*DS.size,DS.page*DS.size+DS.size)
   $$('.opt').forEach(b=>b.onclick=()=>{if(DS.checked)return;DS.ans[+b.dataset.q]=+b.dataset.o;b.parentNode.querySelectorAll('.opt').forEach(x=>x.classList.toggle('sel',x===b));const s=$('#dcnt');if(s)s.textContent=t('answered',{a:Object.keys(DS.ans).length,b:qs.length})});
   const ck=$('#dcheck');if(ck)ck.onclick=()=>{DS.checked=true;const res=LS.get(XID+'res',{});qs.forEach((q,i)=>res[q.s+'-'+q.n]=DS.ans[i]===q.a?1:0);LS.set(XID+'res',res);dPage();scrollTo(0,0)};
   const nx=$('#dnext');if(nx)nx.onclick=()=>{DS.page++;DS.ans={};DS.checked=false;dPage();scrollTo(0,0)};}
+/* ---------- N3 Unit homework (漢字 12 · 語彙 24 · 文法 24, 50 questions each) ---------- */
+let UD=null;const US={sec:'k',unit:1,list:[],ans:{},checked:false,inPage:false,only:false,warn:false};
+const UPASS=.7;
+const UT={nav:['宿題','Units','युनिट'],title:['ユニット別 宿題テスト','Unit homework tests','युनिट अनुसार गृहकार्य परीक्षा'],
+ sub:['各ユニット50問。提出すると点数・合格／不合格・まちがえた問題がすぐわかります。','50 questions per unit. Submit to see your score, pass/fail and every mistake.','हरेक युनिटमा 50 प्रश्न। Submit गरेपछि अङ्क, पास/फेल र गलत भएका प्रश्न तुरुन्तै देखिन्छ।'],
+ k:['漢字','Kanji','खान्जी'],v:['語彙（意味）','Vocabulary','शब्द (अर्थ)'],g:['文法','Grammar','व्याकरण'],
+ kd:['読み方と書き方（12ユニット）','Readings & writing (12 units)','पढाइ र लेखाइ (12 युनिट)'],vd:['単語の意味（24ユニット）','Word meanings (24 units)','शब्दको अर्थ (24 युनिट)'],gd:['文法・並べ替え★（24ユニット）','Grammar & ★ ordering (24 units)','व्याकरण र ★ मिलाउने (24 युनिट)'],
+ start:['はじめる','Start','सुरु गर्नुहोस्'],again:['もう一度','Try again','फेरि गर्नुहोस्'],best:['最高','Best','उत्कृष्ट'],notyet:['未受験','Not taken','अझै नगरेको'],
+ rule:['合格ライン：70%（50問中35問）','Pass mark: 70% (35 of 50)','पास हुन: 70% (50 मध्ये 35)'],
+ submit:['提出する','Submit','Submit गर्नुहोस्'],warn:['未回答が{n}問あります。もう一度押すと提出します（未回答はまちがいになります）。','{n} questions are not answered. Press again to submit (unanswered count as wrong).','{n} वटा प्रश्नको उत्तर दिनुभएको छैन। फेरि थिच्नुभयो भने submit हुन्छ (उत्तर नदिएको गलत गनिन्छ)।'],
+ pass:['合格！','PASSED!','पास भयो!'],fail:['不合格','NOT PASSED','फेल भयो'],passM:['よくできました！次のユニットへ進みましょう。','Well done! Move on to the next unit.','स्याबास! अब अर्को युनिटमा जानुहोस्।'],failM:['まちがえた問題を復習して、もう一度挑戦しよう。','Review your mistakes and try again.','गलत भएका प्रश्न दोहोर्याएर फेरि प्रयास गर्नुहोस्।'],
+ right:['正解','Correct','सही'],wrong:['まちがい','Wrong','गलत'],blank:['未回答','Not answered','उत्तर दिइएन'],
+ wrongList:['まちがえた問題','Questions you got wrong','गलत भएका प्रश्न'],onlyW:['まちがいだけ表示','Show only mistakes','गलत मात्र देखाउनुहोस्'],showAll:['全部表示','Show all','सबै देखाउनुहोस्'],
+ back:['ユニット一覧へ','Back to units','युनिट सूचीमा'],ans:['正しい答え','Correct answer','सही उत्तर'],exp:['解説','Explanation','व्याख्या'],
+ kq:['読み方・書き方','Reading / writing','पढाइ / लेखाइ'],p1:['問題1：（　）に入るものを選ぶ','Part 1: choose what fits （　）','भाग 1: （　）मा मिल्ने छान्नुहोस्'],p2:['問題2：★に入るものを選ぶ','Part 2: choose the word for ★','भाग 2: ★ मा पर्ने शब्द छान्नुहोस्'],
+ kh:['【　】の言葉の読み方、または漢字を選んでください。','Choose the reading of the 【】 word, or its kanji.','【】 भित्रको शब्दको सही पढाइ वा सही खान्जी छान्नुहोस्।'],vh:['正しい意味・言葉を選んでください。','Choose the correct meaning or word.','सही अर्थ वा सही शब्द छान्नुहोस्।'],
+ done:['回答','Answered','उत्तर दिइयो']};
+const ut=(k,o)=>{const v=UT[k];const c=LANGS[LI][0];let s=c==='ja'?v[0]:c==='ne'?v[2]:v[1];if(o)for(const x in o)s=s.replace('{'+x+'}',o[x]);return s};
+const ulang=()=>{const c=LANGS[LI][0];return c==='ja'||c==='ne'?c:'en'};
+async function loadUnits(){if(UD)return;try{UD=await fetch('units.json').then(r=>r.json())}catch(e){UD={k:[],v:[],g:[]}}}
+async function renderUnits(){
+  if(!UD){shell('units','<div class="card empty" style="margin-top:20px">…</div>');await loadUnits()}
+  const res=LS.get('ures',{}),sec=US.sec;
+  const card=u=>{const r=res[sec+u.n];const pct=r?Math.round(r.b/u.qs.length*100):null;
+    return `<div class="card ucard ${r?(r.b/u.qs.length>=UPASS?'pass':'tried'):''}"><div class="uh"><b>Unit ${u.n}</b>${r?`<span class="ubadge ${r.b/u.qs.length>=UPASS?'ok':'ng'}">${r.b/u.qs.length>=UPASS?'✓ ':''}${ut('best')} ${r.b}/${u.qs.length}</span>`:`<span class="ubadge">${ut('notyet')}</span>`}</div>
+    ${u.title?`<small class="muted">${esc(u.title)}</small>`:''}<div class="bar"><i style="width:${pct||0}%;background:${pct==null?'var(--line)':pct>=70?'var(--ok)':'var(--shu)'}"></i></div>
+    <button class="btn ${r?'':'grad'}" data-us="${u.n}">${r?ut('again'):ut('start')} · ${u.qs.length}問</button></div>`};
+  shell('units',`<section class="card dhero">${hanko('hk')}<div><div class="eyebrow">JLPT N3 · 宿題 HOMEWORK</div><h2>${ut('title')}</h2><p class="muted">${ut('sub')}</p><p class="note" style="margin:6px 0 0">${ut('rule')}</p></div></section>
+  <div class="usecs" role="tablist">${['k','v','g'].map(s=>`<button role="tab" aria-selected="${s===sec}" class="usec ${s===sec?'on':''}" data-sec="${s}"><b>${ut(s)}</b><small>${ut(s+'d')}</small></button>`).join('')}</div>
+  <section class="ugrid">${(UD[sec]||[]).map(card).join('')}</section>`);
+  $$('[data-sec]').forEach(b=>b.onclick=()=>{US.sec=b.dataset.sec;renderUnits()});
+  $$('[data-us]').forEach(b=>b.onclick=()=>uStart(US.sec,+b.dataset.us));
+}
+function uStart(sec,n){const u=UD[sec].find(x=>x.n===n);US.sec=sec;US.unit=n;US.list=u.qs;US.title=u.title||'';US.ans={};US.checked=false;US.only=false;US.warn=false;US.inPage=true;
+  if(location.hash!=='#uquiz')location.hash='#uquiz';else uPage()}
+function uPage(){
+  const L=US.list,lk=ulang();let right=0;const wrongIdx=[];
+  if(US.checked)L.forEach((q,i)=>{if(US.ans[i]===q.a)right++;else wrongIdx.push(i)});
+  const pct=right/L.length,passed=pct>=UPASS;
+  const qhtml=(q,i)=>{const a=US.ans[i],ok=US.checked&&a===q.a,un=US.checked&&a==null;
+    if(US.checked&&US.only&&ok)return '';
+    const stem=S.furi&&q.qr?q.qr:plain(q.q);const ops=q.o.map((o,j)=>{let cl='';if(US.checked){if(j===q.a)cl='right';else if(a===j)cl='wrong'}else if(a===j)cl='sel';
+      return `<button class="opt ${cl}" data-q="${i}" data-o="${j}" ${US.checked?'disabled':''}><span class="c">${C[j]}</span><span>${S.furi&&q.or?q.or[j]:esc(o)}</span></button>`}).join('');
+    const e=q.e[lk]||q.e.ne||'';
+    return `${q.k==='★'&&(i===0||L[i-1].k!=='★')?`<h3 class="upart">${ut('p2')}</h3>`:''}${q.k==='文'&&i===0?`<h3 class="upart">${ut('p1')}</h3>`:''}
+    <article class="card q ${US.checked?(ok?'is-ok':'is-ng'):''}" id="uq${i}"><div class="meta"><span class="num">${i+1}</span><span>${q.k==='読'||q.k==='書'?ut('kq'):q.k==='意'||q.k==='語'?ut('v'):ut('g')}</span></div>${US.checked?`<div class="stamp">${ok?'〇':'✕'}</div>`:''}
+    <div class="stem">${stem}</div><div class="opts ${q.o.some(o=>o.length>9)?'long':''}">${ops}</div>
+    ${US.checked?`<div class="expl ${ok?'ok':'ng'}"><div class="ex-h"><b>${ok?ut('right'):un?ut('blank'):ut('wrong')}</b><span>${ut('ans')}: <b>${C[q.a]} ${esc(q.o[q.a])}</b></span></div><div class="ex-sec"><span class="ex-l">${ut('exp')}</span><span style="white-space:pre-line">${esc(e)}</span></div></div>`:''}</article>`};
+  const n=Object.keys(US.ans).length;
+  const score=US.checked?`<section class="card score uscore ${passed?'pass':'fail'}"><div><div class="eyebrow">${ut(US.sec)} · Unit ${US.unit} · 結果</div><div class="big">${right}<span style="font-size:22px;color:var(--muted)"> / ${L.length}</span></div><div class="muted">${Math.round(pct*100)}%</div></div>
+    <div style="flex:1;min-width:200px"><b class="ures ${passed?'ok':'ng'}">${passed?'🎉 '+ut('pass'):ut('fail')}</b><p style="margin:6px 0">${passed?ut('passM'):ut('failM')}</p><p class="note" style="margin:0">${ut('rule')}</p>
+    ${wrongIdx.length?`<div class="eyebrow" style="margin-top:10px">${ut('wrongList')} (${wrongIdx.length})</div><div class="wchips">${wrongIdx.map(i=>`<a href="#uquiz" data-jump="${i}" class="wchip">${i+1}</a>`).join('')}</div>`:''}
+    <div class="row" style="margin-top:10px">${wrongIdx.length?`<button class="chip ${US.only?'on':''}" id="uonly">${US.only?ut('showAll'):ut('onlyW')}</button>`:''}<button class="btn grad" id="uagain">${ut('again')}</button><a class="btn" href="#units">${ut('back')}</a></div></div></section>`:'';
+  shell('units',`<section class="card qhead"><h2>${ut(US.sec)} · Unit ${US.unit}</h2><span class="muted">${US.title?esc(US.title)+' · ':''}${L.length}問</span><button class="chip ${S.furi?'on':''}" id="furi"><ruby>振<rt>ふ</rt></ruby> ${t('furi')}</button></section>
+  ${US.checked?'':`<p class="muted">${US.sec==='k'?ut('kh'):US.sec==='v'?ut('vh'):''} ${ut('rule')}</p>`}${score}<div class="qlist">${L.map(qhtml).join('')}</div>
+  <div class="foot">${US.checked?`<button class="btn grad" id="uagain2">${ut('again')}</button><a class="btn" href="#units">${ut('back')}</a>`:`<span class="muted" id="ucnt" style="align-self:center">${ut('done')} ${n}/${L.length}</span><div class="err" id="uwarn" role="alert" style="flex-basis:100%"></div><button class="btn red" id="usub">${ut('submit')}</button>`}</div>`);
+  $('#furi').onclick=()=>{S.furi=!S.furi;saveS();uPage()};
+  $$('.opt').forEach(b=>b.onclick=()=>{if(US.checked)return;US.ans[+b.dataset.q]=+b.dataset.o;b.parentNode.querySelectorAll('.opt').forEach(x=>x.classList.toggle('sel',x===b));const s=$('#ucnt');if(s)s.textContent=ut('done')+' '+Object.keys(US.ans).length+'/'+L.length});
+  const sb=$('#usub');if(sb)sb.onclick=()=>{const miss=L.length-Object.keys(US.ans).length;if(miss&&!US.warn){US.warn=true;$('#uwarn').textContent=ut('warn',{n:miss});return}
+    US.checked=true;let r=0;L.forEach((q,i)=>{if(US.ans[i]===q.a)r++});const res=LS.get('ures',{}),k=US.sec+US.unit,o=res[k]||{b:0};res[k]={b:Math.max(o.b||0,r),l:r,d:today()};LS.set('ures',res);
+    try{P.log[today()]=(P.log[today()]||0)+L.length;P.save()}catch(e){}
+    uPage();scrollTo(0,0)};
+  [$('#uagain'),$('#uagain2')].forEach(b=>b&&(b.onclick=()=>uStart(US.sec,US.unit)));
+  const on=$('#uonly');if(on)on.onclick=()=>{US.only=!US.only;uPage()};
+  $$('[data-jump]').forEach(a=>a.onclick=e=>{e.preventDefault();if(US.only===false||true){const el=$('#uq'+a.dataset.jump);if(el)el.scrollIntoView({behavior:'smooth',block:'center'})}});
+}
 /* ---------- certificate (name stays on this device only) ---------- */
 async function openCert(course,detail){
   const m=document.createElement('div');m.className='modal';m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');
