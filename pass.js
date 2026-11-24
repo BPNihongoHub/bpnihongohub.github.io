@@ -70,6 +70,14 @@ const CSS=`
 .ps-ne{font-size:20px;font-weight:800;color:var(--shu);margin:6px 0}
 .ps-kbtns{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.ps-kbtns button{font:700 22px var(--f-jp);border:1.5px solid var(--line);background:var(--paper);color:var(--ink);border-radius:12px;width:48px;height:48px;cursor:pointer}
 .ps-ex{background:var(--ai-soft);border-radius:14px;padding:12px;margin:10px 0}.ps-ex .jp{font:600 17px/1.7 var(--f-jp)}.ps-ex .nep{color:var(--muted);margin-top:4px}
+.ps-h{margin:0 0 10px;font-size:19px}.ps-h small{font:600 14px var(--f-jp);color:var(--muted);margin-left:6px}
+.ps-use{margin:0 0 14px}.ps-use .t{font-weight:800;font-size:16px;display:flex;gap:8px;align-items:center}.ps-use .t span{background:var(--ai);color:#fff;border-radius:50%;width:24px;height:24px;display:grid;place-items:center;font-size:13px;flex:none}
+.ps-use p{margin:6px 0;line-height:1.6;font-size:14.5px}
+.ps-ex rt,.ps-pr rt,.ps-ftbl rt{font-size:.55em;color:var(--muted)}
+.ps-ftbl .r{border:1.5px solid var(--line);border-radius:12px;overflow:hidden;margin:0 0 8px}.ps-ftbl .l{background:#3a3d55;color:#fff;padding:7px 10px;font-weight:700;font-size:14px}.ps-ftbl .c{padding:8px 10px;font:500 17px/2 var(--f-jp)}
+.ps-pr{padding-left:22px;margin:0 0 12px}.ps-pr li{padding:10px 8px;border-bottom:1px solid var(--line);border-radius:8px}.ps-pr li.ok{background:var(--ok-soft)}.ps-pr li.ng{background:var(--shu-soft)}
+.ps-pr .q{font:500 17px/2.1 var(--f-jp)}.ps-pr .m{font-size:13px;color:var(--muted)}.ps-pr .a{font-size:14px;margin-top:3px}.ps-pr .a b{font-family:var(--f-jp);color:var(--ai)}
+.ps-in{font:600 16px var(--f-jp);width:8.5em;max-width:60vw;border:0;border-bottom:2px solid var(--ai);background:var(--ai-soft);color:var(--ink);padding:3px 6px;border-radius:6px 6px 0 0;margin:0 3px}
 .ps-credit{font-size:11.5px;color:var(--muted);margin:18px 0 0;line-height:1.5}
 `;
 function css(){if(!document.getElementById('psCss')){const s=document.createElement('style');s.id='psCss';s.textContent=CSS;document.head.appendChild(s)}}
@@ -197,17 +205,40 @@ async function info(kind,lv,i){
     m.querySelectorAll('[data-k]').forEach(btn=>btn.onclick=()=>{m.remove();showKanji(btn.dataset.k)});
   }
 }
+const GD={};
+async function gdata(lv){if(!(lv in GD))GD[lv]=await fetch('pass/gd-'+lv+'.json').then(r=>r.ok?r.json():{}).catch(()=>({}));return GD[lv]}
+function nrm(t){return String(t||'').replace(/[\s　。、,，．.！!？?「」]/g,'').replace(/[ァ-ヶ]/g,c=>String.fromCharCode(c.charCodeAt(0)-96)).replace(/[xX✕✖]/g,'×').replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-65248))}
 async function grammarPage(lv,i){
-  shell('pass','<div id="psBody"><p class="ps-note">लोड हुँदैछ…</p></div>');
-  const d=await load(lv).catch(()=>null);const x=d&&d.g[i];
-  if(!x){$('#psBody').innerHTML='<p>भेटिएन।</p>';return}
-  const S=getSet(lv,'g');
-  $('#psBody').innerHTML=`<p><a href="#pass">← ${lv.toUpperCase()} व्याकरण सूची</a></p>
-  <section class="ps-hero"><p>${lv.toUpperCase()} · 文法 ${i+1}/${d.g.length}</p><h1 style="font-family:var(--f-jp)">${E(x[0])}</h1></section>
-  <div class="card ps-res"><h3 style="margin:0 0 6px">अर्थ</h3><div class="ps-ne">${E(x[1])}</div>
-  <h3 style="margin:14px 0 6px">उदाहरण</h3><div class="ps-ex"><div class="jp">${E(x[2])}</div><div class="nep">${E(x[3])}</div></div>
-  <label style="display:flex;gap:10px;align-items:center;margin-top:14px;font-weight:700"><input type="checkbox" id="psGk" ${S.has(i)?'checked':''} style="width:22px;height:22px"> मैले यो व्याकरण बुझेँ ✓</label></div>
-  <div style="display:flex;gap:8px;justify-content:space-between">${i>0?`<a class="btn ghost" href="#pass/g/${lv}/${i-1}">← अघिल्लो</a>`:'<span></span>'}${i<d.g.length-1?`<a class="btn" href="#pass/g/${lv}/${i+1}">अर्को →</a>`:''}</div>`;
+  shell('pass','<div id="psBody"><p class="ps-note">Loading…</p></div>');
+  const [d,G]=await Promise.all([load(lv).catch(()=>null),gdata(lv)]);const x=d&&d.g[i];
+  if(!x){$('#psBody').innerHTML='<p>Not found.</p>';return}
+  const S=getSet(lv,'g'),g=G[i];
+  const nav=`<div style="display:flex;gap:8px;justify-content:space-between;margin:12px 0">${i>0?`<a class="btn ghost" href="#pass/g/${lv}/${i-1}">← Previous</a>`:'<span></span>'}${i<d.g.length-1?`<a class="btn" href="#pass/g/${lv}/${i+1}">Next →</a>`:''}</div>`;
+  let body;
+  if(g){
+    body=`<div class="card ps-res"><h2 class="ps-h">① How to use <small>使い方</small></h2>
+    ${g.u.map((u,k)=>`<div class="ps-use"><div class="t"><span>${k+1}</span>${E(u[0])}</div><p>${E(u[1])}</p><div class="ps-ex"><div class="jp">${u[2]}</div><div class="nep">${E(u[3])}</div></div></div>`).join('')}</div>
+    ${g.f.length?`<div class="card ps-res"><h2 class="ps-h">② How to make <small>作り方</small></h2><div class="ps-ftbl">${g.f.map(f=>`<div class="r"><div class="l">${E(f[0])}</div><div class="c">${f[1]}</div></div>`).join('')}</div></div>`:''}
+    ${g.p.length?`<div class="card ps-res"><h2 class="ps-h">③ Practice <small>練習</small></h2><p class="ps-note">Fill in the blank (＿＿). Words in （　） show the base form or a hint. Then press <b>Check answers</b>.</p>
+    <ol class="ps-pr">${g.p.map((q,k)=>`<li data-k="${k}"><div class="q">${q[0].replace('＿＿',`<input class="ps-in" data-k="${k}" autocomplete="off" autocapitalize="off" spellcheck="false">`).replace(/＿＿/g,'<u>　　</u>')}</div><div class="m">${E(q[3])}</div><div class="a"></div></li>`).join('')}</ol>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn ps-check" id="psPc">Check answers</button><button class="btn ghost" id="psPs">Show answers</button><b id="psPsc"></b></div></div>`:''}
+    ${g.h.length?`<div class="card ps-res"><h2 class="ps-h">④ Homework <small>宿題</small></h2>${g.h.map(h=>`<div class="ps-ex"><div class="jp">${h[0]}</div><div class="nep">${E(h[1])}</div></div>`).join('')}<p class="ps-note">Write it in your notebook and show it to your teacher.</p></div>`:''}`;
+  }else{
+    body=`<div class="card ps-res"><h3 style="margin:0 0 6px">Meaning</h3><div class="ps-ne">${E(x[1])}</div>
+    <h3 style="margin:14px 0 6px">Example</h3><div class="ps-ex"><div class="jp">${E(x[2])}</div><div class="nep">${E(x[3])}</div></div><p class="ps-note">Full lesson for this point is coming soon.</p></div>`;
+  }
+  $('#psBody').innerHTML=`<p><a href="#pass">← ${lv.toUpperCase()} grammar list</a></p>
+  <section class="ps-hero"><p>${lv.toUpperCase()} · Grammar ${i+1}/${d.g.length}</p><h1 style="font-family:var(--f-jp)">${E(x[0])}</h1>${g&&g.u[0]?`<p>${E(g.u[0][0])}</p>`:''}</section>
+  ${body}
+  <label class="card" style="display:flex;gap:10px;align-items:center;padding:14px;font-weight:700"><input type="checkbox" id="psGk" ${S.has(i)?'checked':''} style="width:22px;height:22px"> I understand this grammar ✓</label>
+  ${nav}`;
   $('#psGk').onchange=e=>{const s=getSet(lv,'g');e.target.checked?s.add(i):s.delete(i);putSet(lv,'g',s)};
+  if(g&&g.p.length){
+    const show=(mark)=>{let ok=0;g.p.forEach((q,k)=>{const li=$(`.ps-pr li[data-k="${k}"]`),inp=li.querySelector('input'),v=inp?inp.value:'';const good=q[2].map(nrm).includes(nrm(v))&&nrm(v)!=='';if(good)ok++;
+      li.classList.toggle('ok',mark&&good);li.classList.toggle('ng',mark&&!good);
+      li.querySelector('.a').innerHTML=(mark?(good?'<span class="ps-ok">✓ Correct</span> ':'<span class="ps-ng">✗</span> '):'')+(mark&&good?'':`Answer: <b>${E([].concat(q[1]).join(' / '))}</b>`)});
+      if(mark)$('#psPsc').innerHTML=`Score: ${ok} / ${g.p.length} ${ok===g.p.length?'🎉':''}`};
+    $('#psPc').onclick=()=>show(true);$('#psPs').onclick=()=>show(false);
+  }
 }
 })();
