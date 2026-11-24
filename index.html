@@ -940,6 +940,7 @@ function render(){
   if(false&&['drive','bjt'].includes(exam())&&['home','quiz','mock','review','words','srs','unlock'].includes(r))return driveRoute(r);
   const views={home:renderHome,quiz:renderQuiz,mock:renderMock,review:()=>Q.start({mode:'review'}),words:renderWords,srs:renderSRS,admin:renderAdmin,unlock:renderUnlock};
   if(r==='acc')return renderAccount();if(r==='pay')return renderPay();if(r==='rate')return renderReview();if(r==='teacher')return renderTeacher();
+  if(r==='pass'||r.startsWith('pass/'))return window.renderPass?renderPass():null;
   if(r==='units')return renderUnits();
   if(r==='books')return renderBooks();
   if(r==='read')return renderRead();
@@ -952,14 +953,14 @@ window.addEventListener('hashchange',()=>{Q.inPage=false;window.scrollTo(0,0);re
 const MORE={ja:'その他',en:'More',ne:'अरू',vi:'Thêm',id:'Lainnya',my:'နောက်ထပ်',zh:'更多',tl:'Iba pa'};
 const ph=(g,ti,sub)=>`<section class="phead"><i>${g}</i><div><h1>${ti}</h1>${sub?`<p>${sub}</p>`:''}</div></section>`;
 function shell(active,inner){
-  const tabs=[['home','家',t('navHome')],['quiz','練',t('navQuiz')],['mock','試',t('navMock')],['srs','札',t('navSrs')],['review','誤',t('navRev')],['words','辞',t('navWords')]];
+  const tabs=[['home','家',t('navHome')],['pass','合','Pass? Try it'],['quiz','練',t('navQuiz')],['mock','試',t('navMock')],['srs','札',t('navSrs')],['review','誤',t('navRev')],['words','辞',t('navWords')]];
   if(exam()==='n3'||exam()==='n5')tabs.splice(1,0,['units','課',ut('nav')]);
   if(exam()==='n3'||exam()==='n5')tabs.push(['books','本',bt('lib')]);
   if(BE.admin)tabs.push(['teacher','師',at('tT')]);
   if(isOwner)tabs.push(['admin','管',t('navAdmin')]);
   const lnk=([h,k,s])=>`<a href="#${h}" class="${h===active?'on':''}" ${h===active?'aria-current="page"':''}><i aria-hidden="true">${k}</i><span>${s}</span></a>`;
   const nav=cls=>`<nav class="${cls}">${tabs.map(lnk).join('')}</nav>`;
-  const mainT=tabs.filter(x=>['home','units','quiz','mock'].includes(x[0])),moreT=tabs.filter(x=>!mainT.includes(x));
+  const mainT=tabs.filter(x=>['home','pass','units','quiz','mock'].includes(x[0])),moreT=tabs.filter(x=>!mainT.includes(x));
   const bnav=`<nav class="bnav">${mainT.map(lnk).join('')}<button class="${moreT.some(x=>x[0]===active)?'on':''}" id="moreBtn" aria-expanded="false"><i aria-hidden="true">⋯</i><span>${MORE[LANGS[LI][0]]||'More'}</span></button></nav><div class="moresheet" id="moreSheet" hidden><div class="ms-in">${moreT.map(lnk).join('')}</div></div>`;
   $('#app').innerHTML=`<header class="top"><div class="in"><a class="brand" href="#home">${hanko('hk')}<div><b>BP Nihongo <em>Hub</em></b><small>日本語 · <strong>JLPT</strong></small></div></a>
   <div class="tools">${langSel('langTop')}<button class="iconbtn" id="themeBtn" aria-label="${t('theme')}">◐</button><a class="iconbtn accbtn ${BE.user?'in':''}" href="#acc" aria-label="${at('acc')}">${BE.user?esc(((BE.prof&&BE.prof.name)||BE.user.email||'?').trim().charAt(0).toUpperCase()||'人'):'人'}</a>${UNL?'':`<a class="iconbtn lockbtn" href="#unlock" aria-label="${t('unlockT')}">🔒</a>`}</div>
@@ -1697,7 +1698,9 @@ function renderAdmin(){
     try{await ART.publish({'keys.json':{content:JSON.stringify(nk),contentType:'application/json'}});KEYS=nk;toast('Code बन्द भयो।');renderAdmin()}
     catch(err){$('#aerr').textContent=(err&&err.code==='capability_disabled')?'लिंक public भएकाले यहाँबाट सेभ हुँदैन। Claude लाई code को पहिलो ४ अक्षर भन्नुहोस्।':'सेभ भएन ('+(err&&err.code||'error')+')।'}};
 }
+window.PSH={shell:(a,b)=>shell(a,b)};
 boot();
 })();
 </script>
+<script src="pass.js"></script>
 <script>if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{})</script>
