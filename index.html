@@ -922,6 +922,7 @@ function render(){
   if(false&&['drive','bjt'].includes(exam())&&['home','quiz','mock','review','words','srs','unlock'].includes(r))return driveRoute(r);
   const views={home:renderHome,quiz:renderQuiz,mock:renderMock,review:()=>Q.start({mode:'review'}),words:renderWords,srs:renderSRS,admin:renderAdmin,unlock:renderUnlock};
   if(r==='acc')return renderAccount();if(r==='pay')return renderPay();if(r==='rate')return renderReview();if(r==='teacher')return renderTeacher();
+  if(exam()==='n5'&&!['units','uquiz'].includes(r))return renderN5Home();
   if(r==='units')return renderUnits();
   if(r==='books')return renderBooks();
   if(r==='read')return renderRead();
@@ -935,7 +936,8 @@ const MORE={ja:'その他',en:'More',ne:'अरू',vi:'Thêm',id:'Lainnya',my:'
 const ph=(g,ti,sub)=>`<section class="phead"><i>${g}</i><div><h1>${ti}</h1>${sub?`<p>${sub}</p>`:''}</div></section>`;
 function shell(active,inner){
   const tabs=[['home','家',t('navHome')],['quiz','練',t('navQuiz')],['mock','試',t('navMock')],['srs','札',t('navSrs')],['review','誤',t('navRev')],['words','辞',t('navWords')]];
-  if(exam()==='n3')tabs.splice(1,0,['units','課',ut('nav')]);
+  if(exam()==='n3'||exam()==='n5')tabs.splice(1,0,['units','課',ut('nav')]);
+  if(exam()==='n5')tabs.splice(2);
   if(exam()==='n3')tabs.push(['books','本',bt('lib')]);
   if(BE.admin)tabs.push(['teacher','師',at('tT')]);
   if(isOwner)tabs.push(['admin','管',t('navAdmin')]);
@@ -984,7 +986,7 @@ function renderUnlock(){
     const ok=await unlock($('#ucode').value,false);if(!ok){b.disabled=false;b.textContent='🔓 '+t('unlockBtn');$('#uerr').textContent=t('codeErr')}else{toast(t('unlocked'))}};
 }
 /* ---------- home ---------- */
-const COURSES=[['n5','JLPT N5','入門',0],['n4','JLPT N4','初級',0],['n3','JLPT N3','中級',1],['n2','JLPT N2','中上級',0],['n1','JLPT N1','上級',0],['jft','JFT-Basic','A2',0],['bjt','BJT','Business',0],['ssw','SSW 特定技能','Skills',0],['food','Food 外食','SSW',0],['care','Nursing 介護','SSW',0],['drive','Driving licence','運転免許',0]];
+const COURSES=[['n5','JLPT N5','入門',1],['n4','JLPT N4','初級',0],['n3','JLPT N3','中級',1],['n2','JLPT N2','中上級',0],['n1','JLPT N1','上級',0],['jft','JFT-Basic','A2',0],['bjt','BJT','Business',0],['ssw','SSW 特定技能','Skills',0],['food','Food 外食','SSW',0],['care','Nursing 介護','SSW',0],['drive','Driving licence','運転免許',0]];
 const exam=()=>LS.get('exam','n3');
 function typeStats(ty){const qs=D.q.filter(q=>q.t===ty);let done=0,ok=0;qs.forEach(q=>{const v=P.res[qid(q)];if(v!=null){done++;ok+=v}});return{total:qs.length,done,ok}}
 function secStats(types){return types.map(typeStats).reduce((a,b)=>({total:a.total+b.total,done:a.done+b.done,ok:a.ok+b.ok}),{total:0,done:0,ok:0})}
@@ -1261,7 +1263,7 @@ function dPage(){const qs=DS.list.slice(DS.page*DS.size,DS.page*DS.size+DS.size)
   const ck=$('#dcheck');if(ck)ck.onclick=()=>{DS.checked=true;const res=LS.get(XID+'res',{});qs.forEach((q,i)=>res[q.s+'-'+q.n]=DS.ans[i]===q.a?1:0);LS.set(XID+'res',res);dPage();scrollTo(0,0)};
   const nx=$('#dnext');if(nx)nx.onclick=()=>{DS.page++;DS.ans={};DS.checked=false;dPage();scrollTo(0,0)};}
 /* ---------- N3 Unit homework (漢字 12 · 語彙 24 · 文法 24, 50 questions each) ---------- */
-let UD=null;const US={sec:'k',unit:1,list:[],ans:{},checked:false,inPage:false,only:false,warn:false};
+let UD=null,UDE='';const UKP=()=>exam()==='n5'?'n5':'';const US={sec:'k',unit:1,list:[],ans:{},checked:false,inPage:false,only:false,warn:false};
 const UPASS=.7;
 const UT={nav:['宿題','Units','युनिट'],title:['ユニット別 宿題テスト','Unit homework tests','युनिट अनुसार गृहकार्य परीक्षा'],
  sub:['各ユニット50問。提出すると点数・合格／不合格・まちがえた問題がすぐわかります。','50 questions per unit. Submit to see your score, pass/fail and every mistake.','हरेक युनिटमा 50 प्रश्न। Submit गरेपछि अङ्क, पास/फेल र गलत भएका प्रश्न तुरुन्तै देखिन्छ।'],
@@ -1279,20 +1281,20 @@ const UT={nav:['宿題','Units','युनिट'],title:['ユニット別 宿�
  done:['回答','Answered','उत्तर दिइयो'],
  setsH:['模擬問題セット','Model question sets','मोडल प्रश्न सेट'],hwH:['宿題（ユニット別）','Homework (by unit)','गृहकार्य (युनिट अनुसार)'],
  l:['聴解','Listening','सुनाइ (Listening)'],ld:['近日公開','Coming soon','छिट्टै आउँदैछ'],units:['ユニット','units','युनिट']};
-const ut=(k,o)=>{const v=UT[k];const c=LANGS[LI][0];let s=c==='ja'?v[0]:c==='ne'?v[2]:v[1];if(o)for(const x in o)s=s.replace('{'+x+'}',o[x]);return s};
+const ut=(k,o)=>{const v=(exam()==='n5'&&UT5[k])||UT[k];const c=LANGS[LI][0];let s=c==='ja'?v[0]:c==='ne'?v[2]:v[1];if(o)for(const x in o)s=s.replace('{'+x+'}',o[x]);return s};
 const ulang=()=>LANGS[LI][0]==='ne'?'ne':'en';
-async function loadUnits(){if(UD)return;try{UD=await fetch('units.json').then(r=>r.json())}catch(e){UD={k:[],v:[],g:[]};return}
+async function loadUnits(){if(UD&&UDE===exam())return;UDE=exam();try{UD=await fetch(exam()==='n5'?'units-n5.json':'units.json').then(r=>r.json())}catch(e){UD={k:[],v:[],g:[]};return}
   if(window.MK&&Object.values(UD).some(s=>s.some(x=>x.lk))){try{const L=await fetch('units-locked.json').then(r=>r.json());
     const raw=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64d(L.iv)},window.MK,b64d(L.ct));const B=JSON.parse(new TextDecoder().decode(raw));
     for(const s in B)B[s].forEach(full=>{const i=UD[s].findIndex(x=>x.n===full.n);if(i>=0)UD[s][i]=full})}catch(e){}}}
 async function renderUnits(){
-  if(!UD){shell('units','<div class="card empty" style="margin-top:20px">…</div>');await loadUnits()}
-  const res=LS.get('ures',{}),sec=US.sec;
-  const card=u=>{if(u.lk&&!u.qs)return `<div class="card ucard ulock"><div class="uh"><b>Unit ${u.n}</b><span class="ubadge">🔒</span></div>${u.title?`<small class="muted">${esc(ulang()==='ne'?u.title:(u.te||u.title))}</small>`:''}<a class="btn ghost" href="#unlock">🔒 ${t('unlockBtn')} · ${u.lk}問</a></div>`;const r=res[sec+u.n];const pct=r?Math.round(r.b/u.qs.length*100):null;
+  if(!UD||UDE!==exam()){shell('units','<div class="card empty" style="margin-top:20px">…</div>');await loadUnits()}
+  const res=LS.get('ures',{}),sec=US.sec,kp=UKP();
+  const card=u=>{if(u.lk&&!u.qs)return `<div class="card ucard ulock"><div class="uh"><b>Unit ${u.n}</b><span class="ubadge">🔒</span></div>${u.title?`<small class="muted">${esc(ulang()==='ne'?u.title:(u.te||u.title))}</small>`:''}<a class="btn ghost" href="#unlock">🔒 ${t('unlockBtn')} · ${u.lk}問</a></div>`;const r=res[kp+sec+u.n];const pct=r?Math.round(r.b/u.qs.length*100):null;
     return `<div class="card ucard ${r?(r.b/u.qs.length>=UPASS?'pass':'tried'):''}"><div class="uh"><b>Unit ${u.n}</b>${r?`<span class="ubadge ${r.b/u.qs.length>=UPASS?'ok':'ng'}">${r.b/u.qs.length>=UPASS?'✓ ':''}${ut('best')} ${r.b}/${u.qs.length}</span>`:`<span class="ubadge">${ut('notyet')}</span>`}</div>
     ${u.title?`<small class="muted">${esc(ulang()==='ne'?u.title:(u.te||u.title))}</small>`:''}<div class="bar"><i style="width:${pct||0}%;background:${pct==null?'var(--line)':pct>=70?'var(--ok)':'var(--shu)'}"></i></div>
     <button class="btn ${r?'':'grad'}" data-us="${u.n}">${r?ut('again'):ut('start')} · ${u.qs.length}問</button></div>`};
-  shell('units',`<section class="card dhero">${hanko('hk')}<div><div class="eyebrow">JLPT N3 · 宿題 HOMEWORK</div><h2>${ut('title')}</h2><p class="muted">${ut('sub')}</p><p class="note" style="margin:6px 0 0">${ut('rule')}</p></div></section>
+  shell('units',`<section class="card dhero">${hanko('hk')}<div><div class="eyebrow">JLPT ${exam().toUpperCase()} · 宿題 HOMEWORK</div><h2>${ut('title')}</h2><p class="muted">${ut('sub')}</p><p class="note" style="margin:6px 0 0">${ut('rule')}</p></div></section>
   <div class="usecs" role="tablist">${['k','v','g'].map(s=>`<button role="tab" aria-selected="${s===sec}" class="usec ${s===sec?'on':''}" data-sec="${s}"><b>${ut(s)}</b><small>${ut(s+'d')}</small></button>`).join('')}</div>
   <section class="ugrid">${(UD[sec]||[]).map(card).join('')}</section>`);
   $$('[data-sec]').forEach(b=>b.onclick=()=>{US.sec=b.dataset.sec;renderUnits()});
@@ -1324,7 +1326,7 @@ function uPage(){
   $('#furi').onclick=()=>{S.furi=!S.furi;saveS();uPage()};
   $$('.opt').forEach(b=>b.onclick=()=>{if(US.checked)return;US.ans[+b.dataset.q]=+b.dataset.o;b.parentNode.querySelectorAll('.opt').forEach(x=>x.classList.toggle('sel',x===b));const s=$('#ucnt');if(s)s.textContent=ut('done')+' '+Object.keys(US.ans).length+'/'+L.length});
   const sb=$('#usub');if(sb)sb.onclick=()=>{const miss=L.length-Object.keys(US.ans).length;if(miss&&!US.warn){US.warn=true;$('#uwarn').textContent=ut('warn',{n:miss});return}
-    US.checked=true;let r=0;L.forEach((q,i)=>{if(US.ans[i]===q.a)r++});const res=LS.get('ures',{}),k=US.sec+US.unit,o=res[k]||{b:0};res[k]={b:Math.max(o.b||0,r),l:r,d:today()};LS.set('ures',res);
+    US.checked=true;let r=0;L.forEach((q,i)=>{if(US.ans[i]===q.a)r++});const res=LS.get('ures',{}),k=UKP()+US.sec+US.unit,o=res[k]||{b:0};res[k]={b:Math.max(o.b||0,r),l:r,d:today()};LS.set('ures',res);
     try{P.log[today()]=(P.log[today()]||0)+L.length;P.save()}catch(e){}
     uPage();scrollTo(0,0)};
   [$('#uagain'),$('#uagain2')].forEach(b=>b&&(b.onclick=()=>uStart(US.sec,US.unit)));
@@ -1332,6 +1334,18 @@ function uPage(){
   $$('[data-jump]').forEach(a=>a.onclick=e=>{e.preventDefault();if(US.only===false||true){const el=$('#uq'+a.dataset.jump);if(el)el.scrollIntoView({behavior:'smooth',block:'center'})}});
 }
 
+const UT5={kd:['読み方と書き方（10ユニット）','Readings & writing (10 units)','पढाइ र लेखाइ (10 युनिट)'],vd:['単語の意味（25ユニット）','Word meanings (25 units)','शब्दको अर्थ (25 युनिट)'],gd:['文法・並べ替え★（25ユニット）','Grammar & ★ ordering (25 units)','व्याकरण र ★ मिलाउने (25 युनिट)'],
+ h5:['JLPT N5 入門','JLPT N5 · Beginner','JLPT N5 · सुरुवात'],h5s:['基礎から：漢字10・語彙25・文法25ユニット、各50問。','From the basics: 10 kanji, 25 vocabulary and 25 grammar units, 50 questions each.','सुरुदेखि: कान्जी 10, शब्द 25, व्याकरण 25 युनिट, हरेकमा 50 प्रश्न।'],
+ n5note:['N5の模擬試験は近日公開。今はユニット宿題で勉強しましょう。','N5 model tests are coming soon. Study with the unit homework for now.','N5 मोडल टेस्ट छिट्टै आउँदैछ। अहिले युनिट गृहकार्यबाट पढ्नुहोस्।']};
+function renderN5Home(){const res=LS.get('ures',{});
+  const cnt=s=>Object.keys(res).filter(k=>k.startsWith('n5'+s)&&res[k].b>=35).length;
+  const it=(s,n,ic)=>`<a class="card hwc" href="#units" data-hsec="${s}"><i>${ic}</i><b>${ut(s)}</b><span>${n} ${ut('units')} · 50問</span><small>✓ ${cnt(s)}/${n}</small></a>`;
+  shell('home',`${courseStrip()}<section class="card dhero">${hanko('hk')}<div><div class="eyebrow">JLPT N5 · BP NIHONGO HUB</div><h2>${ut('h5')}</h2><p class="muted">${ut('h5s')}</p><p class="note" style="margin:6px 0 0">${ut('rule')}</p></div></section>
+  <section class="hwsec"><h2 class="hsech"><i>課</i>${ut('hwH')}</h2><div class="hwgrid">${it('k',10,'漢')}${it('v',25,'語')}${it('g',25,'文')}<div class="card hwc off"><i>試</i><b>${ut('setsH')}</b><span>${ut('ld')}</span></div></div></section>
+  <p class="muted" style="margin:14px 4px">${ut('n5note')}</p>`);
+  $$('[data-exam]').forEach(b=>b.onclick=()=>{LS.set('exam',b.dataset.exam);location.hash='#home';render()});
+  $$('[data-hsec]').forEach(b=>b.onclick=()=>{US.sec=b.dataset.hsec;US.inPage=false});
+}
 function hwHome(){const res=LS.get('ures',{});
   const cnt=s=>Object.keys(res).filter(k=>k[0]===s&&res[k].b>=35).length;
   const it=(s,n,ic)=>`<a class="card hwc" href="#units" data-hsec="${s}"><i>${ic}</i><b>${ut(s)}</b><span>${n} ${ut('units')} · 50問</span><small>✓ ${cnt(s)}/${n}</small></a>`;
