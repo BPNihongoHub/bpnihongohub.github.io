@@ -1364,7 +1364,7 @@ async function decStrip(src){const buf=new Uint8Array(await fetch(src).then(r=>r
 /* ---------- Accounts, payment, teacher dashboard, reviews (Firebase) ----------
    FBCONF stays null until Binod creates his Firebase project; then paste the config here.
    PAY.on stays false until Binod confirms price + free rules (locks are OFF meanwhile). */
-const FBCONF=null;
+const FBCONF={apiKey:"AIzaSyDe-FSQzW7RaAMCAS81ghbBLYMI5kB-zzk",authDomain:"binod-paudel.firebaseapp.com",projectId:"binod-paudel",storageBucket:"binod-paudel.firebasestorage.app",messagingSenderId:"589004931560",appId:"1:589004931560:web:a7a205b8ef231749dbe45d"};/* public web config (not a secret) */
 const PAY={on:false,price:2000,cur:'¥',course:'JLPT N3',qr:'pay/qr.png'};
 const FBV='10.12.5';
 const AT={
@@ -1408,7 +1408,7 @@ const at=k=>{const v=AT[k];if(!v)return k;const c=LANGS[LI][0];return c==='ja'?v
 const BE={ok:false,user:null,prof:null,admin:false,ready:false,_l:[]};
 function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s)})}
 async function beInit(){
-  const mock=!FBCONF&&/^(localhost|127\.0\.0\.1)$/.test(location.hostname)&&new URLSearchParams(location.search).has('mock');
+  const mock=/^(localhost|127\.0\.0\.1)$/.test(location.hostname)&&new URLSearchParams(location.search).has('mock');
   if(mock){BE.api=mockApi();BE.ok=true}
   else if(FBCONF&&!/claude\.ai|claudeusercontent/.test(location.hostname)){
     try{const b=`https://www.gstatic.com/firebasejs/${FBV}/`;await loadScript(b+'firebase-app-compat.js');await Promise.all([loadScript(b+'firebase-auth-compat.js'),loadScript(b+'firebase-firestore-compat.js')]);
