@@ -10,7 +10,7 @@ const PD={},SD={};
 const PS={lv:'n5',kind:'k',page:0};
 try{Object.assign(PS,JSON.parse(localStorage.getItem('rk_passui')||'{}'))}catch(e){}
 const saveUI=()=>{try{localStorage.setItem('rk_passui',JSON.stringify(PS))}catch(e){}};
-const keyOf=(lv,kind)=>'rk_pass_'+lv+'_'+kind;
+const keyOf=(lv,kind)=>'rk_pass2_'+lv+'_'+kind;
 function getSet(lv,kind){try{return new Set(JSON.parse(localStorage.getItem(keyOf(lv,kind))||'[]'))}catch(e){return new Set()}}
 function putSet(lv,kind,s){try{localStorage.setItem(keyOf(lv,kind),JSON.stringify([...s]))}catch(e){}}
 async function load(lv){if(!PD[lv])PD[lv]=await fetch('pass/pass-'+lv+'.json').then(r=>r.json());return PD[lv]}
@@ -143,7 +143,7 @@ async function results(){
   <table class="ps-tbl"><tr><th>JLPT</th><th>कान्जी</th><th>शब्द</th><th>व्याकरण</th><th>%</th></tr>${rows.slice().reverse().map(r=>`<tr class="${r.lv===est?'me':''}"><td>${r.lv.toUpperCase()}</td><td>${r.k[0]}/${r.k[1]}</td><td>${r.v[0]}/${r.v[1]}</td><td>${r.g[0]}/${r.g[1]}</td><td>${r.p}%</td></tr>`).join('')}</table>
   <h3 style="margin:16px 0 4px">JLPT स्तर र आवश्यक पढाइ</h3>
   <table class="ps-tbl"><tr><th>JLPT</th><th>पढाइ समय</th><th>कान्जी</th><th>शब्द</th></tr>${LV.slice().reverse().map(l=>`<tr><td>${l.toUpperCase()}</td><td>${LVINFO[l][0]} घण्टा</td><td>करिब ${LVINFO[l][1]}</td><td>करिब ${LVINFO[l][2]}</td></tr>`).join('')}</table>
-  <p class="ps-note">यो वेबसाइटको सूचीमा: N5 कान्जी 79/शब्द 718, N4 166/668, N3 367/2140, N2 367/1906, N1 1232/2699 (अघिल्लो स्तरका शब्द दोहोरिँदैनन्)।</p></div>
+  <p class="ps-note">यो वेबसाइटको सूचीमा: N5 कान्जी 103/शब्द 718, N4 144/668, N3 366/2140, N2 367/1906, N1 1232/2699 (हरेक स्तरमा त्यही स्तरका मात्र; अघिल्लो स्तरका दोहोरिँदैनन्। माथिल्लो तहको कान्जी भएको शब्द हिरागानामा देखाइन्छ)।</p></div>
   <button class="btn ghost" id="psWrong">✗ नआउने ${KIND.k[1]}/${KIND.v[1]} मात्र हेर्नुहोस्</button><div id="psWL"></div>`+credit();
   $('#psWrong').onclick=async()=>{
     const d=await load(cur.lv);let h='';
@@ -192,6 +192,7 @@ async function info(kind,lv,i){
     const w=x[0].split(';')[0].trim();const ks=[...new Set([...w].filter(c=>/[一-鿿]/.test(c)))];
     const m=modal(`<div style="font:700 40px/1.2 var(--f-jp)">${E(w)}</div><div class="ps-note" style="font-size:17px">${E(x[1])}</div>
     <div class="ps-ne">${E(x[3])}</div><div class="ps-kv"><div><b>English</b> ${E(x[2])}</div><div><b>स्तर</b> ${lv.toUpperCase()}</div></div>
+    ${x[4]?`<p class="ps-note" style="margin-top:10px">${lv.toUpperCase()} मा यो शब्द प्रायः हिरागानामै लेखिन्छ। माथिल्लो तहमा कान्जीमा: <b style="font-family:var(--f-jp);font-size:17px">${E(x[4])}</b></p>`:''}
     ${ks.length?`<p class="ps-note" style="margin-top:12px">यो शब्दका कान्जी (थिच्दा अर्थ र लेख्ने तरिका):</p><div class="ps-kbtns">${ks.map(c=>`<button data-k="${E(c)}">${E(c)}</button>`).join('')}</div>`:''}`);
     m.querySelectorAll('[data-k]').forEach(btn=>btn.onclick=()=>{m.remove();showKanji(btn.dataset.k)});
   }
