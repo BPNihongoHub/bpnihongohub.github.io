@@ -1519,7 +1519,7 @@ async function renderAccount(){
    <form id="pForm" class="eform"><label>${at('name')}<input id="pName" value="${esc(p.name||'')}"></label><label>${at('phone')}<input id="pPhone" type="tel" value="${esc(p.phone||'')}"></label>
    <button class="btn ghost">${at('save')}</button></form></section>
   <section class="card accbox"><h3>${at('prog')}</h3><div class="astats"><div><b>${done}</b><span>${at('done')}</span></div><div><b>${done?Math.round(ok*100/done):0}%</b><span>${at('acc2')}</span></div><div><b>${hwp}</b><span>${at('hw')} ✓</span></div></div></section>
-  ${BE.err?`<p class="muted" style="text-align:center;font-size:12px;color:var(--shu)">⚠ ${esc(BE.err)}</p>`:''}${BE.aerr?`<p class="muted" style="text-align:center;font-size:10px;opacity:.6">t: ${esc(BE.aerr)}</p>`:''}
+  ${BE.err?`<p class="muted" style="text-align:center;font-size:12px;color:var(--shu)">⚠ ${esc(BE.err)}</p>`:''}
   <div class="erow" style="justify-content:center;margin:14px 0"><a class="btn ghost" href="#rate">★ ${at('rev')}</a>${BE.admin?`<a class="btn ghost" href="#teacher">師 ${at('tT')}</a>`:''}<button class="btn ghost" id="outB">${at('logout')}</button></div>`);
   $('#pForm').onsubmit=async e=>{e.preventDefault();const o={name:$('#pName').value.trim().slice(0,60),phone:$('#pPhone').value.trim().slice(0,30)};try{await BE.api.saveProf(BE.user.uid,o);Object.assign(BE.prof,o);toast('✓')}catch(x){toast(at('err'))}};
   $('#outB').onclick=()=>BE.api.out();
