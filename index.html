@@ -1379,7 +1379,7 @@ async function decStrip(src){const buf=new Uint8Array(await fetch(src).then(r=>r
    FBCONF stays null until Binod creates his Firebase project; then paste the config here.
    PAY.on stays false until Binod confirms price + free rules (locks are OFF meanwhile). */
 const FBCONF={apiKey:"AIzaSyDe-FSQzW7RaAMCAS81ghbBLYMI5kB-zzk",authDomain:"binod-paudel.firebaseapp.com",projectId:"binod-paudel",storageBucket:"binod-paudel.firebasestorage.app",messagingSenderId:"589004931560",appId:"1:589004931560:web:a7a205b8ef231749dbe45d"};/* public web config (not a secret) */
-const PAY={on:true,price:2000,cur:'¥',course:'JLPT N3',months:6,qr:'pay/qr.png'};
+const PAY={on:true,price:2000,cur:'¥',course:'JLPT N3',months:6,qr:'pay/qr.png',link:''};/* link = Stripe Payment Link (card + konbini) once Binod creates it */
 const SIXM=()=>183*864e5;
 const isPaidP=p=>!!(p&&p.paid&&(p.paidUntil||0)>Date.now());
 const FBV='10.12.5';
@@ -1393,6 +1393,7 @@ const AT={
  soon:['ログイン機能は準備中です。','Accounts are being set up. Coming soon.','लगइन सुविधा तयार हुँदैछ। छिट्टै आउँछ।'],
  paid:['✓ 購入済み（すべて利用可）','✓ Paid: everything is open','✓ तिरिसक्नुभयो: सबै खुला छ'],until:['有効期限','Open until','म्याद'],expired:['期限が切れました。もう一度お支払いください。','Your 6 months have ended. Please pay again.','६ महिनाको म्याद सकियो। फेरि तिर्नुहोस्।'],
  st2:['QRコードで ¥2,000 を支払う','Pay ¥2,000 with the QR code','QR बाट ¥2,000 तिर्नुहोस्'],st3:['スクリーンショットか取引番号を送る','Send the screenshot or transaction ID','Screenshot वा transaction ID पठाउनुहोस्'],st4:['先生が確認すると、6か月すべて開きます','After the teacher checks it, everything opens for 6 months','गुरुले जाँचेपछि ६ महिना सबै खुल्छ'],
+ cardT:['クレジットカード / コンビニ払い','Credit card / convenience store','Credit card / Konbini (コンビニ)'],cardS:['支払い後、先生が確認すると6か月すべて開きます。','After paying, the teacher checks it and everything opens for 6 months.','तिरेपछि गुरुले जाँचेर ६ महिना सबै खोलिदिनुहुन्छ।'],cardB:['カード・コンビニで支払う','Pay by card or konbini','Card वा Konbini बाट तिर्ने'],
  per6:['6か月 すべて利用可','6 months, everything open','६ महिना सबै खुला'],
  free:['無料プラン','Free plan','Free plan'],
  pending:['⏳ 支払い確認中','⏳ Payment being checked','⏳ पैसा जाँच हुँदैछ'],
@@ -1549,7 +1550,8 @@ async function renderAccount(){
 function renderPay(){
   if(!BE.ok||!BE.user){location.hash='#acc';return}
   shell('acc',`${ph('¥',at('payT'),PAY.course+' · '+PAY.cur+PAY.price.toLocaleString('en')+' · '+at('per6'))}
-  <section class="card accbox"><p>${at('payS')}</p><div class="qrbox"><img src="${PAY.qr}" alt="QR" onerror="this.replaceWith(Object.assign(document.createElement('p'),{className:'muted',textContent:'${at('noqr')}'}))"></div>
+  ${PAY.link&&/^https:\/\/buy\.stripe\.com\//.test(PAY.link)?`<section class="card accbox"><b>💳 ${at('cardT')}</b><p class="muted" style="margin:0">${at('cardS')}</p><a class="btn grad" target="_blank" rel="noopener" href="${PAY.link}?client_reference_id=${encodeURIComponent(BE.user.uid)}${BE.user.email?'&prefilled_email='+encodeURIComponent(BE.user.email):''}">💳 ${at('cardB')}</a></section>`:''}
+  <section class="card accbox"><b>📱 PayPay</b><p>${at('payS')}</p><div class="qrbox"><img src="${PAY.qr}" alt="QR" onerror="this.replaceWith(Object.assign(document.createElement('p'),{className:'muted',textContent:'${at('noqr')}'}))"></div>
   <form id="payF" class="eform"><label>${at('method')}<select id="pyM"><option>PayPay</option><option>Bank transfer</option><option>eSewa / Khalti</option><option>Cash</option></select></label>
   <label>${at('txn')}<input id="pyT" maxlength="80"></label><label>${at('shot')}<input id="pyS" type="file" accept="image/*"></label><img id="pyPrev" class="pyprev" hidden alt="">
   <label>${at('note')}<input id="pyN" maxlength="200"></label><div class="err" id="pyE" role="alert"></div><button class="btn grad" id="pyB">${at('send')}</button></form></section>`);
