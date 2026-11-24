@@ -1415,7 +1415,7 @@ async function beInit(){
       firebase.initializeApp(FBCONF);BE.api=fbApi();BE.ok=true}catch(e){BE.ok=false}}
   if(!BE.ok){BE.ready=true;return}
   BE.api.onAuth(async u=>{BE.user=u;BE.prof=null;BE.admin=false;
-    if(u){try{BE.prof=await BE.api.touch(u)}catch(e){}try{BE.admin=await BE.api.isAdmin()}catch(e){}
+    if(u){BE.err='';try{BE.prof=await BE.api.touch(u)}catch(e){BE.err='profile: '+((e&&(e.code||e.message))||e)}try{BE.admin=await BE.api.isAdmin()}catch(e){}
       if(BE.prof&&BE.prof.paid)beKey()}
     BE.ready=true;render()});
 }
@@ -1446,7 +1446,7 @@ function fbApi(){
       const p=norm(s);if(p.lastDay!==day()){await r.update({last:TS(),lastDay:day()});p.last=Date.now()}return p},
     saveProf:(uid,o)=>F.doc('users/'+uid).update({name:o.name,phone:o.phone}),
     progress:(uid,sum)=>F.doc('users/'+uid).update({prog:sum,last:TS(),lastDay:day()}),
-    async isAdmin(){try{await F.doc('config/admin').get();return true}catch(e){return false}},/* rules let only the teacher read config/* */
+    async isAdmin(){try{await F.doc('config/admin').get();return true}catch(e){BE.aerr=(e&&(e.code||e.message))||String(e);return false}},/* rules let only the teacher read config/* */
     async hasKey(){const s=await F.doc('secret/n3').get();return s.exists},setKey:c=>F.doc('secret/n3').set({code:c}),
     async key(){const s=await F.doc('secret/n3').get();return s.exists?s.data().code:null},
     pay:(uid,o)=>F.collection('pay').add(Object.assign({uid,status:'pending',created:TS()},o)),
@@ -1519,6 +1519,7 @@ async function renderAccount(){
    <form id="pForm" class="eform"><label>${at('name')}<input id="pName" value="${esc(p.name||'')}"></label><label>${at('phone')}<input id="pPhone" type="tel" value="${esc(p.phone||'')}"></label>
    <button class="btn ghost">${at('save')}</button></form></section>
   <section class="card accbox"><h3>${at('prog')}</h3><div class="astats"><div><b>${done}</b><span>${at('done')}</span></div><div><b>${done?Math.round(ok*100/done):0}%</b><span>${at('acc2')}</span></div><div><b>${hwp}</b><span>${at('hw')} ✓</span></div></div></section>
+  ${BE.err?`<p class="muted" style="text-align:center;font-size:12px;color:var(--shu)">⚠ ${esc(BE.err)}${BE.aerr?' · teacher: '+esc(BE.aerr):''}</p>`:''}
   <div class="erow" style="justify-content:center;margin:14px 0"><a class="btn ghost" href="#rate">★ ${at('rev')}</a>${BE.admin?`<a class="btn ghost" href="#teacher">師 ${at('tT')}</a>`:''}<button class="btn ghost" id="outB">${at('logout')}</button></div>`);
   $('#pForm').onsubmit=async e=>{e.preventDefault();const o={name:$('#pName').value.trim().slice(0,60),phone:$('#pPhone').value.trim().slice(0,30)};try{await BE.api.saveProf(BE.user.uid,o);Object.assign(BE.prof,o);toast('✓')}catch(x){toast(at('err'))}};
   $('#outB').onclick=()=>BE.api.out();
