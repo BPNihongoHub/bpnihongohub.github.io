@@ -781,11 +781,17 @@ const SECT={kanji:KANJI_T,mean:MEAN_T,gram:GRAM_T,read:READ_T,listen:LISTEN_T};c
 const TL={reading:'漢字読み',writing:'表記',context:'文脈規定',paraphrase:'言い換え類義',usage:'用法',grammar:'文法形式',order:'文の組み立て',bunsho:'文章の文法',dokkai:'読解',listen:'聴解'};
 const TN=k=>LI===0?'':t('t_'+k);
 const C='①②③④';
-const MOJ={1:{1:'＿＿＿のことばの読み方として最もよいものを、１・２・３・４から一つえらびなさい。',2:'＿＿＿のことばを漢字で書くとき、最もよいものを、１・２・３・４から一つえらびなさい。',3:'（　　）に入れるのに最もよいものを、１・２・３・４から一つえらびなさい。',4:'＿＿＿に意味が最も近いものを、１・２・３・４から一つえらびなさい。',5:'つぎのことばの使い方として最もよいものを、１・２・３・４から一つえらびなさい。'},
+let MOJ={1:{1:'＿＿＿のことばの読み方として最もよいものを、１・２・３・４から一つえらびなさい。',2:'＿＿＿のことばを漢字で書くとき、最もよいものを、１・２・３・４から一つえらびなさい。',3:'（　　）に入れるのに最もよいものを、１・２・３・４から一つえらびなさい。',4:'＿＿＿に意味が最も近いものを、１・２・３・４から一つえらびなさい。',5:'つぎのことばの使い方として最もよいものを、１・２・３・４から一つえらびなさい。'},
  2:{1:'つぎの文の（　　）に入れるのに最もよいものを、１・２・３・４から一つえらびなさい。',2:'つぎの文の　★　に入る最もよいものを、１・２・３・４から一つえらびなさい。',3:'つぎの文章を読んで、文章全体の内容を考えて、（　）に入る最もよいものを、１・２・３・４から一つえらびなさい。',4:'つぎの（１）から（４）の文章を読んで、質問に答えなさい。答えは、１・２・３・４から最もよいものを一つえらびなさい。',5:'つぎの（１）と（２）の文章を読んで、質問に答えなさい。答えは、１・２・３・４から最もよいものを一つえらびなさい。',6:'つぎの文章を読んで、質問に答えなさい。答えは、１・２・３・４から最もよいものを一つえらびなさい。',7:'右のページは、ある案内である。これを読んで、下の質問に答えなさい。答えは、１・２・３・４から最もよいものを一つえらびなさい。'},
  3:{1:'問題１では、まず質問を聞いてください。それから話を聞いて、１から４の中から、最もよいものを一つえらんでください。',2:'問題２では、まず質問を聞いてください。そのあと、せんたくしを読んでください。それから話を聞いて、１から４の中から、最もよいものを一つえらんでください。',3:'問題３では、問題用紙に何もいんさつされていません。話の前に質問はありません。まず話を聞いてください。それから、質問とせんたくしを聞いて、１から４の中から、最もよいものを一つえらんでください。',4:'問題４では、絵を見ながら質問を聞いてください。やじるし（➡️）の人は何と言いますか。１から３の中から、最もよいものを一つえらんでください。',5:'問題５では、問題用紙に何もいんさつされていません。まず文を聞いてください。それから、その返事を聞いて、１から３の中から、最もよいものを一つえらんでください。'}};
-const PTS={1:{1:2,2:2,3:2,4:2,5:3},2:{1:1,2:2,3:3,4:5,5:6,6:10,7:6},3:{1:3,2:2,3:3,4:2,5:1}};
-const PART={1:['言語知識（文字・語彙）',30],2:['言語知識（文法）・読解',70],3:['聴解',40]};
+let PTS={1:{1:2,2:2,3:2,4:2,5:3},2:{1:1,2:2,3:3,4:5,5:6,6:10,7:6},3:{1:3,2:2,3:3,4:2,5:1}};
+let PART={1:['言語知識（文字・語彙）',30],2:['言語知識（文法）・読解',70],3:['聴解',40]};
+const N3T={MOJ:null,PTS:null,PART:null};
+const N5T={PART:{1:['言語知識（文字・語彙）',20],2:['言語知識（文法）・読解',40],3:['聴解',30]},PTS:{},
+ MOJ:{1:{1:'＿＿＿の ことばは ひらがなで どう かきますか。１・２・３・４から いちばん いい ものを 一つ えらんで ください。',2:'＿＿＿の ことばは どう かきますか。１・２・３・４から いちばん いい ものを 一つ えらんで ください。',3:'（　　）に なにを いれますか。１・２・３・４から いちばん いい ものを 一つ えらんで ください。',4:'＿＿＿の ぶんと だいたい おなじ いみの ぶんが あります。１・２・３・４から いちばん いい ものを 一つ えらんで ください。'},
+  2:{1:'（　　）に 何を 入れますか。１・２・３・４から いちばん いい ものを 一つ えらんで ください。',2:'★に 入る ものは どれですか。１・２・３・４から いちばん いい ものを 一つ えらんで ください。',3:'［　］に 何を 入れますか。ぶんしょうの いみを かんがえて、１・２・３・４から いちばん いい ものを 一つ えらんで ください。',4:'つぎの ぶんしょうを 読んで、しつもんに こたえて ください。こたえは、１・２・３・４から いちばん いい ものを 一つ えらんで ください。',5:'つぎの ぶんしょうを 読んで、しつもんに こたえて ください。こたえは、１・２・３・４から いちばん いい ものを 一つ えらんで ください。',6:'みぎの ページを 見て、下の しつもんに こたえて ください。こたえは、１・２・３・４から いちばん いい ものを 一つ えらんで ください。'},
+  3:{1:'もんだい１では はじめに しつもんを きいて ください。それから はなしを きいて、もんだいようしの １から４の なかから、いちばん いい ものを ひとつ えらんで ください。',2:'もんだい２では はじめに しつもんを きいて ください。それから はなしを きいて、もんだいようしの １から４の なかから、いちばん いい ものを ひとつ えらんで ください。',3:'もんだい３では、えを みながら しつもんを きいて ください。➡️の ひとは なんと いいますか。１から３の なかから、いちばん いい ものを ひとつ えらんで ください。',4:'もんだい４は、えなどが ありません。ぶんを きいて、１から３の なかから、いちばん いい ものを ひとつ えらんで ください。'}}};
+function jlpt5Score(rs){let g=0,gm=0,l=0,lm=0;rs.forEach(([q,ok])=>{if(q.pt===3){lm++;if(ok)l++}else{gm++;if(ok)g++}});const lk=gm?Math.round(g/gm*120):0,ls=lm?Math.round(l/lm*60):0;return{lk,ls,hasL:lm>0,hasR:true,tot:lk+ls,pass:lm>0?(lk>=38&&ls>=19&&lk+ls>=80):lk>=54}}
 function jlptScore(rs){const raw={g:0,gm:0,r:0,rm:0,l:0,lm:0};rs.forEach(([q,ok])=>{const p=(PTS[q.pt]||{})[q.mo]||1;const k=q.pt===3?'l':(q.pt===2&&q.mo>=4)?'r':'g';raw[k+'m']+=p;if(ok)raw[k]+=p});
   const lk=raw.gm?Math.round(raw.g/raw.gm*60):0,rd=raw.rm?Math.round(raw.r/raw.rm*60):0,ls=raw.lm?Math.round(raw.l/raw.lm*60):0,hasL=raw.lm>0;
   return {lk,rd,ls,hasL,tot:lk+rd+ls,hasR:raw.rm>0,pass:hasL?(lk>=19&&rd>=19&&ls>=19&&lk+rd+ls>=95):(raw.rm>0&&lk>=19&&rd>=19&&lk+rd>=64)}}
@@ -796,9 +802,9 @@ const TTS={v:[],busy:false,load(){try{this.v=speechSynthesis.getVoices().filter(
     if(sp==='M')return mal[0]||a[a.length>1?1:0];return fem[0]||a[0]},
   stop(){this.busy=false;try{speechSynthesis.cancel()}catch(e){}},
   lines(q){const L=[];const say=(sp,tx)=>L.push([sp,tx]);const o=q.o;const nums=['１','２','３','４'];
-    if(q.mo===4){say('N',q.in);o.forEach((x,j)=>say('M',nums[j]+'、'+x))}
-    else if(q.mo===5){q.sc.forEach(l=>say(l[0],l[1]));const other=q.sc[0][0]==='M'?'F':'M';o.forEach((x,j)=>say(other,nums[j]+'、'+x))}
-    else{say('N',q.in);if(q.mo===2)say('P','');q.sc.forEach(l=>say(l[0],l[1]));say('N',q.q);if(q.mo===3)o.forEach((x,j)=>say('N',nums[j]+'、'+x))}
+    const lmo=q.lm||q.mo;if(lmo===4){say('N',q.in);o.forEach((x,j)=>say('M',nums[j]+'、'+x))}
+    else if(lmo===5){q.sc.forEach(l=>say(l[0],l[1]));const other=q.sc[0][0]==='M'?'F':'M';o.forEach((x,j)=>say(other,nums[j]+'、'+x))}
+    else{say('N',q.in);if(lmo===2)say('P','');q.sc.forEach(l=>say(l[0],l[1]));say('N',q.q);if(lmo===3)o.forEach((x,j)=>say('N',nums[j]+'、'+x))}
     return L},
   play(q,done){if(!this.ok()){done&&done(false);return}this.load();this.stop();this.busy=true;const L=this.lines(q);let i=0;const same=this.v.length<2;
     const nx=()=>{if(!this.busy)return;if(i>=L.length){this.busy=false;done&&done(true);return}const [sp,tx]=L[i++];
@@ -810,7 +816,8 @@ try{speechSynthesis.onvoiceschanged=()=>TTS.load();TTS.load()}catch(e){}
 let D=null, LOGIN=null, isOwner=false, ART=null, KJ=null, KEYS=null, UNL=false, LX={};
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const LS={get(k,d){try{const v=localStorage.getItem('rk_'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('rk_'+k,JSON.stringify(v))}catch(e){}}};
+const LSK=k=>{try{return ['res','srs','mock'].includes(k)&&localStorage.getItem('rk_exam')==='"n5"'?k+'_n5':k}catch(e){return k}};
+const LS={get(k,d){try{k=LSK(k);const v=localStorage.getItem('rk_'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{k=LSK(k);localStorage.setItem('rk_'+k,JSON.stringify(v))}catch(e){}}};
 const SS={get(k){try{return sessionStorage.getItem('rk_'+k)}catch(e){return null}},set(k,v){try{sessionStorage.setItem('rk_'+k,v)}catch(e){}}};
 function toast(s){const el=$('#toast');el.textContent=s;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,2600)}
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
@@ -886,6 +893,14 @@ function splash(){
 }
 
 /* boot */
+const DC={};let DX='n3';
+const dxOf=()=>exam()==='n5'?'n5':'n3';
+async function ensureData(){const ex=dxOf();if(DX===ex)return;
+  DC[DX]={D,KEYS,UNL,LX};let c=DC[ex];
+  if(!c){const d=await fetch(ex==='n5'?'data-n5.json':'data.json').then(r=>r.json());c=ex==='n5'?{D:d,KEYS:null,UNL:true,LX:{}}:{D:d,KEYS,UNL:(d.sets||[]).every(n=>(d.free||[]).includes(n)),LX:{}};DC[ex]=c}
+  D=c.D;KEYS=c.KEYS||KEYS;UNL=c.UNL;LX=c.LX;DX=ex;for(const k in EX)delete EX[k];
+  const T=ex==='n5'?N5T:N3T;if(!N3T.MOJ){N3T.MOJ=MOJ;N3T.PTS=PTS;N3T.PART=PART}MOJ=T.MOJ||N3T.MOJ;PTS=T.PTS||N3T.PTS;PART=T.PART||N3T.PART;
+  P.res=LS.get('res',{});SR.c=LS.get('srs',{})}
 async function boot(){
   splash();
   try{const [d,k]=await Promise.all([fetch('data.json').then(r=>r.json()),fetch('keys.json',{cache:'no-store'}).then(r=>r.json())]);D=d;KEYS=k;if((d.sets||[]).length&&d.sets.every(n=>(d.free||[]).includes(n)))UNL=true}
@@ -910,7 +925,8 @@ async function unlock(code,silent,nosave){
   try{const L=await fetch('locked.json').then(r=>r.json());
     const raw=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64d(L.iv)},mk,b64d(L.ct));
     const B=JSON.parse(new TextDecoder().decode(raw));
-    if(!UNL){D.q=D.q.concat(B.q);D.w=D.w.concat(B.w);LX=B.ex;UNL=true}
+    if(DX!=='n3'){const c=DC.n3;if(c&&!c.UNL){c.D.q=c.D.q.concat(B.q);c.D.w=c.D.w.concat(B.w);c.LX=B.ex;c.UNL=true}}
+    else if(!UNL){D.q=D.q.concat(B.q);D.w=D.w.concat(B.w);LX=B.ex;UNL=true}
     UD=null;if(!nosave)LS.set('code',code);render();return true}
   catch(e){return false}
 }
@@ -919,10 +935,10 @@ const me=()=>isOwner?'Binod Paudel':'';
 function render(){
   if(!D)return;
   const r=(location.hash||'#home').slice(1);
+  if(['n3','n5'].includes(exam())&&DX!==dxOf()){ensureData().then(render).catch(()=>{});return}
   if(false&&['drive','bjt'].includes(exam())&&['home','quiz','mock','review','words','srs','unlock'].includes(r))return driveRoute(r);
   const views={home:renderHome,quiz:renderQuiz,mock:renderMock,review:()=>Q.start({mode:'review'}),words:renderWords,srs:renderSRS,admin:renderAdmin,unlock:renderUnlock};
   if(r==='acc')return renderAccount();if(r==='pay')return renderPay();if(r==='rate')return renderReview();if(r==='teacher')return renderTeacher();
-  if(exam()==='n5'&&!['units','uquiz'].includes(r))return renderN5Home();
   if(r==='units')return renderUnits();
   if(r==='books')return renderBooks();
   if(r==='read')return renderRead();
@@ -937,7 +953,6 @@ const ph=(g,ti,sub)=>`<section class="phead"><i>${g}</i><div><h1>${ti}</h1>${sub
 function shell(active,inner){
   const tabs=[['home','家',t('navHome')],['quiz','練',t('navQuiz')],['mock','試',t('navMock')],['srs','札',t('navSrs')],['review','誤',t('navRev')],['words','辞',t('navWords')]];
   if(exam()==='n3'||exam()==='n5')tabs.splice(1,0,['units','課',ut('nav')]);
-  if(exam()==='n5')tabs.splice(2);
   if(exam()==='n3')tabs.push(['books','本',bt('lib')]);
   if(BE.admin)tabs.push(['teacher','師',at('tT')]);
   if(isOwner)tabs.push(['admin','管',t('navAdmin')]);
@@ -1008,7 +1023,7 @@ function renderHome(){
    <div class="d-stats"><div><b>${done}</b><span>${t('stDone')}</span></div><div><b>${done?Math.round(ok/done*100):0}%</b><span>${t('stAcc')}</span></div><div><b>${streak()}🔥</b><span>${t('stStreak')}</span></div><a href="#review"><b>${weak}</b><span>${t('stWeak')}</span></a></div></section>
   <h2 class="hsech"><i>試</i>${ut('setsH')}<small>${D.total||D.q.length} 問</small></h2>
   <div class="setgrid">${[['kanji','漢','STEP 1',t('kanji'),k],['mean','語','STEP 2',t('mean'),m],...[['gram','文',GRAM_T],['read','読',READ_T],['listen','聴',LISTEN_T]].map(([kk,g,T],x)=>[kk,g,'STEP '+(x+3),t(kk),secStats(T)])].filter(r=>r[4].total).map(([kk,g,st,ti,s])=>`<button class="card setc" data-go="${kk}"><span class="sg">${g}</span><small>${st}</small><b>${ti}</b><span class="sn">${s.total} 問</span><span class="sbar"><i style="width:${pct(s)}%"></i></span><span class="sp">${s.done}/${s.total} · ${pct(s)}%</span></button>`).join('')}</div>
-  ${exam()==='n3'?hwHome()+booksHome():''}
+  ${exam()==='n3'?hwHome()+booksHome():exam()==='n5'?hwHome():''}
   <section id="revHome" class="revhome"></section>
   <div class="grid2">
    <section class="card wotd"><div class="eyebrow">${t('wotd')} · 今日の単語</div><div class="w">${esc(w[0])}</div><div class="r">${esc(w[1])}</div><div class="mn"><span class="tag">NE</span>${esc(w[2])}</div><div class="mn"><span class="tag">EN</span>${esc(w[3])}</div>
@@ -1021,7 +1036,7 @@ function renderHome(){
   $$('[data-exam]').forEach(b=>b.onclick=()=>{LS.set('exam',b.dataset.exam);render()});
   $$('[data-go]').forEach(b=>b.onclick=()=>{Object.assign(Q.sel,{sec:b.dataset.go,set:'all',type:'all'});Q.auto=true;if(location.hash==='#quiz')render();else location.hash='#quiz'});
   $$('[data-type-go]').forEach(b=>b.onclick=()=>{const ty=b.dataset.typeGo;Object.assign(Q.sel,{sec:secOf(ty),set:'all',type:ty,order:'shuffle'});Q.auto=true;location.hash='#quiz'});
-  $$('[data-cert]').forEach(b=>b.onclick=()=>{const st=secStats(b.dataset.cert==='kanji'?KANJI_T:MEAN_T);openCert(b.dataset.cert==='kanji'?'JLPT N3 漢字 Kanji Section':'JLPT N3 語彙 Vocabulary Section','Accuracy '+Math.round(st.ok/st.total*100)+'%')});
+  $$('[data-cert]').forEach(b=>b.onclick=()=>{const st=secStats(b.dataset.cert==='kanji'?KANJI_T:MEAN_T);openCert(b.dataset.cert==='kanji'?'JLPT '+exam().toUpperCase()+' 漢字 Kanji Section':'JLPT '+exam().toUpperCase()+' 語彙 Vocabulary Section','Accuracy '+Math.round(st.ok/st.total*100)+'%')});
   $('#goalSel').onchange=e=>{S.goal=+e.target.value;saveS();renderHome()};
   $$('[data-bsec]').forEach(b=>b.onclick=()=>{BS.sec=b.dataset.bsec});
   $$('[data-hsec]').forEach(b=>b.onclick=()=>{US.sec=b.dataset.hsec;US.inPage=false});
@@ -1060,8 +1075,8 @@ async function openKanji(word){
 
 /* ---------- teacher explanations (per language file) ---------- */
 const EX={};
-async function loadEx1(c){if(EX[c]!==undefined)return EX[c];EX[c]=null;try{EX[c]=await fetch('ex-'+c+'.json').then(r=>r.ok?r.json():{})}catch(e){EX[c]={}}return EX[c]}
-async function loadEx(){const c=LANGS[LI][0];if(c!=='en')loadEx1('en').then(()=>{if(typeof Q!=='undefined'&&Q.checked)renderPage()});if(EX[c]!==undefined)return EX[c];EX[c]=null;try{EX[c]=await fetch('ex-'+c+'.json').then(r=>r.ok?r.json():{})}catch(e){EX[c]={}}return EX[c]}
+async function loadEx1(c){if(EX[c]!==undefined)return EX[c];EX[c]=null;try{EX[c]=await fetch((DX==='n5'?'ex5-':'ex-')+c+'.json').then(r=>r.ok?r.json():{})}catch(e){EX[c]={}}return EX[c]}
+async function loadEx(){const c=LANGS[LI][0];if(c!=='en')loadEx1('en').then(()=>{if(typeof Q!=='undefined'&&Q.checked)renderPage()});if(EX[c]!==undefined)return EX[c];EX[c]=null;try{EX[c]=await fetch((DX==='n5'?'ex5-':'ex-')+c+'.json').then(r=>r.ok?r.json():{})}catch(e){EX[c]={}}return EX[c]}
 function explain(q,i,ok,a){const c=LANGS[LI][0]==='ja'?'en':LANGS[LI][0],id_=qid(q),e=(EX[c]&&EX[c][id_])||(LX[c]&&LX[c][id_])||(EX.en&&EX.en[id_])||(LX.en&&LX.en[id_]);
   const head=`<div class="ex-h"><b>${ok?t('right'):t('wrong')}</b><span>${t('ans')} ${C[q.a-1]} <b class="jp">${esc(q.t==='usage'?q.q:q.o[q.a-1].replace(/[【】]/g,''))}</b></span>${a&&!ok?`<span class="muted">${t('youChose',{c:C[a-1]})}</span>`:(!a?`<span class="muted">${t('noAns')}</span>`:'')}</div>`;
   if(!e)return `<div class="expl ${ok?'ok':'ng'}">${head}${q.m?`<div class="ex-m"><div><span class="tag">NE</span>${esc(q.m[0])}</div><div><span class="tag">EN</span>${esc(q.m[1])}</div></div>`:''}</div>`;
@@ -1102,7 +1117,7 @@ function renderMock(){
   shell('mock',`${ph('試',t('mockH'),'模擬試験 · MOCK TEST')}<section class="card qhead" style="display:grid;gap:12px">
   <p class="muted" style="margin:0">${t('mockD')}</p>
   <div class="row"><label for="msSel">${t('set')}</label><select id="msSel">${sets.map(n=>`<option value="${n}">${isLocked(n)?'🔒 ':''}${t('setN',{n})}${hist[n]!=null?' · '+t('last',{n:hist[n]}):''}</option>`).join('')}</select>
-</div><div class="card" style="padding:10px 14px;font-size:14px;line-height:1.8"><b>JLPT N3</b><br>${t('part1')} · ${PART[1][0]} · ${t('min',{n:30})} · 35問<br>${t('part2')} · ${PART[2][0]} · ${t('min',{n:70})} · 39問<br>${D.q.some(q=>q.pt===3)?`${t('part3')} · ${PART[3][0]} · ${t('min',{n:40})} · 28問<br>`:''}<span class="muted">${t('mockRule')}</span></div>
+</div><div class="card" style="padding:10px 14px;font-size:14px;line-height:1.8"><b>JLPT ${exam()==='n5'?'N5':'N3'}</b><br>${t('part1')} · ${PART[1][0]} · ${t('min',{n:PART[1][1]})} · ${D.q.filter(q=>q.s===1&&q.pt===1).length}問<br>${t('part2')} · ${PART[2][0]} · ${t('min',{n:PART[2][1]})} · ${D.q.filter(q=>q.s===1&&q.pt===2).length}問<br>${D.q.some(q=>q.pt===3)?`${t('part3')} · ${PART[3][0]} · ${t('min',{n:PART[3][1]})} · ${D.q.filter(q=>q.s===1&&q.pt===3).length}問<br>`:''}<span class="muted">${t('mockRule')}</span></div>
   <div><button class="btn red" id="mgo">${t('startExam')}</button></div></section>`);
   $('#mgo').onclick=()=>{const n=+$('#msSel').value;if(isLocked(n)){location.hash='#unlock';return}Q.start({mode:'mock',set:n,part:1})};
 }
@@ -1115,8 +1130,8 @@ function renderPage(){
   const title=Q.mode==='review'?t('revT'):Q.mode==='mock'?'模試 · '+t('setN',{n:Q.mockSet})+' · '+PART[Q.part][0]:(SECJ[Q.sel.sec]+' '+(LI===0?'':t(Q.sel.sec)))+(Q.sel.set!=='all'?' · '+t('setN',{n:Q.sel.set}):'');
   let right=0;
   const body=qs.map((q,i)=>{const a=Q.ans[i];const ok=Q.checked&&a===q.a;if(ok)right++;
-    const LS_=q.t==='listen',hideO=LS_&&q.mo>=3&&!Q.checked;
-    const long=q.t==='usage'||q.o.some(o=>o.length>9);const stem=LS_?`<div class="lsn">${q.pic?`<div class="lpic" aria-hidden="true">${esc(q.pic)}</div>`:''}<button class="btn play" data-play="${i}" ${Q.mode==='mock'&&Q.played&&Q.played[qid(q)]&&!Q.checked?'disabled':''}>${t('play')}</button><span class="muted lst" id="lst${i}">${Q.mode==='mock'&&!Q.checked?t('playOnce'):''}</span>${Q.checked&&q.mo<=2?`<div class="stem">${esc(q.q)}</div>`:''}</div>`:q.t==='usage'?`<div class="stem word">${S.furi?q.qr:esc(q.q)}</div>`:`<div class="stem">${S.furi?q.qr:plain(q.q)}</div>`;
+    const LS_=q.t==='listen',hideO=LS_&&(q.lm||q.mo)>=3&&!Q.checked;
+    const long=q.t==='usage'||q.o.some(o=>o.length>9);const stem=LS_?`<div class="lsn">${q.pic?`<div class="lpic" aria-hidden="true">${esc(q.pic)}</div>`:''}<button class="btn play" data-play="${i}" ${Q.mode==='mock'&&Q.played&&Q.played[qid(q)]&&!Q.checked?'disabled':''}>${t('play')}</button><span class="muted lst" id="lst${i}">${Q.mode==='mock'&&!Q.checked?t('playOnce'):''}</span>${Q.checked&&(q.lm||q.mo)<=2?`<div class="stem">${esc(q.q)}</div>`:''}</div>`:q.t==='usage'?`<div class="stem word">${S.furi?q.qr:esc(q.q)}</div>`:`<div class="stem">${S.furi?q.qr:plain(q.q)}</div>`;
     const ca=q.o[q.a-1].replace(/[【】]/g,'');
     const pv=qs[i-1];const mh=q.mo&&(!pv||pv.mo!==q.mo||pv.pt!==q.pt||pv.s!==q.s)&&(Q.mode==='mock'||Q.sel.order!=='shuffle')?`<div class="mondai"><b>問題${q.mo}</b> ${MOJ[q.pt]&&MOJ[q.pt][q.mo]||''}</div>`:'';
     const psg=q.p?(i===0||qs[i-1].pid!==q.pid?`<div class="passage">${S.furi?q.pr:esc(q.p).replace(/\n/g,'<br>')}</div>`:`<div class="muted psame">↑ ${t('samePsg')}</div>`):'';
@@ -1134,7 +1149,7 @@ function renderPage(){
    <button class="chip ${S.furi?'on':''}" id="furi" aria-pressed="${S.furi}"><ruby>振<rt>ふ</rt></ruby> ${t('furi')}</button><span class="timer" id="timer"></span></section>
    ${scoreBox}<div class="qlist">${body}</div>
    <div class="foot">${Q.checked?(Q.page+1<pages?`<button class="btn grad" id="next">${t('next')}</button>`:`<button class="btn" id="fin">${t('fin')}</button>`):`<span class="muted" id="cnt" style="align-self:center">${t('answered',{a:answered,b:qs.length})}</span><button class="btn red" id="check">${t('check')}</button>`}</div>`);
-  const cb=$('#certBtn');if(cb)cb.onclick=()=>{const r=jlptScore(Q.mockRes);openCert('JLPT N3 模擬試験 · Set '+Q.mockSet,'言語知識 '+r.lk+'/60 · 読解 '+r.rd+'/60'+(r.hasL?' · 聴解 '+r.ls+'/60':''))};const p3=$('#p3go');if(p3)p3.onclick=()=>{Q.start({mode:'mock',set:Q.mockSet,part:3});window.scrollTo(0,0)};const p2=$('#p2go');if(p2)p2.onclick=()=>{Q.start({mode:'mock',set:Q.mockSet,part:2});window.scrollTo(0,0)};
+  const cb=$('#certBtn');if(cb)cb.onclick=()=>{const r=jlptScore(Q.mockRes);exam()==='n5'?(()=>{const r5=jlpt5Score(Q.mockRes);openCert('JLPT N5 模擬試験 · Set '+Q.mockSet,'言語知識・読解 '+r5.lk+'/120'+(r5.hasL?' · 聴解 '+r5.ls+'/60':''))})():openCert('JLPT N3 模擬試験 · Set '+Q.mockSet,'言語知識 '+r.lk+'/60 · 読解 '+r.rd+'/60'+(r.hasL?' · 聴解 '+r.ls+'/60':''))};const p3=$('#p3go');if(p3)p3.onclick=()=>{Q.start({mode:'mock',set:Q.mockSet,part:3});window.scrollTo(0,0)};const p2=$('#p2go');if(p2)p2.onclick=()=>{Q.start({mode:'mock',set:Q.mockSet,part:2});window.scrollTo(0,0)};
   TTS.stop();$$('[data-play]').forEach(b=>b.onclick=()=>{const i=+b.dataset.play,q=qs[i],st=$('#lst'+i);
     if(!TTS.ok()){st.textContent=t('noVoice');return}TTS.load();if(!TTS.v.length)st.textContent=t('noVoice');
     if(Q.mode==='mock'&&!Q.checked){if(Q.played[qid(q)])return;Q.played[qid(q)]=1;b.disabled=true}
@@ -1143,7 +1158,7 @@ function renderPage(){
   $$('.opt').forEach(b=>b.onclick=()=>{if(Q.checked)return;const i=+b.dataset.q;Q.ans[i]=+b.dataset.o;
     b.parentNode.querySelectorAll('.opt').forEach(x=>x.classList.toggle('sel',x===b));const s=$('#cnt');if(s)s.textContent=t('answered',{a:Object.keys(Q.ans).length,b:qs.length})});
   const doCheck=()=>{Q.checked=true;let r=0;qs.forEach((q,i)=>{const ok=Q.ans[i]===q.a;r+=ok;P.mark(qid(q),ok)});if(r===qs.length)P.hana++;
-    if(Q.mode==='mock'){qs.forEach((q,i)=>Q.mockRes.push([q,Q.ans[i]===q.a]));const js=jlptScore(Q.mockRes);const h=LS.get('mock',{});h[Q.mockSet]=js.hasR?js.tot:js.lk;LS.set('mock',h)}
+    if(Q.mode==='mock'){qs.forEach((q,i)=>Q.mockRes.push([q,Q.ans[i]===q.a]));const js=exam()==='n5'?jlpt5Score(Q.mockRes):jlptScore(Q.mockRes);const h=LS.get('mock',{});h[Q.mockSet]=js.hasR?js.tot:js.lk;LS.set('mock',h)}
     P.save();clearInterval(tick);Q.elapsed=Date.now()-Q.t0;renderPage();window.scrollTo({top:0,behavior:'smooth'})};
   const ch=$('#check');if(ch)ch.onclick=()=>{const un=qs.length-Object.keys(Q.ans).length;
     if(un&&!ch.dataset.sure){ch.dataset.sure=1;ch.textContent=t('remain',{n:un});return}doCheck()};
@@ -1155,12 +1170,14 @@ function renderPage(){
     tm.textContent=(Q.limit&&!Q.checked?'⏳ ':'⏱ ')+String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
   upd();if(!Q.checked)tick=setInterval(upd,1000);
 }
-function scriptBox(q){const nm={M:'男',F:'女',N:'ナレーター'};const L=[];if(q.in)L.push(['N',q.in]);q.sc.forEach(l=>L.push(l));if(q.mo<=3&&q.q)L.push(['N',q.q]);
-  return `<details class="script" open><summary>${t('script')}</summary>${L.map(([sp,tx])=>`<div><b>${nm[sp]||sp}：</b>${esc(tx)}</div>`).join('')}${q.mo>=3?`<div class="muted" style="margin-top:6px">${q.o.map((o,j)=>C[j]+' '+esc(o)).join('　')}</div>`:''}</details>`}
+function scriptBox(q){const nm={M:'男',F:'女',N:'ナレーター'};const L=[];if(q.in)L.push(['N',q.in]);q.sc.forEach(l=>L.push(l));if((q.lm||q.mo)<=3&&q.q)L.push(['N',q.q]);
+  return `<details class="script" open><summary>${t('script')}</summary>${L.map(([sp,tx])=>`<div><b>${nm[sp]||sp}：</b>${esc(tx)}</div>`).join('')}${(q.lm||q.mo)>=3?`<div class="muted" style="margin-top:6px">${q.o.map((o,j)=>C[j]+' '+esc(o)).join('　')}</div>`:''}</details>`}
 function mockBox(qs){const r=jlptScore(Q.mockRes);const mo={};Q.mockRes.filter(([q])=>q.pt===Q.part||!q.pt).forEach(([q,ok])=>{const k=q.mo||0;mo[k]=mo[k]||[0,0];mo[k][1]++;if(ok)mo[k][0]++});
   const tbl=`<table class="motbl">${Object.keys(mo).map(k=>`<tr><td>問題${k}</td><td>${mo[k][0]} / ${mo[k][1]}</td></tr>`).join('')}</table>`;
-  if(Q.part===1&&Q.hasP2)return `${tbl}<div style="margin-top:8px">${PART[1][0]} ${t('done1')}</div><button class="btn red" id="p2go" style="margin-top:10px">${t('part2')} · ${PART[2][0]} (${t('min',{n:70})}) →</button>`;
-  if(Q.part===2&&Q.hasP3)return `${tbl}<div style="margin-top:8px">${PART[2][0]} ${t('done1')}</div><button class="btn red" id="p3go" style="margin-top:10px">${t('part3')} · ${PART[3][0]} (${t('min',{n:40})}) →</button>`;
+  if(Q.part===1&&Q.hasP2)return `${tbl}<div style="margin-top:8px">${PART[1][0]} ${t('done1')}</div><button class="btn red" id="p2go" style="margin-top:10px">${t('part2')} · ${PART[2][0]} (${t('min',{n:PART[2][1]})}) →</button>`;
+  if(Q.part===2&&Q.hasP3)return `${tbl}<div style="margin-top:8px">${PART[2][0]} ${t('done1')}</div><button class="btn red" id="p3go" style="margin-top:10px">${t('part3')} · ${PART[3][0]} (${t('min',{n:PART[3][1]})}) →</button>`;
+  if(exam()==='n5'){const r5=jlpt5Score(Q.mockRes);return `${tbl}<table class="motbl sc"><tr><td>言語知識（文字・語彙・文法）・読解</td><td><b>${r5.lk}</b> / 120</td></tr>${r5.hasL?`<tr><td>聴解</td><td><b>${r5.ls}</b> / 60</td></tr><tr><td>${t('total180')}</td><td><b>${r5.tot}</b> / 180</td></tr>`:''}</table>
+  <div class="verdict ${r5.pass?'ok':'ng'}">${r5.pass?'合格 '+t('passY'):'不合格 '+t('passN')}</div><span class="muted" style="font-size:12px">JLPT N5: 言語知識・読解 38/120, 聴解 19/60, 合計 80/180</span>${r5.pass?`<br><button class="btn red" id="certBtn" style="margin-top:10px">${t('getCert')}</button>`:''}`}
   if(r.hasL)return `${tbl}<table class="motbl sc"><tr><td>言語知識（文字・語彙・文法）</td><td><b>${r.lk}</b> / 60</td></tr><tr><td>読解</td><td><b>${r.rd}</b> / 60</td></tr><tr><td>聴解</td><td><b>${r.ls}</b> / 60</td></tr><tr><td>${t('total180')}</td><td><b>${r.tot}</b> / 180</td></tr></table>
   <div class="verdict ${r.pass?'ok':'ng'}">${r.pass?'合格 '+t('passY'):'不合格 '+t('passN')}</div><span class="muted" style="font-size:12px">${t('passRule3')}</span>${r.pass?`<br><button class="btn red" id="certBtn" style="margin-top:10px">${t('getCert')}</button>`:''}`;
   if(!r.hasR)return `${tbl}${t('est')} <b style="font-size:20px">${r.lk} / 60</b><br><span class="muted">${t('passNote')}</span>`;
@@ -1346,10 +1363,10 @@ function renderN5Home(){const res=LS.get('ures',{});
   $$('[data-exam]').forEach(b=>b.onclick=()=>{LS.set('exam',b.dataset.exam);location.hash='#home';render()});
   $$('[data-hsec]').forEach(b=>b.onclick=()=>{US.sec=b.dataset.hsec;US.inPage=false});
 }
-function hwHome(){const res=LS.get('ures',{});
-  const cnt=s=>Object.keys(res).filter(k=>k[0]===s&&res[k].b>=35).length;
+function hwHome(){const res=LS.get('ures',{}),n5=exam()==='n5',NU=n5?[10,25,25]:[12,24,24];
+  const cnt=s=>Object.keys(res).filter(k=>(n5?k.startsWith('n5'+s):k[0]===s)&&res[k].b>=35).length;
   const it=(s,n,ic)=>`<a class="card hwc" href="#units" data-hsec="${s}"><i>${ic}</i><b>${ut(s)}</b><span>${n} ${ut('units')} · 50問</span><small>✓ ${cnt(s)}/${n}</small></a>`;
-  return `<section class="hwsec"><h2 class="hsech"><i>課</i>${ut('hwH')}</h2><div class="hwgrid">${it('k',12,'漢')}${it('v',24,'語')}${it('g',24,'文')}<div class="card hwc off"><i>聴</i><b>${ut('l')}</b><span>${ut('ld')}</span></div></div></section>`}
+  return `<section class="hwsec"><h2 class="hsech"><i>課</i>${ut('hwH')}</h2><div class="hwgrid">${it('k',NU[0],'漢')}${it('v',NU[1],'語')}${it('g',NU[2],'文')}<div class="card hwc off"><i>聴</i><b>${ut('l')}</b><span>${ut('ld')}</span></div></div></section>`}
 /* ---------- Book library: view-only page images (no PDF files, no download) ---------- */
 let BK=null;const BS={sec:'k',id:null};
 const BT={lib:['教材ライブラリー','Books','किताब'],
