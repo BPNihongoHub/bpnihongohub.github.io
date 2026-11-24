@@ -555,6 +555,12 @@ tr[data-kanji]:hover td{background:var(--ai-soft)}
 .trev{display:flex;gap:10px;justify-content:space-between;align-items:flex-start;margin-bottom:10px}.trev p{margin:4px 0}.trev small{color:var(--muted)}
 .imgzoom{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.8);display:grid;place-items:center;padding:16px}.imgzoom img{max-width:100%;max-height:100%}
 @media(max-width:480px){.tools{margin-left:auto;gap:4px}.tools .langsel{padding-left:6px}.tools .langsel select{max-width:78px}.tools .iconbtn{padding:6px 9px}.accbtn{width:32px;height:32px;padding:0!important}.brand small{white-space:nowrap}}
+
+.plan small{display:block;font-weight:600;font-size:12px;margin-top:4px;opacity:.85}
+.ucard.ulock{opacity:.75}.ucard.ulock .btn{width:100%}
+.paybox{display:grid;gap:10px;text-align:center}.paybox .big{font-size:34px;font-weight:900}.paybox ol{text-align:left;margin:0;padding-left:20px;line-height:1.8}
+details.codebox{margin-top:10px}details.codebox summary{cursor:pointer;color:var(--muted);font-size:13px}
+@media(max-width:480px){.tools .lockbtn{display:none}}
 </style>
 <div id="app"><div class="loginwrap"><div class="aur a1"></div><div class="aur a2"></div></div></div>
 <div id="toast" class="toast" hidden></div>
@@ -892,7 +898,7 @@ function normLogin(l){if(l&&l.users)return l;if(l&&l.h)return{users:[{id:'',h:l.
 const authed=()=>true;
 const b64d=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 const isLocked=n=>!UNL&&!(D.free||[]).includes(+n);
-async function unlock(code,silent){
+async function unlock(code,silent,nosave){
   code=(code||'').toUpperCase().replace(/[^0-9A-Z]/g,'');const w=KEYS&&KEYS.w&&KEYS.w[code.slice(0,4)];
   if(code.length!==12||!w){if(silent&&KEYS)LS.set('code','');return false}
   let mk;
@@ -905,7 +911,7 @@ async function unlock(code,silent){
     const raw=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64d(L.iv)},mk,b64d(L.ct));
     const B=JSON.parse(new TextDecoder().decode(raw));
     if(!UNL){D.q=D.q.concat(B.q);D.w=D.w.concat(B.w);LX=B.ex;UNL=true}
-    LS.set('code',code);render();return true}
+    UD=null;if(!nosave)LS.set('code',code);render();return true}
   catch(e){return false}
 }
 const me=()=>isOwner?'Binod Paudel':'';
@@ -964,6 +970,11 @@ const PRICES=[['N5',2000],['N4',2000],['N3',2000],['N2',3000],['N1',3000]];
 const SHOWPRICE=false;
 const priceBox=()=>!SHOWPRICE?'':`<div class="pricebox"><div class="eyebrow">${t('priceT')}</div><div class="prow">${PRICES.map(([k,y])=>`<div class="pr ${k.toLowerCase()===exam()?'sel':''}"><b>JLPT ${k}</b><span>¥${y.toLocaleString('en')}</span></div>`).join('')}</div><p class="muted">${t('priceNote')}</p></div>`;
 function renderUnlock(){
+  if(BE.ok&&!UNL){shell('home',`${ph('🔓',at('payT'),PAY.course)}<section class="card accbox paybox"><div class="big">${PAY.cur}${PAY.price.toLocaleString('en')}</div><b>${at('per6')}</b>
+    <ol><li>${BE.user?'✓ ':''}${at('login')} (Google / Email)</li><li>${at('st2')}</li><li>${at('st3')}</li><li>${at('st4')}</li></ol>
+    ${BE.user?(isPaidP(BE.prof)?`<p>${at('paid')}</p>`:`<a class="btn grad" href="#pay">💳 ${at('payT')}</a>`):`<a class="btn grad" href="#acc">${at('login')} →</a>`}
+    <details class="codebox"><summary>Code?</summary><form id="uf"><input id="ucode" placeholder="XXXX-XXXXXXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="16" required><div class="err" id="uerr" role="alert"></div><button class="btn ghost" id="ubtn">🔓 ${t('unlockBtn')}</button></form></details></section>`);
+    $('#uf').onsubmit=async e=>{e.preventDefault();const bt_=$('#ubtn');bt_.disabled=true;const ok=await unlock($('#ucode').value,false);if(!ok){bt_.disabled=false;$('#uerr').textContent=t('codeErr')}else toast(t('unlocked'))};return}
   if(UNL){shell('home',`<section class="card unlockpage"><h2>✓ ${t('unlocked')}</h2><p><a class="btn" href="#quiz">${t('startP')} →</a></p></section>`);return}
   shell('home',`<section class="card unlockpage">${hanko('hk')}<h2>🔒 ${t('unlockT')}</h2><p class="muted">${t('freeDemo')} ${t('lockedN',{n:(D.sets||[]).length-(D.free||[]).length})}</p>
   <form id="uf"><label for="ucode">${t('enterCode')}</label><input id="ucode" placeholder="XXXX-XXXXXXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="16" required>
@@ -1270,11 +1281,14 @@ const UT={nav:['宿題','Units','युनिट'],title:['ユニット別 宿�
  l:['聴解','Listening','सुनाइ (Listening)'],ld:['近日公開','Coming soon','छिट्टै आउँदैछ'],units:['ユニット','units','युनिट']};
 const ut=(k,o)=>{const v=UT[k];const c=LANGS[LI][0];let s=c==='ja'?v[0]:c==='ne'?v[2]:v[1];if(o)for(const x in o)s=s.replace('{'+x+'}',o[x]);return s};
 const ulang=()=>LANGS[LI][0]==='ne'?'ne':'en';
-async function loadUnits(){if(UD)return;try{UD=await fetch('units.json').then(r=>r.json())}catch(e){UD={k:[],v:[],g:[]}}}
+async function loadUnits(){if(UD)return;try{UD=await fetch('units.json').then(r=>r.json())}catch(e){UD={k:[],v:[],g:[]};return}
+  if(window.MK&&Object.values(UD).some(s=>s.some(x=>x.lk))){try{const L=await fetch('units-locked.json').then(r=>r.json());
+    const raw=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64d(L.iv)},window.MK,b64d(L.ct));const B=JSON.parse(new TextDecoder().decode(raw));
+    for(const s in B)B[s].forEach(full=>{const i=UD[s].findIndex(x=>x.n===full.n);if(i>=0)UD[s][i]=full})}catch(e){}}}
 async function renderUnits(){
   if(!UD){shell('units','<div class="card empty" style="margin-top:20px">…</div>');await loadUnits()}
   const res=LS.get('ures',{}),sec=US.sec;
-  const card=u=>{const r=res[sec+u.n];const pct=r?Math.round(r.b/u.qs.length*100):null;
+  const card=u=>{if(u.lk&&!u.qs)return `<div class="card ucard ulock"><div class="uh"><b>Unit ${u.n}</b><span class="ubadge">🔒</span></div>${u.title?`<small class="muted">${esc(ulang()==='ne'?u.title:(u.te||u.title))}</small>`:''}<a class="btn ghost" href="#unlock">🔒 ${t('unlockBtn')} · ${u.lk}問</a></div>`;const r=res[sec+u.n];const pct=r?Math.round(r.b/u.qs.length*100):null;
     return `<div class="card ucard ${r?(r.b/u.qs.length>=UPASS?'pass':'tried'):''}"><div class="uh"><b>Unit ${u.n}</b>${r?`<span class="ubadge ${r.b/u.qs.length>=UPASS?'ok':'ng'}">${r.b/u.qs.length>=UPASS?'✓ ':''}${ut('best')} ${r.b}/${u.qs.length}</span>`:`<span class="ubadge">${ut('notyet')}</span>`}</div>
     ${u.title?`<small class="muted">${esc(ulang()==='ne'?u.title:(u.te||u.title))}</small>`:''}<div class="bar"><i style="width:${pct||0}%;background:${pct==null?'var(--line)':pct>=70?'var(--ok)':'var(--shu)'}"></i></div>
     <button class="btn ${r?'':'grad'}" data-us="${u.n}">${r?ut('again'):ut('start')} · ${u.qs.length}問</button></div>`};
@@ -1284,7 +1298,7 @@ async function renderUnits(){
   $$('[data-sec]').forEach(b=>b.onclick=()=>{US.sec=b.dataset.sec;renderUnits()});
   $$('[data-us]').forEach(b=>b.onclick=()=>uStart(US.sec,+b.dataset.us));
 }
-function uStart(sec,n){const u=UD[sec].find(x=>x.n===n);US.sec=sec;US.unit=n;US.list=u.qs;US.title=(ulang()==='ne'?u.title:(u.te||u.title))||'';US.ans={};US.checked=false;US.only=false;US.warn=false;US.inPage=true;
+function uStart(sec,n){const u=UD[sec].find(x=>x.n===n);if(!u||!u.qs){location.hash='#unlock';return}US.sec=sec;US.unit=n;US.list=u.qs;US.title=(ulang()==='ne'?u.title:(u.te||u.title))||'';US.ans={};US.checked=false;US.only=false;US.warn=false;US.inPage=true;
   if(location.hash!=='#uquiz')location.hash='#uquiz';else uPage()}
 function uPage(){
   const L=US.list,lk=ulang();let right=0;const wrongIdx=[];
@@ -1365,7 +1379,9 @@ async function decStrip(src){const buf=new Uint8Array(await fetch(src).then(r=>r
    FBCONF stays null until Binod creates his Firebase project; then paste the config here.
    PAY.on stays false until Binod confirms price + free rules (locks are OFF meanwhile). */
 const FBCONF={apiKey:"AIzaSyDe-FSQzW7RaAMCAS81ghbBLYMI5kB-zzk",authDomain:"binod-paudel.firebaseapp.com",projectId:"binod-paudel",storageBucket:"binod-paudel.firebasestorage.app",messagingSenderId:"589004931560",appId:"1:589004931560:web:a7a205b8ef231749dbe45d"};/* public web config (not a secret) */
-const PAY={on:false,price:2000,cur:'¥',course:'JLPT N3',qr:'pay/qr.png'};
+const PAY={on:true,price:2000,cur:'¥',course:'JLPT N3',months:6,qr:'pay/qr.png'};
+const SIXM=()=>183*864e5;
+const isPaidP=p=>!!(p&&p.paid&&(p.paidUntil||0)>Date.now());
 const FBV='10.12.5';
 const AT={
  acc:['アカウント','Account','मेरो खाता'],
@@ -1375,7 +1391,9 @@ const AT={
  name:['名前','Name','नाम'],phone:['電話番号','Phone','फोन नम्बर'],save:['保存','Save','सेभ'],logout:['ログアウト','Sign out','लगआउट'],
  why:['ログインすると、成績が保存され、先生が進み具合を確認できます。','Sign in so your scores are saved and your teacher can follow your progress.','लगइन गर्नुभयो भने तपाईंको नतिजा सेभ हुन्छ र गुरुले तपाईंको प्रगति हेर्न सक्नुहुन्छ।'],
  soon:['ログイン機能は準備中です。','Accounts are being set up. Coming soon.','लगइन सुविधा तयार हुँदैछ। छिट्टै आउँछ।'],
- paid:['✓ 購入済み（すべて利用可）','✓ Paid: everything is open','✓ तिरिसक्नुभयो: सबै खुला छ'],
+ paid:['✓ 購入済み（すべて利用可）','✓ Paid: everything is open','✓ तिरिसक्नुभयो: सबै खुला छ'],until:['有効期限','Open until','म्याद'],expired:['期限が切れました。もう一度お支払いください。','Your 6 months have ended. Please pay again.','६ महिनाको म्याद सकियो। फेरि तिर्नुहोस्।'],
+ st2:['QRコードで ¥2,000 を支払う','Pay ¥2,000 with the QR code','QR बाट ¥2,000 तिर्नुहोस्'],st3:['スクリーンショットか取引番号を送る','Send the screenshot or transaction ID','Screenshot वा transaction ID पठाउनुहोस्'],st4:['先生が確認すると、6か月すべて開きます','After the teacher checks it, everything opens for 6 months','गुरुले जाँचेपछि ६ महिना सबै खुल्छ'],
+ per6:['6か月 すべて利用可','6 months, everything open','६ महिना सबै खुला'],
  free:['無料プラン','Free plan','Free plan'],
  pending:['⏳ 支払い確認中','⏳ Payment being checked','⏳ पैसा जाँच हुँदैछ'],
  payT:['お支払い','Payment','पैसा तिर्ने'],
@@ -1416,11 +1434,11 @@ async function beInit(){
   if(!BE.ok){BE.ready=true;return}
   BE.api.onAuth(async u=>{BE.user=u;BE.prof=null;BE.admin=false;
     if(u){BE.err='';try{BE.prof=await BE.api.touch(u)}catch(e){BE.err='profile: '+((e&&(e.code||e.message))||e)}try{BE.admin=await BE.api.isAdmin()}catch(e){}
-      if(BE.prof&&BE.prof.paid)beKey()}
+      if(isPaidP(BE.prof))beKey()}
     BE.ready=true;render()});
 }
 async function beKey(){/* paid account: fetch the course unlock code (readable only by paid users) and open locked sets */
-  if(window.MK)return;try{const c=await BE.api.key();if(c)await unlock(c,true)}catch(e){}}
+  if(window.MK)return;try{const c=await BE.api.key();if(c)await unlock(c,true,true)}catch(e){}}/* not saved locally: access ends when the 6 months end */
 let _syncT=0;
 function beSync(force){/* push a small progress summary, at most once a minute */
   if(!BE.ok||!BE.user)return;const now=Date.now();if(!force&&now-_syncT<60000)return;_syncT=now;
@@ -1455,8 +1473,9 @@ function fbApi(){
     async reviews(all){const q=all?await F.collection('reviews').get():await F.collection('reviews').where('show','==',true).get();return q.docs.map(norm).sort((a,b)=>b.created-a.created)},
     async users(){const q=await F.collection('users').get();return q.docs.map(norm)},
     async pays(){const q=await F.collection('pay').where('status','==','pending').get();return q.docs.map(norm)},
-    async decide(p,ok){const b=F.batch();b.update(F.doc('pay/'+p.id),{status:ok?'approved':'rejected',decided:TS()});if(ok)b.update(F.doc('users/'+p.uid),{paid:true,paidAt:TS()});await b.commit()},
-    setPaid:(uid,v)=>F.doc('users/'+uid).update({paid:v}),
+    async decide(p,ok){const b=F.batch();b.update(F.doc('pay/'+p.id),{status:ok?'approved':'rejected',decided:TS()});
+      if(ok){const s=await F.doc('users/'+p.uid).get();const cur=s.exists?toMs(s.data().paidUntil):0;b.update(F.doc('users/'+p.uid),{paid:true,paidAt:TS(),paidUntil:firebase.firestore.Timestamp.fromMillis(Math.max(Date.now(),cur)+SIXM())})}await b.commit()},
+    setPaid:(uid,v)=>F.doc('users/'+uid).update(v?{paid:true,paidAt:firebase.firestore.FieldValue.serverTimestamp(),paidUntil:firebase.firestore.Timestamp.fromMillis(Date.now()+SIXM())}:{paid:false,paidUntil:null}),
     showReview:(id,v)=>F.doc('reviews/'+id).update({show:v}),
     reviewsPublic:async()=>{try{const q=await F.collection('reviews').where('show','==',true).get();return q.docs.map(norm)}catch(e){return[]}},
     toMs
@@ -1479,8 +1498,8 @@ function mockApi(){/* localhost test double with the same shape as fbApi */
     async reviews(all){return Object.entries(db().reviews).map(([id,r])=>Object.assign({id},r)).filter(r=>all||r.show)},
     async users(){return Object.entries(db().users).map(([id,u])=>Object.assign({id},u))},
     async pays(){return Object.entries(db().pay).map(([id,p])=>Object.assign({id},p)).filter(p=>p.status==='pending')},
-    async decide(p,ok){const d=db();d.pay[p.id].status=ok?'approved':'rejected';if(ok)d.users[p.uid].paid=true;put(d)},
-    async setPaid(uid,v){const d=db();d.users[uid].paid=v;put(d)},
+    async decide(p,ok){const d=db();d.pay[p.id].status=ok?'approved':'rejected';if(ok){const u=d.users[p.uid];u.paid=true;u.paidUntil=Math.max(Date.now(),u.paidUntil||0)+SIXM()}put(d)},
+    async setPaid(uid,v){const d=db();const u=d.users[uid];u.paid=v;u.paidUntil=v?Date.now()+SIXM():null;put(d)},
     async showReview(id,v){const d=db();d.reviews[id].show=v;put(d)},
     async reviewsPublic(){return Object.values(db().reviews).filter(r=>r.show)},
     toMs:v=>v||0};
@@ -1514,8 +1533,8 @@ async function renderAccount(){
   const pend=mine.some(x=>x.status==='pending');
   const vals=Object.values(P.res),done=vals.length,ok=vals.filter(v=>v===1).length,ures=LS.get('ures',{}),hwp=Object.values(ures).filter(v=>(v.b||0)>=35).length;
   shell('acc',`${ph('人',at('acc'),esc(p.email||BE.user.email||''))}
-  <section class="card accbox"><div class="plan ${p.paid?'ok':''}">${p.paid?at('paid'):pend?at('pending'):at('free')}</div>
-   ${!p.paid&&PAY.on&&!pend?`<a class="btn grad" href="#pay">💳 ${at('payT')} · ${PAY.cur}${PAY.price.toLocaleString('en')}</a>`:''}
+  <section class="card accbox"><div class="plan ${isPaidP(p)?'ok':''}">${isPaidP(p)?at('paid')+`<small>${at('until')}: ${fdate(p.paidUntil)}</small>`:pend?at('pending'):p.paid?at('expired'):at('free')}</div>
+   ${!isPaidP(p)&&PAY.on&&!pend?`<a class="btn grad" href="#pay">💳 ${at('payT')} · ${PAY.cur}${PAY.price.toLocaleString('en')} · ${at('per6')}</a>`:''}
    <form id="pForm" class="eform"><label>${at('name')}<input id="pName" value="${esc(p.name||'')}"></label><label>${at('phone')}<input id="pPhone" type="tel" value="${esc(p.phone||'')}"></label>
    <button class="btn ghost">${at('save')}</button></form></section>
   <section class="card accbox"><h3>${at('prog')}</h3><div class="astats"><div><b>${done}</b><span>${at('done')}</span></div><div><b>${done?Math.round(ok*100/done):0}%</b><span>${at('acc2')}</span></div><div><b>${hwp}</b><span>${at('hw')} ✓</span></div></div></section>
@@ -1529,7 +1548,7 @@ async function renderAccount(){
 /* ---- payment page ---- */
 function renderPay(){
   if(!BE.ok||!BE.user){location.hash='#acc';return}
-  shell('acc',`${ph('¥',at('payT'),PAY.course+' · '+PAY.cur+PAY.price.toLocaleString('en'))}
+  shell('acc',`${ph('¥',at('payT'),PAY.course+' · '+PAY.cur+PAY.price.toLocaleString('en')+' · '+at('per6'))}
   <section class="card accbox"><p>${at('payS')}</p><div class="qrbox"><img src="${PAY.qr}" alt="QR" onerror="this.replaceWith(Object.assign(document.createElement('p'),{className:'muted',textContent:'${at('noqr')}'}))"></div>
   <form id="payF" class="eform"><label>${at('method')}<select id="pyM"><option>PayPay</option><option>Bank transfer</option><option>eSewa / Khalti</option><option>Cash</option></select></label>
   <label>${at('txn')}<input id="pyT" maxlength="80"></label><label>${at('shot')}<input id="pyS" type="file" accept="image/*"></label><img id="pyPrev" class="pyprev" hidden alt="">
@@ -1561,7 +1580,7 @@ async function renderTeacher(){
   if(!BE.ok||!BE.admin){location.hash='#acc';return}
   shell('teacher',`${ph('師',at('tT'),'')}<div class="card empty">…</div>`);
   let U=[],PY=[],RV=[];try{[U,PY,RV]=await Promise.all([BE.api.users(),BE.api.pays(),BE.api.reviews(true)])}catch(e){shell('teacher',`${ph('師',at('tT'),'')}<div class="card empty">${at('err')}</div>`);return}
-  const wk=Date.now()-7*864e5,act=U.filter(u=>(u.last||0)>=wk).length,paid=U.filter(u=>u.paid).length,avg=RV.length?(RV.reduce((a,r)=>a+(r.stars||0),0)/RV.length).toFixed(1):'—';
+  const wk=Date.now()-7*864e5,act=U.filter(u=>(u.last||0)>=wk).length,paid=U.filter(isPaidP).length,avg=RV.length?(RV.reduce((a,r)=>a+(r.stars||0),0)/RV.length).toFixed(1):'—';
   const q=TD.q.toLowerCase(),L=U.filter(u=>!q||(u.name+' '+u.email+' '+u.phone).toLowerCase().includes(q))
     .sort((a,b)=>TD.sort==='name'?String(a.name).localeCompare(b.name):TD.sort==='done'?((b.prog||{}).done||0)-((a.prog||{}).done||0):TD.sort==='joined'?(b.created||0)-(a.created||0):(b.last||0)-(a.last||0));
   const pr=u=>{const g=u.prog||{};return{d:g.done||0,a:g.done?Math.round((g.ok||0)*100/g.done):0,h:Object.values(g.hw||{}).filter(v=>v>=35).length}};
@@ -1575,7 +1594,7 @@ async function renderTeacher(){
   <h2 class="hsech"><i>人</i>${at('students')} (${U.length})</h2>
   <div class="ttools"><input id="tq" placeholder="${at('search')}" value="${esc(TD.q)}"><select id="tsort">${[['last',at('last')],['joined',at('joined')],['done',at('done')],['name',at('name')]].map(([k,l])=>`<option value="${k}" ${TD.sort===k?'selected':''}>${l}</option>`).join('')}</select></div>
   <div class="tscroll"><table class="ttab"><thead><tr><th>${at('name')}</th><th>${at('last')}</th><th>${at('done')}</th><th>${at('acc2')}</th><th>${at('hw')} ✓</th><th>${at('joined')}</th><th></th></tr></thead><tbody>
-  ${L.map(u=>{const x=pr(u),on=(u.last||0)>=wk;return `<tr><td><b>${esc(u.name||'—')}</b><small>${esc(u.email||'')}${u.phone?' · '+esc(u.phone):''}</small></td><td><span class="dot ${on?'on':''}"></span>${ago(u.last)}</td><td>${x.d}</td><td>${x.a}%</td><td>${x.h}</td><td>${fdate(u.created)}</td><td>${u.paid?'<span class="paidtag">¥ ✓</span>':''}<button class="chip" data-pd="${u.id}" data-v="${u.paid?0:1}">${u.paid?at('takePaid'):at('givePaid')}</button></td></tr>`}).join('')||`<tr><td colspan="7" class="muted">${at('none')}</td></tr>`}
+  ${L.map(u=>{const x=pr(u),on=(u.last||0)>=wk;return `<tr><td><b>${esc(u.name||'—')}</b><small>${esc(u.email||'')}${u.phone?' · '+esc(u.phone):''}</small></td><td><span class="dot ${on?'on':''}"></span>${ago(u.last)}</td><td>${x.d}</td><td>${x.a}%</td><td>${x.h}</td><td>${fdate(u.created)}</td><td>${isPaidP(u)?`<span class="paidtag">¥ ✓ ${fdate(u.paidUntil)}</span>`:(u.paid?'<span class="muted">⌛ '+fdate(u.paidUntil)+'</span> ':'')}<button class="chip" data-pd="${u.id}" data-v="${isPaidP(u)?0:1}">${isPaidP(u)?at('takePaid'):at('givePaid')}</button></td></tr>`}).join('')||`<tr><td colspan="7" class="muted">${at('none')}</td></tr>`}
   </tbody></table></div>
   <h2 class="hsech"><i>★</i>${at('revs')} (${RV.length})</h2>
   ${RV.map(r=>`<div class="card trev"><div><span class="st">${stars(r.stars||0)}</span> <b>${esc(r.name||'')}</b><p>${esc(r.text||'')}</p><small>${fdate(r.created)}</small></div><button class="chip ${r.show?'on':''}" data-rv="${r.id}" data-v="${r.show?0:1}">${r.show?at('hide'):at('show')}</button></div>`).join('')||`<p class="muted">${at('none')}</p>`}`);
