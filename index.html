@@ -1446,7 +1446,7 @@ function fbApi(){
       const p=norm(s);if(p.lastDay!==day()){await r.update({last:TS(),lastDay:day()});p.last=Date.now()}return p},
     saveProf:(uid,o)=>F.doc('users/'+uid).update({name:o.name,phone:o.phone}),
     progress:(uid,sum)=>F.doc('users/'+uid).update({prog:sum,last:TS(),lastDay:day()}),
-    async isAdmin(){try{await F.doc('config/admin').get();return true}catch(e){BE.aerr=(e&&(e.code||e.message))||String(e);return false}},/* rules let only the teacher read config/* */
+    async isAdmin(){try{await F.doc('config/admin').get();return true}catch(e){BE.aerr=(e&&(e.code||e.message))||String(e);try{const r=await A.currentUser.getIdTokenResult();BE.aerr+=' · '+r.signInProvider+' · v='+r.claims.email_verified}catch(x){}return false}},/* rules let only the teacher read config/* */
     async hasKey(){const s=await F.doc('secret/n3').get();return s.exists},setKey:c=>F.doc('secret/n3').set({code:c}),
     async key(){const s=await F.doc('secret/n3').get();return s.exists?s.data().code:null},
     pay:(uid,o)=>F.collection('pay').add(Object.assign({uid,status:'pending',created:TS()},o)),
