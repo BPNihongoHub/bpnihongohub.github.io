@@ -893,12 +893,13 @@ function splash(){
 }
 
 /* boot */
-const DC={};let DX='n3';
+const DC={},MKC={};let DX='n3';const codeKey=c=>c==='n3'?'code':'code_'+c;
 const dxOf=()=>exam()==='n5'?'n5':'n3';
 async function ensureData(){const ex=dxOf();if(DX===ex)return;
   DC[DX]={D,KEYS,UNL,LX};let c=DC[ex];
-  if(!c){const d=await fetch(ex==='n5'?'data-n5.json':'data.json').then(r=>r.json());c=ex==='n5'?{D:d,KEYS:null,UNL:true,LX:{}}:{D:d,KEYS,UNL:(d.sets||[]).every(n=>(d.free||[]).includes(n)),LX:{}};DC[ex]=c}
-  D=c.D;KEYS=c.KEYS||KEYS;UNL=c.UNL;LX=c.LX;DX=ex;for(const k in EX)delete EX[k];
+  let fresh=false;if(!c){const [d,k]=await Promise.all([fetch(ex==='n5'?'data-n5.json':'data.json').then(r=>r.json()),fetch(ex==='n5'?'keys-n5.json':'keys.json',{cache:'no-store'}).then(r=>r.json()).catch(()=>null)]);c={D:d,KEYS:k,UNL:ex!=='n5'&&(d.sets||[]).every(n=>(d.free||[]).includes(n)),LX:{}};DC[ex]=c;fresh=true}
+  D=c.D;KEYS=c.KEYS;UNL=c.UNL;LX=c.LX;DX=ex;window.MK=MKC[ex]||null;UD=null;for(const k in EX)delete EX[k];
+  if(fresh&&!UNL){const cc=LS.get(codeKey(ex),'');if(cc)unlock(cc,true);else if(BE.user&&isPaidP(BE.prof,ex))beKey()}
   const T=ex==='n5'?N5T:N3T;if(!N3T.MOJ){N3T.MOJ=MOJ;N3T.PTS=PTS;N3T.PART=PART}MOJ=T.MOJ||N3T.MOJ;PTS=T.PTS||N3T.PTS;PART=T.PART||N3T.PART;
   P.res=LS.get('res',{});SR.c=LS.get('srs',{})}
 async function boot(){
@@ -913,21 +914,21 @@ function normLogin(l){if(l&&l.users)return l;if(l&&l.h)return{users:[{id:'',h:l.
 const authed=()=>true;
 const b64d=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 const isLocked=n=>!UNL&&!(D.free||[]).includes(+n);
-async function unlock(code,silent,nosave){
-  code=(code||'').toUpperCase().replace(/[^0-9A-Z]/g,'');const w=KEYS&&KEYS.w&&KEYS.w[code.slice(0,4)];
-  if(code.length!==12||!w){if(silent&&KEYS)LS.set('code','');return false}
+async function unlock(code,silent,nosave){const cx=DX,K=KEYS;
+  code=(code||'').toUpperCase().replace(/[^0-9A-Z]/g,'');const w=K&&K.w&&K.w[code.slice(0,4)];
+  if(code.length!==12||!w){if(silent&&K)LS.set(codeKey(cx),'');return false}
   let mk;
   try{const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(code),'PBKDF2',false,['deriveKey']);
-    const k=await crypto.subtle.deriveKey({name:'PBKDF2',salt:b64d(w[0]),iterations:KEYS.it,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['decrypt']);
+    const k=await crypto.subtle.deriveKey({name:'PBKDF2',salt:b64d(w[0]),iterations:K.it,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['decrypt']);
     const raw=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64d(w[1])},k,b64d(w[2]));
-    mk=await crypto.subtle.importKey('raw',raw,'AES-GCM',false,['decrypt']);window.MK=mk}
-  catch(e){if(silent)LS.set('code','');return false}
-  try{const L=await fetch('locked.json').then(r=>r.json());
+    mk=await crypto.subtle.importKey('raw',raw,'AES-GCM',false,['decrypt']);MKC[cx]=mk;if(DX===cx)window.MK=mk}
+  catch(e){if(silent)LS.set(codeKey(cx),'');return false}
+  try{const L=await fetch(cx==='n5'?'locked-n5.json':'locked.json').then(r=>r.json());
     const raw=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64d(L.iv)},mk,b64d(L.ct));
     const B=JSON.parse(new TextDecoder().decode(raw));
-    if(DX!=='n3'){const c=DC.n3;if(c&&!c.UNL){c.D.q=c.D.q.concat(B.q);c.D.w=c.D.w.concat(B.w);c.LX=B.ex;c.UNL=true}}
+    if(DX!==cx){const c=DC[cx];if(c&&!c.UNL){c.D.q=c.D.q.concat(B.q);c.D.w=c.D.w.concat(B.w);c.LX=B.ex;c.UNL=true}}
     else if(!UNL){D.q=D.q.concat(B.q);D.w=D.w.concat(B.w);LX=B.ex;UNL=true}
-    UD=null;if(!nosave)LS.set('code',code);render();return true}
+    UD=null;if(!nosave)LS.set(codeKey(cx),code);render();return true}
   catch(e){return false}
 }
 const me=()=>isOwner?'Binod Paudel':'';
@@ -953,7 +954,7 @@ const ph=(g,ti,sub)=>`<section class="phead"><i>${g}</i><div><h1>${ti}</h1>${sub
 function shell(active,inner){
   const tabs=[['home','家',t('navHome')],['quiz','練',t('navQuiz')],['mock','試',t('navMock')],['srs','札',t('navSrs')],['review','誤',t('navRev')],['words','辞',t('navWords')]];
   if(exam()==='n3'||exam()==='n5')tabs.splice(1,0,['units','課',ut('nav')]);
-  if(exam()==='n3')tabs.push(['books','本',bt('lib')]);
+  if(exam()==='n3'||exam()==='n5')tabs.push(['books','本',bt('lib')]);
   if(BE.admin)tabs.push(['teacher','師',at('tT')]);
   if(isOwner)tabs.push(['admin','管',t('navAdmin')]);
   const lnk=([h,k,s])=>`<a href="#${h}" class="${h===active?'on':''}" ${h===active?'aria-current="page"':''}><i aria-hidden="true">${k}</i><span>${s}</span></a>`;
@@ -987,7 +988,7 @@ const PRICES=[['N5',2000],['N4',2000],['N3',2000],['N2',3000],['N1',3000]];
 const SHOWPRICE=false;
 const priceBox=()=>!SHOWPRICE?'':`<div class="pricebox"><div class="eyebrow">${t('priceT')}</div><div class="prow">${PRICES.map(([k,y])=>`<div class="pr ${k.toLowerCase()===exam()?'sel':''}"><b>JLPT ${k}</b><span>¥${y.toLocaleString('en')}</span></div>`).join('')}</div><p class="muted">${t('priceNote')}</p></div>`;
 function renderUnlock(){
-  if(BE.ok&&!UNL){shell('home',`${ph('🔓',at('payT'),PAY.course)}<section class="card accbox paybox"><div class="big">${PAY.cur}${PAY.price.toLocaleString('en')}</div><b>${at('per6')}</b>
+  if(BE.ok&&!UNL){shell('home',`${ph('🔓',at('payT'),PAYC())}<section class="card accbox paybox"><div class="big">${PAY.cur}${PAY.price.toLocaleString('en')}</div><b>${at('per6')}</b>
     <ol><li>${BE.user?'✓ ':''}${at('login')} (Google / Email)</li><li>${at('st2')}</li><li>${at('st3')}</li><li>${at('st4')}</li></ol>
     ${BE.user?(isPaidP(BE.prof)?`<p>${at('paid')}</p>`:`<a class="btn grad" href="#pay">💳 ${at('payT')}</a>`):`<a class="btn grad" href="#acc">${at('login')} →</a>`}
     <details class="codebox"><summary>Code?</summary><form id="uf"><input id="ucode" placeholder="XXXX-XXXXXXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="16" required><div class="err" id="uerr" role="alert"></div><button class="btn ghost" id="ubtn">🔓 ${t('unlockBtn')}</button></form></details></section>`);
@@ -1023,7 +1024,7 @@ function renderHome(){
    <div class="d-stats"><div><b>${done}</b><span>${t('stDone')}</span></div><div><b>${done?Math.round(ok/done*100):0}%</b><span>${t('stAcc')}</span></div><div><b>${streak()}🔥</b><span>${t('stStreak')}</span></div><a href="#review"><b>${weak}</b><span>${t('stWeak')}</span></a></div></section>
   <h2 class="hsech"><i>試</i>${ut('setsH')}<small>${D.total||D.q.length} 問</small></h2>
   <div class="setgrid">${[['kanji','漢','STEP 1',t('kanji'),k],['mean','語','STEP 2',t('mean'),m],...[['gram','文',GRAM_T],['read','読',READ_T],['listen','聴',LISTEN_T]].map(([kk,g,T],x)=>[kk,g,'STEP '+(x+3),t(kk),secStats(T)])].filter(r=>r[4].total).map(([kk,g,st,ti,s])=>`<button class="card setc" data-go="${kk}"><span class="sg">${g}</span><small>${st}</small><b>${ti}</b><span class="sn">${s.total} 問</span><span class="sbar"><i style="width:${pct(s)}%"></i></span><span class="sp">${s.done}/${s.total} · ${pct(s)}%</span></button>`).join('')}</div>
-  ${exam()==='n3'?hwHome()+booksHome():exam()==='n5'?hwHome():''}
+  ${['n3','n5'].includes(exam())?hwHome()+booksHome():''}
   <section id="revHome" class="revhome"></section>
   <div class="grid2">
    <section class="card wotd"><div class="eyebrow">${t('wotd')} · 今日の単語</div><div class="w">${esc(w[0])}</div><div class="r">${esc(w[1])}</div><div class="mn"><span class="tag">NE</span>${esc(w[2])}</div><div class="mn"><span class="tag">EN</span>${esc(w[3])}</div>
@@ -1301,7 +1302,7 @@ const UT={nav:['宿題','Units','युनिट'],title:['ユニット別 宿�
 const ut=(k,o)=>{const v=(exam()==='n5'&&UT5[k])||UT[k];const c=LANGS[LI][0];let s=c==='ja'?v[0]:c==='ne'?v[2]:v[1];if(o)for(const x in o)s=s.replace('{'+x+'}',o[x]);return s};
 const ulang=()=>LANGS[LI][0]==='ne'?'ne':'en';
 async function loadUnits(){if(UD&&UDE===exam())return;UDE=exam();try{UD=await fetch(exam()==='n5'?'units-n5.json':'units.json').then(r=>r.json())}catch(e){UD={k:[],v:[],g:[]};return}
-  if(window.MK&&Object.values(UD).some(s=>s.some(x=>x.lk))){try{const L=await fetch('units-locked.json').then(r=>r.json());
+  if(window.MK&&Object.values(UD).some(s=>s.some(x=>x.lk))){try{const L=await fetch(exam()==='n5'?'units-n5-locked.json':'units-locked.json').then(r=>r.json());
     const raw=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64d(L.iv)},window.MK,b64d(L.ct));const B=JSON.parse(new TextDecoder().decode(raw));
     for(const s in B)B[s].forEach(full=>{const i=UD[s].findIndex(x=>x.n===full.n);if(i>=0)UD[s][i]=full})}catch(e){}}}
 async function renderUnits(){
@@ -1380,12 +1381,13 @@ const BT={lib:['教材ライブラリー','Books','किताब'],
 const bt=k=>{const v=BT[k];const c=LANGS[LI][0];return c==='ja'?v[0]:c==='ne'?v[2]:v[1]};
 async function loadBooks(){if(BK)return;try{BK=await fetch('books/books.json').then(r=>r.json())}catch(e){BK={}}}
 const BICON={k:'漢',v:'語',g:'文',b:'練'};
-function booksHome(){return `<section class="hwsec"><h2 class="hsech"><i>本</i>${bt('lib')}</h2><div class="hwgrid">${['k','v','g','b'].map(s=>`<a class="card hwc" href="#books" data-bsec="${s}"><i>${BICON[s]}</i><b>${bt(s)}</b><span>${bt('read')} →</span></a>`).join('')}</div></section>`}
+const bOf=b=>(b.x||'n3')===dxOf();const BSECS=()=>['k','v','g','b'].filter(s=>!BK||Object.values(BK).some(b=>bOf(b)&&b.sec===s)).filter(s=>BK||dxOf()==='n3'||s!=='b');
+function booksHome(){if(!BK)loadBooks().then(()=>{if(location.hash===''||location.hash==='#home')render()});return `<section class="hwsec"><h2 class="hsech"><i>本</i>${bt('lib')}</h2><div class="hwgrid">${BSECS().map(s=>`<a class="card hwc" href="#books" data-bsec="${s}"><i>${BICON[s]}</i><b>${bt(s)}</b><span>${bt('read')} →</span></a>`).join('')}</div></section>`}
 async function renderBooks(){
   if(!BK){shell('books',`<div class="card empty">${bt('loading')}</div>`);await loadBooks()}
-  const sec=BS.sec,list=Object.entries(BK).filter(([,b])=>b.sec===sec);
+  const SS=BSECS();if(!SS.includes(BS.sec))BS.sec=SS[0]||'k';const sec=BS.sec,list=Object.entries(BK).filter(([,b])=>bOf(b)&&b.sec===sec);
   shell('books',`<section class="card uhero"><div class="eyebrow">LIBRARY · 教材</div><h1>${bt('lib')}</h1><p class="muted">${bt('libS')}</p><p class="cpnote">🔒 ${bt('cp')}</p></section>
-  <div class="usecs bsecs" role="tablist">${['k','v','g','b'].map(s=>`<button role="tab" aria-selected="${s===sec}" class="usec ${s===sec?'on':''}" data-bs="${s}"><b>${BICON[s]} ${bt(s)}</b></button>`).join('')}</div>
+  <div class="usecs bsecs" role="tablist">${SS.map(s=>`<button role="tab" aria-selected="${s===sec}" class="usec ${s===sec?'on':''}" data-bs="${s}"><b>${BICON[s]} ${bt(s)}</b></button>`).join('')}</div>
   <div class="bkgrid">${list.map(([id,b])=>`<button class="card bcard" data-bid="${id}"><b>${esc(b.t)}</b>${b.sub?`<small>${esc(b.sub)}</small>`:''}<span>${b.n} ${bt('pages')}</span></button>`).join('')}</div>`);
   $$('[data-bs]').forEach(x=>x.onclick=()=>{BS.sec=x.dataset.bs;renderBooks()});
   $$('[data-bid]').forEach(x=>x.onclick=()=>{BS.id=x.dataset.bid;location.hash='#read'});
@@ -1412,7 +1414,10 @@ async function decStrip(src){const buf=new Uint8Array(await fetch(src).then(r=>r
 const FBCONF={apiKey:"AIzaSyDe-FSQzW7RaAMCAS81ghbBLYMI5kB-zzk",authDomain:"binod-paudel.firebaseapp.com",projectId:"binod-paudel",storageBucket:"binod-paudel.firebasestorage.app",messagingSenderId:"589004931560",appId:"1:589004931560:web:a7a205b8ef231749dbe45d"};/* public web config (not a secret) */
 const PAY={on:true,price:2000,cur:'¥',course:'JLPT N3',months:6,qr:'pay/qr.png',link:''};/* link = Stripe Payment Link (card + konbini) once Binod creates it */
 const SIXM=()=>183*864e5;
-const isPaidP=p=>!!(p&&p.paid&&(p.paidUntil||0)>Date.now());
+const tms=v=>v&&v.toMillis?v.toMillis():(+v||0);
+const untilOf=(p,c)=>{c=c||dxOf();return p?(c==='n3'?tms(p.paidUntil):tms((p.pu||{})[c])):0};
+const isPaidP=(p,c)=>{c=c||dxOf();if(!p)return false;return c==='n3'?!!(p.paid&&untilOf(p,c)>Date.now()):untilOf(p,c)>Date.now()};
+const PAYC=c=>'JLPT '+(c||dxOf()).toUpperCase();
 const FBV='10.12.5';
 const AT={
  acc:['アカウント','Account','मेरो खाता'],
@@ -1466,11 +1471,11 @@ async function beInit(){
   if(!BE.ok){BE.ready=true;return}
   BE.api.onAuth(async u=>{BE.user=u;BE.prof=null;BE.admin=false;
     if(u){BE.err='';try{BE.prof=await BE.api.touch(u)}catch(e){BE.err='profile: '+((e&&(e.code||e.message))||e)}try{BE.admin=await BE.api.isAdmin()}catch(e){}
-      if(isPaidP(BE.prof))beKey()}
+      if(isPaidP(BE.prof,DX))beKey()}
     BE.ready=true;render()});
 }
 async function beKey(){/* paid account: fetch the course unlock code (readable only by paid users) and open locked sets */
-  if(window.MK)return;try{const c=await BE.api.key();if(c)await unlock(c,true,true)}catch(e){}}/* not saved locally: access ends when the 6 months end */
+  const cx=DX;if(MKC[cx])return;try{const c=await BE.api.key(cx);if(c&&DX===cx)await unlock(c,true,true)}catch(e){}}/* not saved locally: access ends when the 6 months end */
 let _syncT=0;
 function beSync(force){/* push a small progress summary, at most once a minute */
   if(!BE.ok||!BE.user)return;const now=Date.now();if(!force&&now-_syncT<60000)return;_syncT=now;
@@ -1497,8 +1502,8 @@ function fbApi(){
     saveProf:(uid,o)=>F.doc('users/'+uid).update({name:o.name,phone:o.phone}),
     progress:(uid,sum)=>F.doc('users/'+uid).update({prog:sum,last:TS(),lastDay:day()}),
     async isAdmin(){try{await F.doc('config/admin').get();return true}catch(e){BE.aerr=(e&&(e.code||e.message))||String(e);try{const r=await A.currentUser.getIdTokenResult();BE.aerr+=' · '+r.signInProvider+' · v='+r.claims.email_verified}catch(x){}return false}},/* rules let only the teacher read config/* */
-    async hasKey(){const s=await F.doc('secret/n3').get();return s.exists},setKey:c=>F.doc('secret/n3').set({code:c}),
-    async key(){const s=await F.doc('secret/n3').get();return s.exists?s.data().code:null},
+    async hasKey(cx){const s=await F.doc('secret/'+(cx||'n3')).get();return s.exists},setKey:(cx,c)=>F.doc('secret/'+(cx||'n3')).set({code:c}),
+    async key(cx){const s=await F.doc('secret/'+(cx||'n3')).get();return s.exists?s.data().code:null},
     pay:(uid,o)=>F.collection('pay').add(Object.assign({uid,status:'pending',created:TS()},o)),
     async myPay(uid){const q=await F.collection('pay').where('uid','==',uid).get();return q.docs.map(norm).sort((a,b)=>b.created-a.created)},
     review:(uid,o)=>F.doc('reviews/'+uid).set(Object.assign({uid,show:false,created:TS()},o)),
@@ -1506,8 +1511,9 @@ function fbApi(){
     async users(){const q=await F.collection('users').get();return q.docs.map(norm)},
     async pays(){const q=await F.collection('pay').where('status','==','pending').get();return q.docs.map(norm)},
     async decide(p,ok){const b=F.batch();b.update(F.doc('pay/'+p.id),{status:ok?'approved':'rejected',decided:TS()});
-      if(ok){const s=await F.doc('users/'+p.uid).get();const cur=s.exists?toMs(s.data().paidUntil):0;b.update(F.doc('users/'+p.uid),{paid:true,paidAt:TS(),paidUntil:firebase.firestore.Timestamp.fromMillis(Math.max(Date.now(),cur)+SIXM())})}await b.commit()},
-    setPaid:(uid,v)=>F.doc('users/'+uid).update(v?{paid:true,paidAt:firebase.firestore.FieldValue.serverTimestamp(),paidUntil:firebase.firestore.Timestamp.fromMillis(Date.now()+SIXM())}:{paid:false,paidUntil:null}),
+      if(ok){const c=p.course||'n3',s=await F.doc('users/'+p.uid).get(),cur=s.exists?untilOf(s.data(),c):0,until=firebase.firestore.Timestamp.fromMillis(Math.max(Date.now(),cur)+SIXM());
+        b.update(F.doc('users/'+p.uid),c==='n3'?{paid:true,paidAt:TS(),paidUntil:until}:{['pu.'+c]:until})}await b.commit()},
+    setPaid:(uid,v,c)=>F.doc('users/'+uid).update((c||'n3')==='n3'?(v?{paid:true,paidAt:firebase.firestore.FieldValue.serverTimestamp(),paidUntil:firebase.firestore.Timestamp.fromMillis(Date.now()+SIXM())}:{paid:false,paidUntil:null}):{['pu.'+c]:v?firebase.firestore.Timestamp.fromMillis(Date.now()+SIXM()):null}),
     showReview:(id,v)=>F.doc('reviews/'+id).update({show:v}),
     reviewsPublic:async()=>{try{const q=await F.collection('reviews').where('show','==',true).get();return q.docs.map(norm)}catch(e){return[]}},
     toMs
@@ -1523,15 +1529,15 @@ function mockApi(){/* localhost test double with the same shape as fbApi */
     async saveProf(uid,o){const d=db();Object.assign(d.users[uid],o);put(d)},
     async progress(uid,s){const d=db();d.users[uid].prog=s;d.users[uid].last=Date.now();put(d)},
     async isAdmin(){return(db().users[db().me]||{}).email==='teacher@example.com'},
-    async key(){return LS.get('mockcode',null)},async hasKey(){return !!LS.get('mockcode',null)},async setKey(c){LS.set('mockcode',c)},
+    async key(cx){return LS.get('mockcode'+(cx||'n3'),null)},async hasKey(cx){return !!LS.get('mockcode'+(cx||'n3'),null)},async setKey(cx,c){LS.set('mockcode'+(cx||'n3'),c)},
     async pay(uid,o){const d=db();const id='p'+Date.now();d.pay[id]=Object.assign({uid,status:'pending',created:Date.now()},o);put(d)},
     async myPay(uid){return Object.entries(db().pay).filter(([,p])=>p.uid===uid).map(([id,p])=>Object.assign({id},p))},
     async review(uid,o){const d=db();d.reviews[uid]=Object.assign({uid,show:false,created:Date.now()},o);put(d)},
     async reviews(all){return Object.entries(db().reviews).map(([id,r])=>Object.assign({id},r)).filter(r=>all||r.show)},
     async users(){return Object.entries(db().users).map(([id,u])=>Object.assign({id},u))},
     async pays(){return Object.entries(db().pay).map(([id,p])=>Object.assign({id},p)).filter(p=>p.status==='pending')},
-    async decide(p,ok){const d=db();d.pay[p.id].status=ok?'approved':'rejected';if(ok){const u=d.users[p.uid];u.paid=true;u.paidUntil=Math.max(Date.now(),u.paidUntil||0)+SIXM()}put(d)},
-    async setPaid(uid,v){const d=db();const u=d.users[uid];u.paid=v;u.paidUntil=v?Date.now()+SIXM():null;put(d)},
+    async decide(p,ok){const d=db();d.pay[p.id].status=ok?'approved':'rejected';if(ok){const u=d.users[p.uid],c=p.course||'n3',t=Math.max(Date.now(),untilOf(u,c))+SIXM();if(c==='n3'){u.paid=true;u.paidUntil=t}else{u.pu=u.pu||{};u.pu[c]=t}}put(d)},
+    async setPaid(uid,v,c){const d=db();const u=d.users[uid];c=c||'n3';if(c==='n3'){u.paid=v;u.paidUntil=v?Date.now()+SIXM():null}else{u.pu=u.pu||{};u.pu[c]=v?Date.now()+SIXM():null}put(d)},
     async showReview(id,v){const d=db();d.reviews[id].show=v;put(d)},
     async reviewsPublic(){return Object.values(db().reviews).filter(r=>r.show)},
     toMs:v=>v||0};
@@ -1562,10 +1568,10 @@ async function renderAccount(){
       catch(x){$('#eErr').textContent=(x&&x.message)||at('err')}};
     return}
   const p=BE.prof||{},sum=p.prog||{};let mine=[];try{mine=await BE.api.myPay(BE.user.uid)}catch(e){}
-  const pend=mine.some(x=>x.status==='pending');
+  const pend=mine.some(x=>x.status==='pending'&&(x.course||'n3')===dxOf());
   const vals=Object.values(P.res),done=vals.length,ok=vals.filter(v=>v===1).length,ures=LS.get('ures',{}),hwp=Object.values(ures).filter(v=>(v.b||0)>=35).length;
   shell('acc',`${ph('人',at('acc'),esc(p.email||BE.user.email||''))}
-  <section class="card accbox"><div class="plan ${isPaidP(p)?'ok':''}">${isPaidP(p)?at('paid')+`<small>${at('until')}: ${fdate(p.paidUntil)}</small>`:pend?at('pending'):p.paid?at('expired'):at('free')}</div>
+  <section class="card accbox"><div class="plan ${isPaidP(p)?'ok':''}"><b>${PAYC()}</b> · ${isPaidP(p)?at('paid')+`<small>${at('until')}: ${fdate(untilOf(p))}</small>`:pend?at('pending'):untilOf(p)?at('expired'):at('free')}</div>
    ${!isPaidP(p)&&PAY.on&&!pend?`<a class="btn grad" href="#pay">💳 ${at('payT')} · ${PAY.cur}${PAY.price.toLocaleString('en')} · ${at('per6')}</a>`:''}
    <form id="pForm" class="eform"><label>${at('name')}<input id="pName" value="${esc(p.name||'')}"></label><label>${at('phone')}<input id="pPhone" type="tel" value="${esc(p.phone||'')}"></label>
    <button class="btn ghost">${at('save')}</button></form></section>
@@ -1580,7 +1586,7 @@ async function renderAccount(){
 /* ---- payment page ---- */
 function renderPay(){
   if(!BE.ok||!BE.user){location.hash='#acc';return}
-  shell('acc',`${ph('¥',at('payT'),PAY.course+' · '+PAY.cur+PAY.price.toLocaleString('en')+' · '+at('per6'))}
+  shell('acc',`${ph('¥',at('payT'),PAYC()+' · '+PAY.cur+PAY.price.toLocaleString('en')+' · '+at('per6'))}
   ${PAY.link&&/^https:\/\/buy\.stripe\.com\//.test(PAY.link)?`<section class="card accbox"><b>💳 ${at('cardT')}</b><p class="muted" style="margin:0">${at('cardS')}</p><a class="btn grad" target="_blank" rel="noopener" href="${PAY.link}?client_reference_id=${encodeURIComponent(BE.user.uid)}${BE.user.email?'&prefilled_email='+encodeURIComponent(BE.user.email):''}">💳 ${at('cardB')}</a></section>`:''}
   <section class="card accbox"><b>📱 PayPay</b><p>${at('payS')}</p><div class="qrbox"><img src="${PAY.qr}" alt="QR" onerror="this.replaceWith(Object.assign(document.createElement('p'),{className:'muted',textContent:'${at('noqr')}'}))"></div>
   <form id="payF" class="eform"><label>${at('method')}<select id="pyM"><option>PayPay</option><option>Bank transfer</option><option>eSewa / Khalti</option><option>Cash</option></select></label>
@@ -1588,7 +1594,7 @@ function renderPay(){
   <label>${at('note')}<input id="pyN" maxlength="200"></label><div class="err" id="pyE" role="alert"></div><button class="btn grad" id="pyB">${at('send')}</button></form></section>`);
   let img='';$('#pyS').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{img=await shrinkImg(f);const pv=$('#pyPrev');pv.src=img;pv.hidden=false}catch(x){img=''}};
   $('#payF').onsubmit=async e=>{e.preventDefault();const txn=$('#pyT').value.trim();if(!img&&!txn){$('#pyE').textContent=at('needShot');return}
-    const b=$('#pyB');b.disabled=true;try{await BE.api.pay(BE.user.uid,{name:(BE.prof&&BE.prof.name)||'',email:BE.user.email||'',method:$('#pyM').value,txn,note:$('#pyN').value.trim(),img,amount:PAY.price});toast(at('sent'));location.hash='#acc'}
+    const b=$('#pyB');b.disabled=true;try{await BE.api.pay(BE.user.uid,{name:(BE.prof&&BE.prof.name)||'',email:BE.user.email||'',method:$('#pyM').value,txn,note:$('#pyN').value.trim(),img,amount:PAY.price,course:dxOf()});toast(at('sent'));location.hash='#acc'}
     catch(x){b.disabled=false;$('#pyE').textContent=at('err')}};
 }
 
@@ -1608,36 +1614,38 @@ async function reviewsHome(){/* approved reviews block on the home page */
 }
 
 /* ---- teacher dashboard ---- */
-const TD={q:'',sort:'last'};
+const TD={q:'',sort:'last',c:null};
 async function renderTeacher(){
   if(!BE.ok||!BE.admin){location.hash='#acc';return}
   shell('teacher',`${ph('師',at('tT'),'')}<div class="card empty">…</div>`);
   let U=[],PY=[],RV=[];try{[U,PY,RV]=await Promise.all([BE.api.users(),BE.api.pays(),BE.api.reviews(true)])}catch(e){shell('teacher',`${ph('師',at('tT'),'')}<div class="card empty">${at('err')}</div>`);return}
-  const wk=Date.now()-7*864e5,act=U.filter(u=>(u.last||0)>=wk).length,paid=U.filter(isPaidP).length,avg=RV.length?(RV.reduce((a,r)=>a+(r.stars||0),0)/RV.length).toFixed(1):'—';
+  const wk=Date.now()-7*864e5,act=U.filter(u=>(u.last||0)>=wk).length,tc=TD.c||dxOf(),paid=U.filter(u=>isPaidP(u,tc)).length,avg=RV.length?(RV.reduce((a,r)=>a+(r.stars||0),0)/RV.length).toFixed(1):'—';
   const q=TD.q.toLowerCase(),L=U.filter(u=>!q||(u.name+' '+u.email+' '+u.phone).toLowerCase().includes(q))
     .sort((a,b)=>TD.sort==='name'?String(a.name).localeCompare(b.name):TD.sort==='done'?((b.prog||{}).done||0)-((a.prog||{}).done||0):TD.sort==='joined'?(b.created||0)-(a.created||0):(b.last||0)-(a.last||0));
   const pr=u=>{const g=u.prog||{};return{d:g.done||0,a:g.done?Math.round((g.ok||0)*100/g.done):0,h:Object.values(g.hw||{}).filter(v=>v>=35).length}};
-  let hk=true;try{hk=await BE.api.hasKey()}catch(e){}
+  let hk=true;try{hk=await BE.api.hasKey(tc)}catch(e){}
   shell('teacher',`${ph('師',at('tT'),new Date().toISOString().slice(0,10))}
-  ${hk?'':`<section class="card accbox"><b>🔑 ${at('keyT')}</b><p class="muted" style="margin:0">${at('keyS')}</p><form id="kF" class="erow"><input id="kC" placeholder="XXXX-XXXXXXXX" autocomplete="off" style="flex:2"><button class="btn grad">${at('save')}</button></form></section>`}
+  <div class="erow" style="margin:0 0 12px">${['n3','n5'].map(c=>`<button class="chip ${c===tc?'on':''}" data-tc="${c}">${PAYC(c)}</button>`).join('')}</div>
+  ${hk?'':`<section class="card accbox"><b>🔑 ${at('keyT')} · ${PAYC(tc)}</b><p class="muted" style="margin:0">${at('keyS')}</p><form id="kF" class="erow"><input id="kC" placeholder="XXXX-XXXXXXXX" autocomplete="off" style="flex:2"><button class="btn grad">${at('save')}</button></form></section>`}
   <section class="tstats">${[[at('total'),U.length],[at('active'),act],[at('inactive'),U.length-act],[at('paidN'),paid],[at('pendN'),PY.length],[at('avg'),avg+(RV.length?' ★':'')]].map(([l,v])=>`<div class="card ts"><b>${v}</b><span>${l}</span></div>`).join('')}</section>
   <h2 class="hsech"><i>¥</i>${at('pays')} (${PY.length})</h2>
-  ${PY.length?PY.map(p=>`<div class="card tpay"><div><b>${esc(p.name||p.email||'')}</b><small>${esc(p.email||'')} · ${esc(p.method||'')} · ${PAY.cur}${esc(p.amount||'')}</small>${p.txn?`<small>ID: ${esc(p.txn)}</small>`:''}${p.note?`<small>${esc(p.note)}</small>`:''}<small>${fdate(p.created)}</small></div>
+  ${PY.length?PY.map(p=>`<div class="card tpay"><div><b>${esc(p.name||p.email||'')}</b><small><b>${PAYC(p.course||'n3')}</b> · ${esc(p.email||'')} · ${esc(p.method||'')} · ${PAY.cur}${esc(p.amount||'')}</small>${p.txn?`<small>ID: ${esc(p.txn)}</small>`:''}${p.note?`<small>${esc(p.note)}</small>`:''}<small>${fdate(p.created)}</small></div>
     ${p.img&&/^data:image\/jpeg;base64,/.test(p.img)?`<a href="#" data-img="${p.id}"><img src="${p.img}" alt="screenshot"></a>`:''}<div class="tbtn"><button class="btn grad" data-ok="${p.id}">✓ ${at('approve')}</button><button class="btn ghost" data-no="${p.id}">✕ ${at('reject')}</button></div></div>`).join(''):`<p class="muted">${at('none')}</p>`}
   <h2 class="hsech"><i>人</i>${at('students')} (${U.length})</h2>
   <div class="ttools"><input id="tq" placeholder="${at('search')}" value="${esc(TD.q)}"><select id="tsort">${[['last',at('last')],['joined',at('joined')],['done',at('done')],['name',at('name')]].map(([k,l])=>`<option value="${k}" ${TD.sort===k?'selected':''}>${l}</option>`).join('')}</select></div>
   <div class="tscroll"><table class="ttab"><thead><tr><th>${at('name')}</th><th>${at('last')}</th><th>${at('done')}</th><th>${at('acc2')}</th><th>${at('hw')} ✓</th><th>${at('joined')}</th><th></th></tr></thead><tbody>
-  ${L.map(u=>{const x=pr(u),on=(u.last||0)>=wk;return `<tr><td><b>${esc(u.name||'—')}</b><small>${esc(u.email||'')}${u.phone?' · '+esc(u.phone):''}</small></td><td><span class="dot ${on?'on':''}"></span>${ago(u.last)}</td><td>${x.d}</td><td>${x.a}%</td><td>${x.h}</td><td>${fdate(u.created)}</td><td>${isPaidP(u)?`<span class="paidtag">¥ ✓ ${fdate(u.paidUntil)}</span>`:(u.paid?'<span class="muted">⌛ '+fdate(u.paidUntil)+'</span> ':'')}<button class="chip" data-pd="${u.id}" data-v="${isPaidP(u)?0:1}">${isPaidP(u)?at('takePaid'):at('givePaid')}</button></td></tr>`}).join('')||`<tr><td colspan="7" class="muted">${at('none')}</td></tr>`}
+  ${L.map(u=>{const x=pr(u),on=(u.last||0)>=wk;return `<tr><td><b>${esc(u.name||'—')}</b><small>${esc(u.email||'')}${u.phone?' · '+esc(u.phone):''}</small></td><td><span class="dot ${on?'on':''}"></span>${ago(u.last)}</td><td>${x.d}</td><td>${x.a}%</td><td>${x.h}</td><td>${fdate(u.created)}</td><td>${isPaidP(u,tc)?`<span class="paidtag">¥ ✓ ${fdate(untilOf(u,tc))}</span>`:(untilOf(u,tc)?'<span class="muted">⌛ '+fdate(untilOf(u,tc))+'</span> ':'')}<button class="chip" data-pd="${u.id}" data-v="${isPaidP(u,tc)?0:1}">${PAYC(tc)} ${isPaidP(u,tc)?at('takePaid'):at('givePaid')}</button></td></tr>`}).join('')||`<tr><td colspan="7" class="muted">${at('none')}</td></tr>`}
   </tbody></table></div>
   <h2 class="hsech"><i>★</i>${at('revs')} (${RV.length})</h2>
   ${RV.map(r=>`<div class="card trev"><div><span class="st">${stars(r.stars||0)}</span> <b>${esc(r.name||'')}</b><p>${esc(r.text||'')}</p><small>${fdate(r.created)}</small></div><button class="chip ${r.show?'on':''}" data-rv="${r.id}" data-v="${r.show?0:1}">${r.show?at('hide'):at('show')}</button></div>`).join('')||`<p class="muted">${at('none')}</p>`}`);
   $('#tq').oninput=e=>{TD.q=e.target.value;clearTimeout(TD.t);TD.t=setTimeout(()=>{renderTeacher().then(()=>{const i=$('#tq');i.focus();i.setSelectionRange(i.value.length,i.value.length)})},350)};
-  const kf=$('#kF');if(kf)kf.onsubmit=async e=>{e.preventDefault();const c=$('#kC').value.toUpperCase().replace(/[^0-9A-Z]/g,'');if(c.length!==12){toast(at('err'));return}try{await BE.api.setKey(c);toast('✓');renderTeacher()}catch(x){toast(at('err'))}};
+  const kf=$('#kF');if(kf)kf.onsubmit=async e=>{e.preventDefault();const c=$('#kC').value.toUpperCase().replace(/[^0-9A-Z]/g,'');if(c.length!==12){toast(at('err'));return}try{await BE.api.setKey(tc,c);toast('✓');renderTeacher()}catch(x){toast(at('err'))}};
   $('#tsort').onchange=e=>{TD.sort=e.target.value;renderTeacher()};
+  $$('[data-tc]').forEach(b=>b.onclick=()=>{TD.c=b.dataset.tc;renderTeacher()});
   const byId=id=>PY.find(p=>p.id===id);
   $$('[data-ok]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await BE.api.decide(byId(b.dataset.ok),true);toast('✓')}catch(e){toast(at('err'))}renderTeacher()});
   $$('[data-no]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await BE.api.decide(byId(b.dataset.no),false)}catch(e){toast(at('err'))}renderTeacher()});
-  $$('[data-pd]').forEach(b=>b.onclick=async()=>{try{await BE.api.setPaid(b.dataset.pd,b.dataset.v==='1')}catch(e){toast(at('err'))}renderTeacher()});
+  $$('[data-pd]').forEach(b=>b.onclick=async()=>{try{await BE.api.setPaid(b.dataset.pd,b.dataset.v==='1',tc)}catch(e){toast(at('err'))}renderTeacher()});
   $$('[data-rv]').forEach(b=>b.onclick=async()=>{try{await BE.api.showReview(b.dataset.rv,b.dataset.v==='1')}catch(e){toast(at('err'))}renderTeacher()});
   $$('[data-img]').forEach(a=>a.onclick=e=>{e.preventDefault();const im=a.querySelector('img');const w=document.createElement('div');w.className='imgzoom';w.innerHTML=`<img src="${im.src}" alt="">`;w.onclick=()=>w.remove();document.body.appendChild(w)});
 }
