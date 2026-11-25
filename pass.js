@@ -10,7 +10,7 @@ const PD={},SD={};
 const PS={lv:'n5',kind:'k',page:0};
 try{Object.assign(PS,JSON.parse(localStorage.getItem('rk_passui')||'{}'))}catch(e){}
 const saveUI=()=>{try{localStorage.setItem('rk_passui',JSON.stringify(PS))}catch(e){}};
-const keyOf=(lv,kind)=>(lv==='n3'&&kind==='g'?'rk_pass4_':'rk_pass3_')+lv+'_'+kind;
+const keyOf=(lv,kind)=>((lv==='n3'&&kind==='g')||lv==='n4'?'rk_pass4_':'rk_pass3_')+lv+'_'+kind;
 function getSet(lv,kind){try{return new Set(JSON.parse(localStorage.getItem(keyOf(lv,kind))||'[]'))}catch(e){return new Set()}}
 function putSet(lv,kind,s){try{localStorage.setItem(keyOf(lv,kind),JSON.stringify([...s]))}catch(e){}}
 async function load(lv){if(!PD[lv])PD[lv]=await fetch('pass/pass-'+lv+'.json').then(r=>r.json());return PD[lv]}

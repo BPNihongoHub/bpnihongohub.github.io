@@ -852,7 +852,10 @@ const N5T={PART:{1:['言語知識（文字・語彙）',20],2:['言語知識（�
  MOJ:{1:{1:'＿＿＿の ことばは ひらがなで どう かきますか。１・２・３・４から いちばん いい ものを 一つ えらんで ください。',2:'＿＿＿の ことばは どう かきますか。１・２・３・４から いちばん いい ものを 一つ えらんで ください。',3:'（　　）に なにを いれますか。１・２・３・４から いちばん いい ものを 一つ えらんで ください。',4:'＿＿＿の ぶんと だいたい おなじ いみの ぶんが あります。１・２・３・４から いちばん いい ものを 一つ えらんで ください。'},
   2:{1:'（　　）に 何を 入れますか。１・２・３・４から いちばん いい ものを 一つ えらんで ください。',2:'★に 入る ものは どれですか。１・２・３・４から いちばん いい ものを 一つ えらんで ください。',3:'［　］に 何を 入れますか。ぶんしょうの いみを かんがえて、１・２・３・４から いちばん いい ものを 一つ えらんで ください。',4:'つぎの ぶんしょうを 読んで、しつもんに こたえて ください。こたえは、１・２・３・４から いちばん いい ものを 一つ えらんで ください。',5:'つぎの ぶんしょうを 読んで、しつもんに こたえて ください。こたえは、１・２・３・４から いちばん いい ものを 一つ えらんで ください。',6:'みぎの ページを 見て、下の しつもんに こたえて ください。こたえは、１・２・３・４から いちばん いい ものを 一つ えらんで ください。'},
   3:{1:'もんだい１では はじめに しつもんを きいて ください。それから はなしを きいて、もんだいようしの １から４の なかから、いちばん いい ものを ひとつ えらんで ください。',2:'もんだい２では はじめに しつもんを きいて ください。それから はなしを きいて、もんだいようしの １から４の なかから、いちばん いい ものを ひとつ えらんで ください。',3:'もんだい３では、えを みながら しつもんを きいて ください。➡️の ひとは なんと いいますか。１から３の なかから、いちばん いい ものを ひとつ えらんで ください。',4:'もんだい４は、えなどが ありません。ぶんを きいて、１から３の なかから、いちばん いい ものを ひとつ えらんで ください。'}}};
-function jlpt5Score(rs){let g=0,gm=0,l=0,lm=0;rs.forEach(([q,ok])=>{if(q.pt===3){lm++;if(ok)l++}else{gm++;if(ok)g++}});const lk=gm?Math.round(g/gm*120):0,ls=lm?Math.round(l/lm*60):0;return{lk,ls,hasL:lm>0,hasR:true,tot:lk+ls,pass:lm>0?(lk>=38&&ls>=19&&lk+ls>=80):lk>=54}}
+const N4T={PART:{1:['言語知識（文字・語彙）',25],2:['言語知識（文法）・読解',55],3:['聴解',35]},PTS:{},MOJ:JSON.parse(JSON.stringify(N5T.MOJ))};
+N4T.MOJ[1][5]='つぎの ことばの つかいかたで いちばん いい ものを １・２・３・４から 一つ えらんで ください。';
+N4T.MOJ[2][6]='右の ページを 見て、下の しつもんに こたえて ください。こたえは、１・２・３・４から いちばん いい ものを 一つ えらんで ください。';
+function jlpt5Score(rs){let g=0,gm=0,l=0,lm=0;rs.forEach(([q,ok])=>{if(q.pt===3){lm++;if(ok)l++}else{gm++;if(ok)g++}});const lk=gm?Math.round(g/gm*120):0,ls=lm?Math.round(l/lm*60):0;return{lk,ls,hasL:lm>0,hasR:true,tot:lk+ls,pass:lm>0?(lk>=38&&ls>=19&&lk+ls>=(exam()==='n4'?90:80)):lk>=54}}
 function jlptScore(rs){const raw={g:0,gm:0,r:0,rm:0,l:0,lm:0};rs.forEach(([q,ok])=>{const p=(PTS[q.pt]||{})[q.mo]||1;const k=q.pt===3?'l':(q.pt===2&&q.mo>=4)?'r':'g';raw[k+'m']+=p;if(ok)raw[k]+=p});
   const lk=raw.gm?Math.round(raw.g/raw.gm*60):0,rd=raw.rm?Math.round(raw.r/raw.rm*60):0,ls=raw.lm?Math.round(raw.l/raw.lm*60):0,hasL=raw.lm>0;
   return {lk,rd,ls,hasL,tot:lk+rd+ls,hasR:raw.rm>0,pass:hasL?(lk>=19&&rd>=19&&ls>=19&&lk+rd+ls>=95):(raw.rm>0&&lk>=19&&rd>=19&&lk+rd>=64)}}
@@ -877,7 +880,7 @@ try{speechSynthesis.onvoiceschanged=()=>TTS.load();TTS.load()}catch(e){}
 let D=null, LOGIN=null, isOwner=false, ART=null, KJ=null, KEYS=null, UNL=false, LX={};
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const LSK=k=>{try{return ['res','srs','mock'].includes(k)&&localStorage.getItem('rk_exam')==='"n5"'?k+'_n5':k}catch(e){return k}};
+const LSK=k=>{try{return ['res','srs','mock'].includes(k)?(e=>e==='"n5"'?k+'_n5':e==='"n4"'?k+'_n4':k)(localStorage.getItem('rk_exam')):k}catch(e){return k}};
 const LS={get(k,d){try{k=LSK(k);const v=localStorage.getItem('rk_'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{k=LSK(k);localStorage.setItem('rk_'+k,JSON.stringify(v))}catch(e){}}};
 const SS={get(k){try{return sessionStorage.getItem('rk_'+k)}catch(e){return null}},set(k,v){try{sessionStorage.setItem('rk_'+k,v)}catch(e){}}};
 function toast(s){const el=$('#toast');el.textContent=s;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,2600)}
@@ -955,13 +958,13 @@ function splash(){
 
 /* boot */
 const DC={},MKC={};let DX='n3';const codeKey=c=>c==='n3'?'code':'code_'+c;
-const dxOf=()=>exam()==='n5'?'n5':'n3';
+const dxOf=()=>['n4','n5'].includes(exam())?exam():'n3';
 async function ensureData(){const ex=dxOf();if(DX===ex)return;
   DC[DX]={D,KEYS,UNL,LX};let c=DC[ex];
-  let fresh=false;if(!c){const [d,k]=await Promise.all([fetch(ex==='n5'?'data-n5.json':'data.json').then(r=>r.json()),fetch(ex==='n5'?'keys-n5.json':'keys.json',{cache:'no-store'}).then(r=>r.json()).catch(()=>null)]);c={D:d,KEYS:k,UNL:ex!=='n5'&&(d.sets||[]).every(n=>(d.free||[]).includes(n)),LX:{}};DC[ex]=c;fresh=true}
+  let fresh=false;if(!c){const [d,k]=await Promise.all([fetch(ex==='n3'?'data.json':'data-'+ex+'.json').then(r=>r.json()),fetch(ex==='n3'?'keys.json':'keys-'+ex+'.json',{cache:'no-store'}).then(r=>r.json()).catch(()=>null)]);c={D:d,KEYS:k,UNL:ex==='n3'&&(d.sets||[]).every(n=>(d.free||[]).includes(n)),LX:{}};DC[ex]=c;fresh=true}
   D=c.D;KEYS=c.KEYS;UNL=c.UNL;LX=c.LX;DX=ex;window.MK=MKC[ex]||null;UD=null;for(const k in EX)delete EX[k];
   if(fresh&&!UNL){const cc=LS.get(codeKey(ex),'');if(cc)unlock(cc,true);else if(BE.user&&isPaidP(BE.prof,ex))beKey()}
-  const T=ex==='n5'?N5T:N3T;if(!N3T.MOJ){N3T.MOJ=MOJ;N3T.PTS=PTS;N3T.PART=PART}MOJ=T.MOJ||N3T.MOJ;PTS=T.PTS||N3T.PTS;PART=T.PART||N3T.PART;
+  const T=ex==='n5'?N5T:ex==='n4'?N4T:N3T;if(!N3T.MOJ){N3T.MOJ=MOJ;N3T.PTS=PTS;N3T.PART=PART}MOJ=T.MOJ||N3T.MOJ;PTS=T.PTS||N3T.PTS;PART=T.PART||N3T.PART;
   P.res=LS.get('res',{});SR.c=LS.get('srs',{})}
 async function boot(){
   splash();
@@ -984,7 +987,7 @@ async function unlock(code,silent,nosave){const cx=DX,K=KEYS;
     const raw=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64d(w[1])},k,b64d(w[2]));
     mk=await crypto.subtle.importKey('raw',raw,'AES-GCM',false,['decrypt']);MKC[cx]=mk;if(DX===cx)window.MK=mk}
   catch(e){if(silent)LS.set(codeKey(cx),'');return false}
-  try{const L=await fetch(cx==='n5'?'locked-n5.json':'locked.json').then(r=>r.json());
+  try{const L=await fetch(cx==='n3'?'locked.json':'locked-'+cx+'.json').then(r=>r.json());
     const raw=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64d(L.iv)},mk,b64d(L.ct));
     const B=JSON.parse(new TextDecoder().decode(raw));
     if(DX!==cx){const c=DC[cx];if(c&&!c.UNL){c.D.q=c.D.q.concat(B.q);c.D.w=c.D.w.concat(B.w);c.LX=B.ex;c.UNL=true}}
@@ -998,7 +1001,7 @@ window.BPLoad=function(on,txt){let o=document.getElementById('bpLoad');if(!on){i
 function render(){
   if(!D)return;
   const r=(location.hash||'#home').slice(1);
-  if(['n3','n5'].includes(exam())&&DX!==dxOf()){BPLoad(true,'Loading '+exam().toUpperCase()+'…');ensureData().then(()=>{BPLoad(false);render()}).catch(()=>BPLoad(false));return}
+  if(['n3','n4','n5'].includes(exam())&&DX!==dxOf()){BPLoad(true,'Loading '+exam().toUpperCase()+'…');ensureData().then(()=>{BPLoad(false);render()}).catch(()=>BPLoad(false));return}
   if(false&&['drive','bjt'].includes(exam())&&['home','quiz','mock','review','words','srs','unlock'].includes(r))return driveRoute(r);
   const views={home:renderHome,quiz:renderQuiz,mock:renderMock,review:()=>Q.start({mode:'review'}),words:renderWords,srs:renderSRS,admin:renderAdmin,unlock:renderUnlock};
   if(r==='acc')return renderAccount();if(r==='pay')return renderPay();if(r==='rate')return renderReview();if(r==='teacher')return renderTeacher();
@@ -1016,8 +1019,8 @@ const MORE={ja:'その他',en:'More',ne:'अरू',vi:'Thêm',id:'Lainnya',my:'
 const ph=(g,ti,sub)=>`<section class="phead"><i>${g}</i><div><h1>${ti}</h1>${sub?`<p>${sub}</p>`:''}</div></section>`;
 function shell(active,inner){
   HEN=true;const tabs=[['home','家',t('navHome')],['pass','合','Pass? Try it'],['quiz','練',t('navQuiz')],['mock','試',t('navMock')],['srs','札',t('navSrs')],['review','誤',t('navRev')],['words','辞',t('navWords')]];
-  if(exam()==='n3'||exam()==='n5')tabs.splice(1,0,['units','課',ut('nav')]);
-  if(exam()==='n3'||exam()==='n5')tabs.push(['books','本',bt('lib')]);
+  if(['n3','n4','n5'].includes(exam()))tabs.splice(1,0,['units','課',ut('nav')]);
+  if(['n3','n4','n5'].includes(exam()))tabs.push(['books','本',bt('lib')]);
   if(BE.admin)tabs.push(['teacher','師',at('tT')]);
   if(isOwner)tabs.push(['admin','管',t('navAdmin')]);HEN=false;
   const lnk=([h,k,s])=>`<a href="#${h}" class="${h===active?'on':''}" ${h===active?'aria-current="page"':''}><i aria-hidden="true">${k}</i><span>${s}</span></a>`;
@@ -1065,7 +1068,7 @@ function renderUnlock(){
     const ok=await unlock($('#ucode').value,false);if(!ok){b.disabled=false;b.textContent='🔓 '+t('unlockBtn');$('#uerr').textContent=t('codeErr')}else{toast(t('unlocked'))}};
 }
 /* ---------- home ---------- */
-const COURSES=[['n5','JLPT N5','入門',1],['n4','JLPT N4','初級',0],['n3','JLPT N3','中級',1],['n2','JLPT N2','中上級',0],['n1','JLPT N1','上級',0],['jft','JFT-Basic','A2',0],['bjt','BJT','Business',0],['ssw','SSW 特定技能','Skills',0],['food','Food 外食','SSW',0],['care','Nursing 介護','SSW',0],['drive','Driving licence','運転免許',0]];
+const COURSES=[['n5','JLPT N5','入門',1],['n4','JLPT N4','初級',1],['n3','JLPT N3','中級',1],['n2','JLPT N2','中上級',0],['n1','JLPT N1','上級',0],['jft','JFT-Basic','A2',0],['bjt','BJT','Business',0],['ssw','SSW 特定技能','Skills',0],['food','Food 外食','SSW',0],['care','Nursing 介護','SSW',0],['drive','Driving licence','運転免許',0]];
 const exam=()=>LS.get('exam','n3');
 function typeStats(ty){const qs=D.q.filter(q=>q.t===ty);let done=0,ok=0;qs.forEach(q=>{const v=P.res[qid(q)];if(v!=null){done++;ok+=v}});return{total:qs.length,done,ok}}
 function secStats(types){return types.map(typeStats).reduce((a,b)=>({total:a.total+b.total,done:a.done+b.done,ok:a.ok+b.ok}),{total:0,done:0,ok:0})}
@@ -1077,7 +1080,7 @@ function ring(v,max,label){const p=Math.min(1,max?v/max:0),r=42,c=2*Math.PI*r;re
 /* ---------- home launcher (all sections at top + cards) ---------- */
 const HD={units:['युनिट अनुसार गृहकार्य, हरेकमा ५० प्रश्न','Homework by unit, 50 questions each','ユニット別の宿題（各50問）'],pass:['आफ्नो स्तर जाँच: कान्जी, शब्द, व्याकरण','Check your level: kanji, words, grammar','漢字・語彙・文法で実力チェック'],quiz:['मोडल प्रश्न सेट अभ्यास गर्नुहोस्','Practise the model question sets','模擬問題セットで練習'],mock:['वास्तविक JLPT जस्तै समयसहित पूरा परीक्षा','A full timed exam, just like the real JLPT','本番のJLPTと同じ時間で全問テスト'],srs:['फ्ल्यासकार्डले शब्द याद गर्नुहोस्','Remember words with flashcards','フラッシュカードで単語を覚える'],review:['गलत भएका प्रश्न फेरि गर्नुहोस्','Redo the questions you got wrong','間違えた問題をもう一度'],words:['सबै शब्द र अर्थ खोज्नुहोस्','Search every word and meaning','すべての単語と意味を検索'],books:['किताबहरू अनलाइन पढ्नुहोस्','Read the study books online','教材をオンラインで読む'],course:['N5–N1 र अरू कोर्स छान्नुहोस्','Pick N5–N1 or another course','N5〜N1などのコースを選ぶ']};
 const hdx=k=>{const L=LANGS[LI][0];return (HD[k]||['','',''])[L==='ja'?2:1]};
-function homeSecs(){const ex=exam(),uB=ex==='n3'||ex==='n5';
+function homeSecs(){const ex=exam(),uB=['n3','n4','n5'].includes(ex);
   return [uB&&['units','課',ut('nav')],['pass','合','Pass? Try it'],['quiz','練',t('navQuiz')],['mock','試',t('navMock')],['srs','札',t('navSrs')],['review','誤',t('navRev')],['words','辞',t('navWords')],uB&&['books','本',bt('lib')],['course','選',['ne','ja'].includes(LANGS[LI][0])?'コースを選ぶ':'Choose course']].filter(Boolean)}
 function homeTop(){const L=LANGS[LI][0],ne=L==='ne',lv=(COURSES.find(c=>c[0]===exam())||[0,'JLPT'])[1];
   const secs=homeSecs().filter(x=>!['pass','mock'].includes(x[0]));
@@ -1105,7 +1108,7 @@ function renderHome(){
    <div class="d-stats"><div><b>${done}</b><span>${t('stDone')}</span></div><div><b>${done?Math.round(ok/done*100):0}%</b><span>${t('stAcc')}</span></div><div><b>${streak()}🔥</b><span>${t('stStreak')}</span></div><a href="#review"><b>${weak}</b><span>${t('stWeak')}</span></a></div></section>
   <h2 class="hsech"><i>試</i>${ut('setsH')}<small>${D.total||D.q.length} 問</small></h2>
   <div class="setgrid">${[['kanji','漢','STEP 1',t('kanji'),k],['mean','語','STEP 2',t('mean'),m],...[['gram','文',GRAM_T],['read','読',READ_T],['listen','聴',LISTEN_T]].map(([kk,g,T],x)=>[kk,g,'STEP '+(x+3),t(kk),secStats(T)])].filter(r=>r[4].total).map(([kk,g,st,ti,s])=>`<button class="card setc" data-go="${kk}"><span class="sg">${g}</span><small>${st}</small><b>${ti}</b><span class="sn">${s.total} 問</span><span class="sbar"><i style="width:${pct(s)}%"></i></span><span class="sp">${s.done}/${s.total} · ${pct(s)}%</span></button>`).join('')}</div>
-  ${['n3','n5'].includes(exam())?hwHome()+booksHome():''}
+  ${['n3','n4','n5'].includes(exam())?hwHome()+booksHome():''}
   <section id="revHome" class="revhome"></section>
   <div class="grid2">
    <section class="card wotd"><div class="eyebrow">${t('wotd')} · 今日の単語</div><div class="w">${esc(w[0])}</div><div class="r">${esc(w[1])}</div><div class="mn"><span class="tag">NE</span>${esc(w[2])}</div><div class="mn"><span class="tag">EN</span>${esc(w[3])}</div>
@@ -1157,8 +1160,8 @@ async function openKanji(word){
 
 /* ---------- teacher explanations (per language file) ---------- */
 const EX={};
-async function loadEx1(c){if(EX[c]!==undefined)return EX[c];EX[c]=null;try{EX[c]=await fetch((DX==='n5'?'ex5-':'ex-')+c+'.json').then(r=>r.ok?r.json():{})}catch(e){EX[c]={}}return EX[c]}
-async function loadEx(){const c=LANGS[LI][0];if(c!=='en')loadEx1('en').then(()=>{if(typeof Q!=='undefined'&&Q.checked)renderPage()});if(EX[c]!==undefined)return EX[c];EX[c]=null;try{EX[c]=await fetch((DX==='n5'?'ex5-':'ex-')+c+'.json').then(r=>r.ok?r.json():{})}catch(e){EX[c]={}}return EX[c]}
+async function loadEx1(c){if(EX[c]!==undefined)return EX[c];EX[c]=null;try{EX[c]=await fetch((DX==='n5'?'ex5-':DX==='n4'?'ex4-':'ex-')+c+'.json').then(r=>r.ok?r.json():{})}catch(e){EX[c]={}}return EX[c]}
+async function loadEx(){const c=LANGS[LI][0];if(c!=='en')loadEx1('en').then(()=>{if(typeof Q!=='undefined'&&Q.checked)renderPage()});if(EX[c]!==undefined)return EX[c];EX[c]=null;try{EX[c]=await fetch((DX==='n5'?'ex5-':DX==='n4'?'ex4-':'ex-')+c+'.json').then(r=>r.ok?r.json():{})}catch(e){EX[c]={}}return EX[c]}
 function explain(q,i,ok,a){const c=LANGS[LI][0]==='ja'?'en':LANGS[LI][0],id_=qid(q),e=(EX[c]&&EX[c][id_])||(LX[c]&&LX[c][id_])||(EX.en&&EX.en[id_])||(LX.en&&LX.en[id_]);
   const head=`<div class="ex-h"><b>${ok?t('right'):t('wrong')}</b><span>${t('ans')} ${C[q.a-1]} <b class="jp">${esc(q.t==='usage'?q.q:q.o[q.a-1].replace(/[【】]/g,''))}</b></span>${a&&!ok?`<span class="muted">${t('youChose',{c:C[a-1]})}</span>`:(!a?`<span class="muted">${t('noAns')}</span>`:'')}</div>`;
   if(!e)return `<div class="expl ${ok?'ok':'ng'}">${head}${q.m?`<div class="ex-m"><div><span class="tag">NE</span>${esc(q.m[0])}</div><div><span class="tag">EN</span>${esc(q.m[1])}</div></div>`:''}</div>`;
@@ -1199,7 +1202,7 @@ function renderMock(){
   shell('mock',`${ph('試',t('mockH'),'模擬試験 · MOCK TEST')}<section class="card qhead" style="display:grid;gap:12px">
   <p class="muted" style="margin:0">${t('mockD')}</p>
   <div class="row"><label for="msSel">${t('set')}</label><select id="msSel">${sets.map(n=>`<option value="${n}">${isLocked(n)?'🔒 ':''}${t('setN',{n})}${hist[n]!=null?' · '+t('last',{n:hist[n]}):''}</option>`).join('')}</select>
-</div><div class="card" style="padding:10px 14px;font-size:14px;line-height:1.8"><b>JLPT ${exam()==='n5'?'N5':'N3'}</b><br>${t('part1')} · ${PART[1][0]} · ${t('min',{n:PART[1][1]})} · ${D.q.filter(q=>q.s===1&&q.pt===1).length}問<br>${t('part2')} · ${PART[2][0]} · ${t('min',{n:PART[2][1]})} · ${D.q.filter(q=>q.s===1&&q.pt===2).length}問<br>${D.q.some(q=>q.pt===3)?`${t('part3')} · ${PART[3][0]} · ${t('min',{n:PART[3][1]})} · ${D.q.filter(q=>q.s===1&&q.pt===3).length}問<br>`:''}<span class="muted">${t('mockRule')}</span></div>
+</div><div class="card" style="padding:10px 14px;font-size:14px;line-height:1.8"><b>JLPT ${exam().toUpperCase()}</b><br>${t('part1')} · ${PART[1][0]} · ${t('min',{n:PART[1][1]})} · ${D.q.filter(q=>q.s===1&&q.pt===1).length}問<br>${t('part2')} · ${PART[2][0]} · ${t('min',{n:PART[2][1]})} · ${D.q.filter(q=>q.s===1&&q.pt===2).length}問<br>${D.q.some(q=>q.pt===3)?`${t('part3')} · ${PART[3][0]} · ${t('min',{n:PART[3][1]})} · ${D.q.filter(q=>q.s===1&&q.pt===3).length}問<br>`:''}<span class="muted">${t('mockRule')}</span></div>
   <div><button class="btn red" id="mgo">${t('startExam')}</button></div></section>`);
   $('#mgo').onclick=()=>{const n=+$('#msSel').value;if(isLocked(n)){location.hash='#unlock';return}Q.start({mode:'mock',set:n,part:1})};
 }
@@ -1231,7 +1234,7 @@ function renderPage(){
    <button class="chip ${S.furi?'on':''}" id="furi" aria-pressed="${S.furi}"><ruby>振<rt>ふ</rt></ruby> ${t('furi')}</button><span class="timer" id="timer"></span></section>
    ${scoreBox}<div class="qlist">${body}</div>
    <div class="foot">${Q.checked?(Q.page+1<pages?`<button class="btn grad" id="next">${t('next')}</button>`:`<button class="btn" id="fin">${t('fin')}</button>`):`<span class="muted" id="cnt" style="align-self:center">${t('answered',{a:answered,b:qs.length})}</span><button class="btn red" id="check">${t('check')}</button>`}</div>`);
-  const cb=$('#certBtn');if(cb)cb.onclick=()=>{const r=jlptScore(Q.mockRes);exam()==='n5'?(()=>{const r5=jlpt5Score(Q.mockRes);openCert('JLPT N5 模擬試験 · Set '+Q.mockSet,'言語知識・読解 '+r5.lk+'/120'+(r5.hasL?' · 聴解 '+r5.ls+'/60':''))})():openCert('JLPT N3 模擬試験 · Set '+Q.mockSet,'言語知識 '+r.lk+'/60 · 読解 '+r.rd+'/60'+(r.hasL?' · 聴解 '+r.ls+'/60':''))};const p3=$('#p3go');if(p3)p3.onclick=()=>{Q.start({mode:'mock',set:Q.mockSet,part:3});window.scrollTo(0,0)};const p2=$('#p2go');if(p2)p2.onclick=()=>{Q.start({mode:'mock',set:Q.mockSet,part:2});window.scrollTo(0,0)};
+  const cb=$('#certBtn');if(cb)cb.onclick=()=>{const r=jlptScore(Q.mockRes);['n4','n5'].includes(exam())?(()=>{const r5=jlpt5Score(Q.mockRes);openCert('JLPT '+exam().toUpperCase()+' 模擬試験 · Set '+Q.mockSet,'言語知識・読解 '+r5.lk+'/120'+(r5.hasL?' · 聴解 '+r5.ls+'/60':''))})():openCert('JLPT N3 模擬試験 · Set '+Q.mockSet,'言語知識 '+r.lk+'/60 · 読解 '+r.rd+'/60'+(r.hasL?' · 聴解 '+r.ls+'/60':''))};const p3=$('#p3go');if(p3)p3.onclick=()=>{Q.start({mode:'mock',set:Q.mockSet,part:3});window.scrollTo(0,0)};const p2=$('#p2go');if(p2)p2.onclick=()=>{Q.start({mode:'mock',set:Q.mockSet,part:2});window.scrollTo(0,0)};
   TTS.stop();$$('[data-play]').forEach(b=>b.onclick=()=>{const i=+b.dataset.play,q=qs[i],st=$('#lst'+i);
     if(!TTS.ok()){st.textContent=t('noVoice');return}TTS.load();if(!TTS.v.length)st.textContent=t('noVoice');
     if(Q.mode==='mock'&&!Q.checked){if(Q.played[qid(q)])return;Q.played[qid(q)]=1;b.disabled=true}
@@ -1240,7 +1243,7 @@ function renderPage(){
   $$('.opt').forEach(b=>b.onclick=()=>{if(Q.checked)return;const i=+b.dataset.q;Q.ans[i]=+b.dataset.o;
     b.parentNode.querySelectorAll('.opt').forEach(x=>x.classList.toggle('sel',x===b));const s=$('#cnt');if(s)s.textContent=t('answered',{a:Object.keys(Q.ans).length,b:qs.length})});
   const doCheck=()=>{Q.checked=true;let r=0;qs.forEach((q,i)=>{const ok=Q.ans[i]===q.a;r+=ok;P.mark(qid(q),ok)});if(r===qs.length)P.hana++;
-    if(Q.mode==='mock'){qs.forEach((q,i)=>Q.mockRes.push([q,Q.ans[i]===q.a]));const js=exam()==='n5'?jlpt5Score(Q.mockRes):jlptScore(Q.mockRes);const h=LS.get('mock',{});h[Q.mockSet]=js.hasR?js.tot:js.lk;LS.set('mock',h)}
+    if(Q.mode==='mock'){qs.forEach((q,i)=>Q.mockRes.push([q,Q.ans[i]===q.a]));const js=['n4','n5'].includes(exam())?jlpt5Score(Q.mockRes):jlptScore(Q.mockRes);const h=LS.get('mock',{});h[Q.mockSet]=js.hasR?js.tot:js.lk;LS.set('mock',h)}
     P.save();clearInterval(tick);Q.elapsed=Date.now()-Q.t0;renderPage();window.scrollTo({top:0,behavior:'smooth'})};
   const ch=$('#check');if(ch)ch.onclick=()=>{const un=qs.length-Object.keys(Q.ans).length;
     if(un&&!ch.dataset.sure){ch.dataset.sure=1;ch.textContent=t('remain',{n:un});return}doCheck()};
@@ -1258,8 +1261,8 @@ function mockBox(qs){const r=jlptScore(Q.mockRes);const mo={};Q.mockRes.filter((
   const tbl=`<table class="motbl">${Object.keys(mo).map(k=>`<tr><td>問題${k}</td><td>${mo[k][0]} / ${mo[k][1]}</td></tr>`).join('')}</table>`;
   if(Q.part===1&&Q.hasP2)return `${tbl}<div style="margin-top:8px">${PART[1][0]} ${t('done1')}</div><button class="btn red" id="p2go" style="margin-top:10px">${t('part2')} · ${PART[2][0]} (${t('min',{n:PART[2][1]})}) →</button>`;
   if(Q.part===2&&Q.hasP3)return `${tbl}<div style="margin-top:8px">${PART[2][0]} ${t('done1')}</div><button class="btn red" id="p3go" style="margin-top:10px">${t('part3')} · ${PART[3][0]} (${t('min',{n:PART[3][1]})}) →</button>`;
-  if(exam()==='n5'){const r5=jlpt5Score(Q.mockRes);return `${tbl}<table class="motbl sc"><tr><td>言語知識（文字・語彙・文法）・読解</td><td><b>${r5.lk}</b> / 120</td></tr>${r5.hasL?`<tr><td>聴解</td><td><b>${r5.ls}</b> / 60</td></tr><tr><td>${t('total180')}</td><td><b>${r5.tot}</b> / 180</td></tr>`:''}</table>
-  <div class="verdict ${r5.pass?'ok':'ng'}">${r5.pass?'合格 '+t('passY'):'不合格 '+t('passN')}</div><span class="muted" style="font-size:12px">JLPT N5: 言語知識・読解 38/120, 聴解 19/60, 合計 80/180</span>${r5.pass?`<br><button class="btn red" id="certBtn" style="margin-top:10px">${t('getCert')}</button>`:''}`}
+  if(['n4','n5'].includes(exam())){const r5=jlpt5Score(Q.mockRes);return `${tbl}<table class="motbl sc"><tr><td>言語知識（文字・語彙・文法）・読解</td><td><b>${r5.lk}</b> / 120</td></tr>${r5.hasL?`<tr><td>聴解</td><td><b>${r5.ls}</b> / 60</td></tr><tr><td>${t('total180')}</td><td><b>${r5.tot}</b> / 180</td></tr>`:''}</table>
+  <div class="verdict ${r5.pass?'ok':'ng'}">${r5.pass?'合格 '+t('passY'):'不合格 '+t('passN')}</div><span class="muted" style="font-size:12px">JLPT ${exam().toUpperCase()}: 言語知識・読解 38/120, 聴解 19/60, 合計 ${exam()==='n4'?90:80}/180</span>${r5.pass?`<br><button class="btn red" id="certBtn" style="margin-top:10px">${t('getCert')}</button>`:''}`}
   if(r.hasL)return `${tbl}<table class="motbl sc"><tr><td>言語知識（文字・語彙・文法）</td><td><b>${r.lk}</b> / 60</td></tr><tr><td>読解</td><td><b>${r.rd}</b> / 60</td></tr><tr><td>聴解</td><td><b>${r.ls}</b> / 60</td></tr><tr><td>${t('total180')}</td><td><b>${r.tot}</b> / 180</td></tr></table>
   <div class="verdict ${r.pass?'ok':'ng'}">${r.pass?'合格 '+t('passY'):'不合格 '+t('passN')}</div><span class="muted" style="font-size:12px">${t('passRule3')}</span>${r.pass?`<br><button class="btn red" id="certBtn" style="margin-top:10px">${t('getCert')}</button>`:''}`;
   if(!r.hasR)return `${tbl}${t('est')} <b style="font-size:20px">${r.lk} / 60</b><br><span class="muted">${t('passNote')}</span>`;
@@ -1362,7 +1365,7 @@ function dPage(){const qs=DS.list.slice(DS.page*DS.size,DS.page*DS.size+DS.size)
   const ck=$('#dcheck');if(ck)ck.onclick=()=>{DS.checked=true;const res=LS.get(XID+'res',{});qs.forEach((q,i)=>res[q.s+'-'+q.n]=DS.ans[i]===q.a?1:0);LS.set(XID+'res',res);dPage();scrollTo(0,0)};
   const nx=$('#dnext');if(nx)nx.onclick=()=>{DS.page++;DS.ans={};DS.checked=false;dPage();scrollTo(0,0)};}
 /* ---------- N3 Unit homework (漢字 12 · 語彙 24 · 文法 24, 50 questions each) ---------- */
-let UD=null,UDE='';const UKP=()=>exam()==='n5'?'n5':'';const US={sec:'k',unit:1,list:[],ans:{},checked:false,inPage:false,only:false,warn:false};
+let UD=null,UDE='';const UKP=()=>['n4','n5'].includes(exam())?exam():'';const US={sec:'k',unit:1,list:[],ans:{},checked:false,inPage:false,only:false,warn:false};
 const UPASS=.7;
 const UT={nav:['宿題','Units','युनिट'],title:['ユニット別 宿題テスト','Unit homework tests','युनिट अनुसार गृहकार्य परीक्षा'],
  sub:['各ユニット50問。提出すると点数・合格／不合格・まちがえた問題がすぐわかります。','50 questions per unit. Submit to see your score, pass/fail and every mistake.','हरेक युनिटमा 50 प्रश्न। Submit गरेपछि अङ्क, पास/फेल र गलत भएका प्रश्न तुरुन्तै देखिन्छ।'],
@@ -1380,10 +1383,10 @@ const UT={nav:['宿題','Units','युनिट'],title:['ユニット別 宿�
  done:['回答','Answered','उत्तर दिइयो'],
  setsH:['模擬問題セット','Model question sets','मोडल प्रश्न सेट'],hwH:['宿題（ユニット別）','Homework (by unit)','गृहकार्य (युनिट अनुसार)'],
  l:['聴解','Listening','सुनाइ (Listening)'],ld:['近日公開','Coming soon','छिट्टै आउँदैछ'],units:['ユニット','units','युनिट']};
-const ut=(k,o)=>{const v=(exam()==='n5'&&UT5[k])||UT[k];const c=LANGS[LI][0];let s=c==='ja'||(HJ&&c==='ne')?v[0]:v[1];if(o)for(const x in o)s=s.replace('{'+x+'}',o[x]);return s};
+const ut=(k,o)=>{const v=(['n4','n5'].includes(exam())&&UT5[k])||UT[k];const c=LANGS[LI][0];let s=c==='ja'||(HJ&&c==='ne')?v[0]:v[1];if(o)for(const x in o)s=s.replace('{'+x+'}',o[x]);return s};
 const ulang=()=>LANGS[LI][0]==='ne'?'ne':'en';
-async function loadUnits(){if(UD&&UDE===exam())return;UDE=exam();try{UD=await fetch(exam()==='n5'?'units-n5.json':'units.json').then(r=>r.json())}catch(e){UD={k:[],v:[],g:[]};return}
-  if(window.MK&&Object.values(UD).some(s=>s.some(x=>x.lk))){try{const L=await fetch(exam()==='n5'?'units-n5-locked.json':'units-locked.json').then(r=>r.json());
+async function loadUnits(){if(UD&&UDE===exam())return;UDE=exam();try{UD=await fetch(exam()==='n3'?'units.json':'units-'+exam()+'.json').then(r=>r.json())}catch(e){UD={k:[],v:[],g:[]};return}
+  if(window.MK&&Object.values(UD).some(s=>s.some(x=>x.lk))){try{const L=await fetch(exam()==='n3'?'units-locked.json':'units-'+exam()+'-locked.json').then(r=>r.json());
     const raw=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64d(L.iv)},window.MK,b64d(L.ct));const B=JSON.parse(new TextDecoder().decode(raw));
     for(const s in B)B[s].forEach(full=>{const i=UD[s].findIndex(x=>x.n===full.n);if(i>=0)UD[s][i]=full})}catch(e){}}}
 async function renderUnits(){
@@ -1445,8 +1448,8 @@ function renderN5Home(){const res=LS.get('ures',{});
   $$('[data-exam]').forEach(b=>b.onclick=()=>{LS.set('exam',b.dataset.exam);location.hash='#home';render()});
   $$('[data-hsec]').forEach(b=>b.onclick=()=>{US.sec=b.dataset.hsec;US.inPage=false});
 }
-function hwHome(){const res=LS.get('ures',{}),n5=exam()==='n5',NU=n5?[10,25,25]:[12,24,24];
-  const cnt=s=>Object.keys(res).filter(k=>(n5?k.startsWith('n5'+s):k[0]===s)&&res[k].b>=35).length;
+function hwHome(){const res=LS.get('ures',{}),n5=['n4','n5'].includes(exam()),NU=n5?[10,25,25]:[12,24,24];
+  const cnt=s=>Object.keys(res).filter(k=>(n5?k.startsWith(exam()+s):k[0]===s)&&res[k].b>=35).length;
   const it=(s,n,ic)=>`<a class="card hwc" href="#units" data-hsec="${s}"><i>${ic}</i><b>${ut(s)}</b><span>${n} ${ut('units')} · 50問</span><small>✓ ${cnt(s)}/${n}</small></a>`;
   return `<section class="hwsec"><h2 class="hsech"><i>課</i>${ut('hwH')}</h2><div class="hwgrid">${it('k',NU[0],'漢')}${it('v',NU[1],'語')}${it('g',NU[2],'文')}<div class="card hwc off"><i>聴</i><b>${ut('l')}</b><span>${ut('ld')}</span></div></div></section>`}
 /* ---------- Book library: view-only page images (no PDF files, no download) ---------- */
@@ -1715,7 +1718,7 @@ async function renderTeacher(){
   let hk=true;try{hk=await BE.api.hasKey(tc)}catch(e){}
   let HW=null;try{HW=await BE.api.allHw()}catch(e){HW=null}
   shell('teacher',`${ph('師',at('tT'),new Date().toISOString().slice(0,10))}
-  <div class="erow" style="margin:0 0 12px">${['n3','n5'].map(c=>`<button class="chip ${c===tc?'on':''}" data-tc="${c}">${PAYC(c)}</button>`).join('')}</div>
+  <div class="erow" style="margin:0 0 12px">${['n5','n4','n3'].map(c=>`<button class="chip ${c===tc?'on':''}" data-tc="${c}">${PAYC(c)}</button>`).join('')}</div>
   ${hk?'':`<section class="card accbox"><b>🔑 ${at('keyT')} · ${PAYC(tc)}</b><p class="muted" style="margin:0">${at('keyS')}</p><form id="kF" class="erow"><input id="kC" placeholder="XXXX-XXXXXXXX" autocomplete="off" style="flex:2"><button class="btn grad">${at('save')}</button></form></section>`}
   <section class="tstats">${[[at('total'),U.length],[at('active'),act],[at('inactive'),U.length-act],[at('paidN'),paid],[at('pendN'),PY.length],[at('avg'),avg+(RV.length?' ★':'')]].map(([l,v])=>`<div class="card ts"><b>${v}</b><span>${l}</span></div>`).join('')}</section>
   <h2 class="hsech"><i>¥</i>${at('pays')} (${PY.length})</h2>
