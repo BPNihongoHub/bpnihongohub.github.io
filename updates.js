@@ -13,8 +13,8 @@ let UD=null;
 async function data(){if(!UD)UD=await fetch('updates.json',{cache:'no-cache'}).then(r=>r.json()).catch(()=>({ev:[],open:[],news:[]}));return UD}
 // items to show: test/result day within 30 days, or application period open / opening within 30 days
 function soon(ev){return ev.map(e=>{const a=dleft(e.date),b=e.end?dleft(e.end):a;return {...e,a,b}})
-  .filter(e=>e.b>=0&&e.a<=30).sort((x,y)=>Math.max(x.a,0)-Math.max(y.a,0))}
-window.updCount=async()=>{const d=await data();return soon(d.ev||[]).length};
+  .filter(e=>(e.kind==='apply'?e.b>=-7:e.b>=0)&&e.a<=30).sort((x,y)=>(x.b<0)-(y.b<0)||Math.max(x.a,0)-Math.max(y.a,0))}
+window.updCount=async()=>{const d=await data();return soon(d.ev||[]).filter(e=>e.b>=0).length};
 
 const SC={10:'1',20:'2',30:'3',40:'4',45:'5-',50:'5+',55:'6-',60:'6+',70:'7'};
 const scLv=s=>s>=55?['Very strong · danger','#c0001a']:s>=45?['Strong · be careful','#e5193f']:s>=30?['Moderate','#e3a200']:['Weak','#6b7a99'];
@@ -58,6 +58,7 @@ const CSS=`.up-h{background:var(--grad,linear-gradient(135deg,#0a1440,#2443e8));
 .up-sc{color:#fff;border-radius:10px;min-width:46px;text-align:center;font-size:10px;padding:4px 2px;line-height:1.1}.up-sc b{font-size:18px}
 .up-alert{color:#1a1f36;border-left:5px solid;padding:8px 10px;margin:6px 0;background:#fff5f6;border-radius:8px;display:flex;flex-direction:column;gap:2px;font-size:13px}
 .up-ok{margin:0 0 6px}
+.up-st{display:inline-block;font-size:12px;font-weight:800;padding:3px 10px;border-radius:99px;margin:0 0 6px}.up-st.op{background:#e6f7ee;color:#0a7a3e}.up-st.cl{background:#fdeaea;color:#c0001a}.up-st.so{background:#fff3d6;color:#7a5200}
 .up-nh{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-bottom:6px}.up-nh small{margin-left:auto;font-size:11px}
 .up-ja{font-size:16px;line-height:1.7;margin:0 0 8px}.up-tr summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--ai,#2443e8)}
 .up-tr p{font-size:13px;margin:6px 0}.up-src{font-size:12px;margin:8px 0 0;opacity:.85}`;
@@ -66,9 +67,10 @@ window.renderUpdates=async function(){
   if(!document.querySelector('#upCss')){const s=document.createElement('style');s.id='upCss';s.textContent=CSS;document.head.appendChild(s)}
   shell('updates','<section class="up-h"><small>⋮ UPDATES</small><h1>Exams · News · Safety</h1><p>Loading…</p></section>');
   const [d,N]=await Promise.all([data(),news()]),S=soon(d.ev||[]);
-  const ev=S.map(e=>{const [ic,kn]=KN[e.kind]||KN.test,open=e.a<=0;
-    return `<section class="card up-ev"><div class="up-dl ${open?'now':''}">${open?(e.end?`<small>open</small><b>${e.b}</b><small>days left</small>`:'<b>今日</b><small>Today</small>'):`<b>${e.a}</b><small>days left</small>`}</div>
-    <div><span class="up-tag">${esc(e.cat)}</span><span class="up-tag" style="background:#fff0f2;color:#e5193f">${ic} ${kn}</span><h3>${esc(e.t)}</h3><p>${esc(e.s)}</p>
+  const ev=S.map(e=>{const [ic,kn]=KN[e.kind]||KN.test,open=e.a<=0,closed=e.b<0,ap=e.kind==='apply';
+    const st=ap?(closed?'<span class="up-st cl">🔴 Closed</span>':open?`<span class="up-st op">🟢 Open now · until ${fd(e.end||e.date)}</span>`:`<span class="up-st so">🟡 Opens in ${e.a} days</span>`):'';
+    return `<section class="card up-ev" ${closed?'style="opacity:.65"':''}><div class="up-dl ${open&&!closed?'now':''}">${closed?'<b>✕</b><small>closed</small>':open?(e.end?`<small>open</small><b>${e.b}</b><small>days left</small>`:'<b>今日</b><small>Today</small>'):`<b>${e.a}</b><small>${ap?'days to open':'days left'}</small>`}</div>
+    <div><span class="up-tag">${esc(e.cat)}</span><span class="up-tag" style="background:#fff0f2;color:#e5193f">${ic} ${kn}</span><h3>${esc(e.t)}</h3>${st}<p>${esc(e.s)}</p>
     <p class="muted" style="font-size:12px">📅 ${fd(e.date)}${e.end?' – '+fd(e.end):''}</p><a class="up-lk" href="${esc(e.u)}" target="_blank" rel="noopener">Official page (${esc(e.src||'')}) ↗</a></div></section>`}).join('');
   const op=(d.open||[]).map(e=>`<section class="card up-ev"><div class="up-dl" style="background:#e6f7ee;color:#0a7a3e"><b>✓</b><small>any time</small></div><div><span class="up-tag">${esc(e.cat)}</span><h3>${esc(e.t)}</h3><p>${esc(e.s)}</p><a class="up-lk" href="${esc(e.u)}" target="_blank" rel="noopener">Official page ↗</a></div></section>`).join('');
   const nw=(d.news||[]).map(e=>`<section class="card up-ev"><div class="up-dl" style="background:#e8edff;color:#2443e8"><small>${dleft(e.date)>0?'starts in':'since'}</small><b>${Math.abs(dleft(e.date))}</b><small>days</small></div><div><span class="up-tag" style="background:#fff0f2;color:#e5193f">${esc(e.lv)}</span><h3>${esc(e.t)}</h3><p>${esc(e.s)}</p><p class="muted" style="font-size:12px">📅 ${fd(e.date)}</p><a class="up-lk" href="${esc(e.u)}" target="_blank" rel="noopener">Full information (official) ↗</a></div></section>`).join('');
