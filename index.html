@@ -1,5 +1,14 @@
 <!doctype html><meta charset="utf-8"><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes">
-<title>BP Nihongo Hub</title>
+<title>BP Nihongo Hub · JLPT N5 N4 N3 practice in Nepali</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="JLPT N5, N4, N3 practice with Nepali explanations: model tests, mock exams, kanji, vocabulary, grammar and listening. By teacher Binod Paudel in Japan.">
+<link rel="canonical" href="https://bpnihongohub.github.io/">
+<meta property="og:type" content="website"><meta property="og:site_name" content="BP Nihongo Hub">
+<meta property="og:title" content="BP Nihongo Hub · JLPT practice in Nepali">
+<meta property="og:description" content="JLPT N5, N4, N3 practice with Nepali explanations: model tests, mock exams, kanji, vocabulary, grammar and listening. By teacher Binod Paudel in Japan.">
+<meta property="og:url" content="https://bpnihongohub.github.io/"><meta property="og:image" content="https://bpnihongohub.github.io/og.jpg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://bpnihongohub.github.io/og.jpg">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"EducationalOrganization","name":"BP Nihongo Hub","url":"https://bpnihongohub.github.io/","logo":"https://bpnihongohub.github.io/icon-512.png","founder":{"@type":"Person","name":"Binod Paudel"},"description":"JLPT N5, N4, N3 practice with Nepali explanations: model tests, mock exams, kanji, vocabulary, grammar and listening. By teacher Binod Paudel in Japan."}</script>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="theme-color" content="#06071a">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1002,6 +1011,7 @@ const b64d=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 const isLocked=n=>!UNL&&!(D.free||[]).includes(+n);
 async function unlock(code,silent,nosave){const cx=DX,K=KEYS;
   code=(code||'').toUpperCase().replace(/[^0-9A-Z]/g,'');const w=K&&K.w&&K.w[code.slice(0,4)];
+  if(!nosave&&LS.get('blk',[]).includes(code.slice(0,4))){LS.set(codeKey(cx),'');return false}/* account keys work only through a signed-in paid/trial account */
   if(code.length!==12||!w){if(silent&&K)LS.set(codeKey(cx),'');return false}
   let mk;
   try{const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(code),'PBKDF2',false,['deriveKey']);
@@ -1052,7 +1062,7 @@ function shell(active,inner){
   $('#app').innerHTML=`<header class="top"><div class="in"><a class="brand" href="#home">${hanko('hk')}<div><b>BP Nihongo <em>Hub</em></b><small>日本語 · <strong>JLPT</strong></small></div></a>
   <div class="tools">${langSel('langTop')}<button class="iconbtn" id="themeBtn" aria-label="${t('theme')}">◐</button><a class="iconbtn accbtn ${BE.user?'in':''}" href="#acc" aria-label="${at('acc')}">${BE.user?esc(((BE.prof&&BE.prof.name)||BE.user.email||'?').trim().charAt(0).toUpperCase()||'人'):'人'}</a>${UNL?'':`<a class="iconbtn lockbtn" href="#unlock" aria-label="${t('unlockT')}">🔒</a>`}</div>
   ${nav('tabs')}</div></header><main class="wrap">${inner}</main>
-  <footer class="wrap foot-note">© Binod Paudel</footer>${bnav}`;
+  <footer class="wrap foot-note">© BP Nihongo Hub · Binod Paudel · <a href="legal.html" style="color:inherit">Terms · Privacy · 特定商取引法</a></footer>${bnav}`;
   bindLang('langTop');
   const mb=$('#moreBtn'),ms=$('#moreSheet');if(mb){mb.onclick=e=>{e.stopPropagation();ms.hidden=!ms.hidden;mb.setAttribute('aria-expanded',!ms.hidden)};ms.onclick=e=>{if(e.target===ms)ms.hidden=true};ms.querySelectorAll('a').forEach(x=>x.onclick=()=>{ms.hidden=true})}
   $('#themeBtn').onclick=()=>{const dark=matchMedia('(prefers-color-scheme: dark)').matches;const cur=document.documentElement.getAttribute('data-theme')||'dark';setTheme(cur==='dark'?'light':'dark')};
@@ -1525,7 +1535,8 @@ const tms=v=>v&&v.toMillis?v.toMillis():(+v||0);
 const untilOf=(p,c)=>{c=c||dxOf();return p?(c==='n3'?tms(p.paidUntil):tms((p.pu||{})[c])):0};
 const TRIALD=3;/* every new account: all courses open for 3 days (rules: secret/* readable while users.created + 3 days > now) */
 const trialEnd=p=>p&&p.created?tms(p.created)+TRIALD*864e5:0;
-const isTrialP=p=>trialEnd(p)>Date.now();
+const verOK=()=>!BE.user||BE.user.emailVerified!==false;/* email sign-ups must verify their address before the free trial (rules: email_verified) */
+const isTrialP=p=>trialEnd(p)>Date.now()&&verOK();
 const trialLeft=p=>Math.max(0,Math.ceil((trialEnd(p)-Date.now())/864e5));
 const isPaidP=(p,c)=>{c=c||dxOf();if(!p)return false;return c==='n3'?!!(p.paid&&untilOf(p,c)>Date.now()):untilOf(p,c)>Date.now()};
 const PAYC=c=>'JLPT '+(c||dxOf()).toUpperCase();
@@ -1578,13 +1589,18 @@ async function beInit(){
   if(mock){BE.api=mockApi();BE.ok=true}
   else if(FBCONF&&!/claude\.ai|claudeusercontent/.test(location.hostname)){
     try{const b=`https://www.gstatic.com/firebasejs/${FBV}/`;await loadScript(b+'firebase-app-compat.js');await Promise.all([loadScript(b+'firebase-auth-compat.js'),loadScript(b+'firebase-firestore-compat.js')]);
-      firebase.initializeApp(FBCONF);BE.api=fbApi();BE.ok=true}catch(e){BE.ok=false}}
+      firebase.initializeApp(FBCONF);BE.api=fbApi();BE.ok=true;if(FBCONF.measurementId)loadScript(b+'firebase-analytics-compat.js').then(()=>{const an=firebase.analytics();window.BPLog=(n,o)=>{try{an.logEvent(n,o||{})}catch(e){}};window.addEventListener('hashchange',()=>BPLog('page_view',{page_path:'/'+location.hash}))}).catch(()=>{})}catch(e){BE.ok=false}}
   if(!BE.ok){BE.ready=true;return}
+  if(BE.api.blk)BE.api.blk().then(b=>{if(!b)return;LS.set('blk',b);for(const cx of ['n3','n5','n4','n2','n1']){const c=LS.get(codeKey(cx),'');if(c&&b.includes(c.toUpperCase().replace(/[^0-9A-Z]/g,'').slice(0,4))){LS.set(codeKey(cx),'');if(cx===DX&&UNL)location.reload()}}});
   BE.api.onAuth(async u=>{BE.user=u;BE.prof=null;BE.admin=false;
     if(u){BE.err='';try{BE.prof=await BE.api.touch(u)}catch(e){BE.err='profile: '+((e&&(e.code||e.message))||e)}try{BE.admin=await BE.api.isAdmin()}catch(e){}
+      if(BE.admin)beBlk();
       if(BE.admin||isTrialP(BE.prof)||isPaidP(BE.prof,DX))beKey()}
     BE.ready=true;render()});
 }
+async function beBlk(){/* teacher: publish the ids of the account keys so they cannot be typed in or saved on a phone */
+  if(!BE.api.setBlk)return;try{const ids=[];for(const cx of ['n3','n5','n4','n2','n1']){try{const c=await BE.api.key(cx);if(c)ids.push(c.toUpperCase().replace(/[^0-9A-Z]/g,'').slice(0,4))}catch(e){}}
+    const old=(await BE.api.blk())||[];const all=[...new Set(old.concat(ids))];if(all.length!==old.length)await BE.api.setBlk(all)}catch(e){}}
 async function beKey(){/* paid account: fetch the course unlock code (readable only by paid users) and open locked sets */
   const cx=DX;if(MKC[cx])return;try{const c=await BE.api.key(cx);if(c&&DX===cx)await unlock(c,true,true)}catch(e){}}/* not saved locally: access ends when the 6 months end */
 let _syncT=0;
@@ -1605,7 +1621,10 @@ function fbApi(){
     onAuth:f=>A.onAuthStateChanged(f),
     google:()=>A.signInWithPopup(new firebase.auth.GoogleAuthProvider()),
     signin:(e,p)=>A.signInWithEmailAndPassword(e,p),
-    signup:async(e,p,n)=>{const c=await A.createUserWithEmailAndPassword(e,p);if(n)await c.user.updateProfile({displayName:n});return c},
+    signup:async(e,p,n)=>{const c=await A.createUserWithEmailAndPassword(e,p);if(n)await c.user.updateProfile({displayName:n});try{await c.user.sendEmailVerification()}catch(x){}return c},
+    verify:()=>A.currentUser.sendEmailVerification(),
+    reloadUser:async()=>{await A.currentUser.reload();return A.currentUser},
+    async blk(){try{const s=await F.doc('pub/keys').get();return s.exists?(s.data().ids||[]):[]}catch(e){return null}},setBlk:ids=>F.doc('pub/keys').set({ids}),
     out:()=>A.signOut(),
     async touch(u){const r=F.doc('users/'+u.uid),s=await r.get();
       if(!s.exists){const p={name:u.displayName||'',email:u.email||'',phone:'',created:TS(),last:TS(),lastDay:day(),paid:false,prog:{}};await r.set(p);return Object.assign(p,{created:Date.now(),last:Date.now()})}
@@ -1692,7 +1711,9 @@ async function renderAccount(){
   const p=BE.prof||{},sum=p.prog||{};let mine=[];try{mine=await BE.api.myPay(BE.user.uid)}catch(e){}
   const pend=mine.some(x=>x.status==='pending'&&(x.course||'n3')===dxOf());
   const vals=Object.values(P.res),done=vals.length,ok=vals.filter(v=>v===1).length,ures=LS.get('ures',{}),hwp=Object.values(ures).filter(v=>(v.b||0)>=35).length;
+  const nv=BE.user.emailVerified===false;
   shell('acc',`${ph('人',at('acc'),esc(p.email||BE.user.email||''))}
+  ${nv?`<section class="card accbox" style="border:1.5px solid #e3a200"><b>📧 Please verify your email · メール確認</b><p class="muted">We sent a link to <b>${esc(BE.user.email||'')}</b>. Open it, then tap "I verified". Your 3-day free trial starts after this.</p><div class="erow"><button class="btn grad" id="vDone">✓ I verified</button><button class="btn ghost" id="vSend">Resend email</button></div><div class="err" id="vErr"></div></section>`:''}
   <section class="card accbox"><div class="plan ${isPaidP(p)?'ok':isTrialP(p)?'trial':'lock'}"><b>${PAYC()}</b> · ${isPaidP(p)?at('paid')+`<small>${at('until')}: ${fdate(untilOf(p))}</small>`:pend?at('pending'):isTrialP(p)?`🎁 Free trial: everything open<small>${trialLeft(p)} day(s) left · until ${fdate(trialEnd(p))}. Pay before it ends to keep everything open.</small>`:untilOf(p)?at('expired'):`🔒 Locked${trialEnd(p)?'<small>Your 3-day free trial has ended. Pay to open everything.</small>':''}`}</div>
    ${!isPaidP(p)&&PAY.on&&!pend?`<a class="btn grad" href="#pay">💳 ${at('payT')} · ${PAY.cur}${PAY.price.toLocaleString('en')} · ${at('per6')}</a>`:''}
    <form id="pForm" class="eform"><label>${at('name')}<input id="pName" value="${esc(p.name||'')}"></label><label>${at('phone')}<input id="pPhone" type="tel" value="${esc(p.phone||'')}"></label>
@@ -1701,6 +1722,8 @@ async function renderAccount(){
   <section class="card accbox"><h3>${at('prog')}</h3><div class="astats"><div><b>${done}</b><span>${at('done')}</span></div><div><b>${done?Math.round(ok*100/done):0}%</b><span>${at('acc2')}</span></div><div><b>${hwp}</b><span>${at('hw')} ✓</span></div></div></section>
   ${BE.err?`<p class="muted" style="text-align:center;font-size:12px;color:var(--shu)">⚠ ${esc(BE.err)}</p>`:''}
   <div class="erow" style="justify-content:center;margin:14px 0"><a class="btn ghost" href="#rate">★ ${at('rev')}</a>${BE.admin?`<a class="btn ghost" href="#teacher">師 ${at('tT')}</a>`:''}<button class="btn ghost" id="outB">${at('logout')}</button></div>`);
+  if($('#vDone')){$('#vDone').onclick=async()=>{try{const u=await BE.api.reloadUser();if(u.emailVerified){await u.getIdToken(true);BE.user=u;toast('✓ Email verified');if(isTrialP(BE.prof))beKey();render()}else $('#vErr').textContent='Not verified yet. Open the link in your email (check Spam too).'}catch(e){$('#vErr').textContent=at('err')}};
+    $('#vSend').onclick=async()=>{try{await BE.api.verify();$('#vErr').textContent='✓ Sent. Check your inbox and Spam folder.'}catch(e){$('#vErr').textContent='Please wait a few minutes and try again.'}}}
   $('#pForm').onsubmit=async e=>{e.preventDefault();const o={name:$('#pName').value.trim().slice(0,60),phone:$('#pPhone').value.trim().slice(0,30)};try{await BE.api.saveProf(BE.user.uid,o);Object.assign(BE.prof,o);toast('✓')}catch(x){toast(at('err'))}};
   $('#outB').onclick=()=>BE.api.out();
   $$('[data-rc]').forEach(b=>b.onclick=()=>showReceipt(mine.find(x=>x.id===b.dataset.rc),BE.prof));
@@ -1717,7 +1740,7 @@ function renderPay(){
   <section class="card accbox"><b>📱 PayPay</b><p>${at('payS')}</p><div class="qrbox"><a href="${PAY.pp||PAY.qr}" target="_blank" rel="noopener" title="PayPay"><img src="${PAY.qr}" alt="QR" onerror="this.replaceWith(Object.assign(document.createElement('p'),{className:'muted',textContent:'${at('noqr')}'}))"></a></div>${PAY.pp?`<a class="btn grad" style="display:block;text-align:center;margin:10px auto 0;max-width:320px;background:#ff0033" target="_blank" rel="noopener" href="${PAY.pp}">📱 PayPay で払う · Pay with PayPay</a>`:''}${PAY.ppid?`<p style="text-align:center;margin:10px 0 0">PayPay ID: <b style="font-size:17px;letter-spacing:.5px">${PAY.ppid}</b> <button class="chip" onclick="navigator.clipboard&&navigator.clipboard.writeText('${PAY.ppid}').then(()=>toast('Copied: ${PAY.ppid}'))">📋 Copy</button></p>`:''}
   <form id="payF" class="eform"><label>${at('method')}<select id="pyM"><option>PayPay</option><option>Bank transfer</option><option>eSewa / Khalti</option><option>Cash</option></select></label>
   <label>${at('txn')}<input id="pyT" maxlength="80"></label><label>${at('shot')}<input id="pyS" type="file" accept="image/*"></label><img id="pyPrev" class="pyprev" hidden alt="">
-  <label>${at('note')}<input id="pyN" maxlength="200"></label><div class="err" id="pyE" role="alert"></div><button class="btn grad" id="pyB">${at('send')}</button></form></section>`);
+  <label>${at('note')}<input id="pyN" maxlength="200"></label><div class="err" id="pyE" role="alert"></div><button class="btn grad" id="pyB">${at('send')}</button></form><p class="muted" style="font-size:12px;margin:8px 0 0">By paying you agree to our <a href="legal.html" target="_blank">terms · 特定商取引法に基づく表記</a>.</p></section>`);
   let img='';$('#pyS').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{img=await shrinkImg(f);const pv=$('#pyPrev');pv.src=img;pv.hidden=false}catch(x){img=''}};
   $('#payF').onsubmit=async e=>{e.preventDefault();const txn=$('#pyT').value.trim();if(!img&&!txn){$('#pyE').textContent=at('needShot');return}
     const b=$('#pyB');b.disabled=true;try{await BE.api.pay(BE.user.uid,{name:(BE.prof&&BE.prof.name)||'',email:BE.user.email||'',method:$('#pyM').value,txn,note:$('#pyN').value.trim(),img,amount:PAY.price,course:dxOf()});toast(at('sent'));try{fetch('https://ntfy.sh/'+NTFY,{method:'POST',body:'New payment report: '+PAYC()+' '+PAY.cur+PAY.price.toLocaleString('en')+' ('+$('#pyM').value+'). Open Teacher page to approve.',headers:{Title:'BP Nihongo Hub - payment',Tags:'moneybag',Click:'https://bpnihongohub.github.io/#teacher'}}).catch(()=>{})}catch(e){}location.hash='#acc'}

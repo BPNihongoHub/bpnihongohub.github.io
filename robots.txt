@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /books/
+Sitemap: https://bpnihongohub.github.io/sitemap.xml
