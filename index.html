@@ -669,6 +669,7 @@ details.codebox{margin-top:10px}details.codebox summary{cursor:pointer;color:var
 .instcard{margin:14px 0;border:1.5px dashed var(--gold,#e3a200)}.instcard:empty{display:none}.in-row{display:flex;gap:12px;align-items:center;margin-bottom:10px}.in-ic{font-size:2rem}.in-row small{display:block;opacity:.8}
 .storyc .st-lv{font-weight:800;color:var(--gold,#e3a200);margin-bottom:6px}#storyHome .btn{margin-top:10px}
 .clsl{margin:8px 0;padding-left:4px;list-style:none;display:grid;gap:6px}.clscard{display:flex;gap:14px;align-items:center;margin:14px 0;text-decoration:none;color:inherit;border:1.5px solid var(--ai,#2443e8)}.clscard i{font-style:normal;font-size:1.6rem;font-weight:900;width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,#2443e8,#e5193f);color:#fff}.clscard div{flex:1}.clscard span{display:block;opacity:.8;font-size:.88rem}.clscard em{font-style:normal;font-size:1.3rem}
+.updbar{display:flex;justify-content:flex-end;margin:0 0 6px}.updbtn{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;background:#fff;border:1px solid var(--line);font-weight:700;font-size:13px;color:var(--ink);text-decoration:none;box-shadow:0 2px 8px rgba(10,20,64,.08)}.updbtn b{font-size:18px;line-height:1}.updn{background:#e5193f;color:#fff;border-radius:99px;font-size:11px;min-width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;padding:0 5px}
 </style>
 <div id="app"><div class="loginwrap"><div class="aur a1"></div><div class="aur a2"></div></div></div>
 <div id="toast" class="toast" hidden></div>
@@ -1091,6 +1092,7 @@ function render(){
   const views={home:renderHome,quiz:renderQuiz,mock:renderMock,review:()=>Q.start({mode:'review'}),words:renderWords,srs:renderSRS,admin:renderAdmin,unlock:renderUnlock};
   if(r==='acc')return renderAccount();if(r==='pay')return renderPay();if(r==='rate')return renderReview();if(r==='story')return renderStory();if(r==='class')return renderClass();if(r==='teacher')return renderTeacher();if(r.startsWith('teacher/codes/')){try{sessionStorage.setItem('rk_ckey',r.slice(14))}catch(e){}history.replaceState(null,'','#teacher');return renderTeacher()}
   if(r==='pass'||r.startsWith('pass/'))return window.renderPass?renderPass():null;
+  if(r==='updates')return window.renderUpdates?renderUpdates():null;
   if(r==='units')return renderUnits();
   if(r==='books')return renderBooks();
   if(r==='read')return renderRead();
@@ -1240,7 +1242,7 @@ function renderHome(){
   const pct=s=>s.total?Math.round(s.done/s.total*100):0;const due=SR.due().length;
   const bars=ALL_T.map(ty=>{const s=typeStats(ty);const a=s.done?Math.round(s.ok/s.done*100):0;return `<div class="brow"><span>${TL[ty]}<small>${TN(ty)}</small></span><div class="bar"><i style="width:${a}%;background:${!s.done?'var(--line)':a<60?'var(--shu)':a<80?'var(--gold)':'var(--ok)'}"></i></div><b>${s.done?a+'%':'–'}</b></div>`}).join('');
   const weakest=ALL_T.map(ty=>({ty,s:typeStats(ty)})).filter(x=>x.s.done>=5).sort((a,b)=>a.s.ok/a.s.done-b.s.ok/b.s.done)[0];
-  HJ=true;const HH=`<section class="courses" id="courses"><div class="eyebrow">${t('courses')}</div><div class="crow">${COURSES.map(([k,n,sub,on])=>`<button class="course ${on?'on':''} ${exam()===k?'sel':''}" data-exam="${k}" aria-pressed="${exam()===k}"><b>${n}</b><small>${sub}</small><span class="st">${on?t('open'):t('soon')}</span></button>`).join('')}</div>${(COURSES.find(c=>c[0]===exam())||[0,0,0,1])[3]?'':`<div class="card soonnote">${t('soonNote',{c:(COURSES.find(c=>c[0]===exam())||[])[1]})}</div>`}</section>${UNL?'':`<section class="card unlockcard"><div><b>🎁 ${t('freeDemo')}</b><p>${t('lockedN',{n:(D.sets||[]).length-(D.free||[]).length})}${SHOWPRICE?' · N5–N3 ¥2,000 · N2–N1 ¥3,000':''}</p></div><a class="btn grad" href="#unlock">🔓 ${t('unlockBtn')}</a></section>`}${homeTop()}
+  HJ=true;const HH=`<div class="updbar"><a class="updbtn" href="#updates" aria-label="Updates"><span class="updn" id="updN" hidden></span>Updates <b>⋮</b></a></div><section class="courses" id="courses"><div class="eyebrow">${t('courses')}</div><div class="crow">${COURSES.map(([k,n,sub,on])=>`<button class="course ${on?'on':''} ${exam()===k?'sel':''}" data-exam="${k}" aria-pressed="${exam()===k}"><b>${n}</b><small>${sub}</small><span class="st">${on?t('open'):t('soon')}</span></button>`).join('')}</div>${(COURSES.find(c=>c[0]===exam())||[0,0,0,1])[3]?'':`<div class="card soonnote">${t('soonNote',{c:(COURSES.find(c=>c[0]===exam())||[])[1]})}</div>`}</section>${UNL?'':`<section class="card unlockcard"><div><b>🎁 ${t('freeDemo')}</b><p>${t('lockedN',{n:(D.sets||[]).length-(D.free||[]).length})}${SHOWPRICE?' · N5–N3 ¥2,000 · N2–N1 ¥3,000':''}</p></div><a class="btn grad" href="#unlock">🔓 ${t('unlockBtn')}</a></section>`}${homeTop()}
   <section class="dash"><div class="d-top"><div class="d-l"><div class="h-hello">${t('hello')}${me()?', <b>'+esc(me())+'</b>':''} 👋</div><h1>${t('goalT',{n:S.goal})}</h1>
    <div class="row d-btns"><button class="btn light" data-go="kanji">${t('startP')} →</button><a class="btn glass" href="#mock">${t('navMock')}</a></div></div>
    <div class="d-r">${ring(tcount,S.goal,t('today'))}<label class="d-goal">${t('goalL')} <select id="goalSel" class="glass">${[...new Set([10,20,30,50,100,+S.goal])].sort((a,b)=>a-b).map(g=>`<option ${g==S.goal?'selected':''}>${g}</option>`).join('')}</select></label></div></div>
@@ -1258,6 +1260,7 @@ function renderHome(){
    <p style="margin:10px 0 0;font-size:14px">${weakest?`${t('weak')} <b style="color:var(--shu)">${TL[weakest.ty]}${TN(weakest.ty)?' ('+TN(weakest.ty)+')':''}</b> · <button class="linkbtn" data-type-go="${weakest.ty}">${t('practiceThis')}</button>`:t('weakHint')}</p></section>
   <section class="card badges"><div class="eyebrow">${t('badgesT')}</div>${(k.done>=k.total&&k.ok/k.total>=.7)?`<button class="btn red" data-cert="kanji" style="margin:10px 8px 0 0">${t('certK')}</button>`:''}${(m.done>=m.total&&m.ok/m.total>=.7)?`<button class="btn red" data-cert="mean" style="margin:10px 0 0">${t('certM')}</button>`:''}<p class="note" style="margin:8px 0 0">${t('certRule')}</p><div class="bgrid">${badges().map(([i,s,on])=>`<div class="badge ${on?'on':''}" title="${esc(s)}"><span>${i}</span><small>${s}</small></div>`).join('')}</div></section>${homeCards()}`;HJ=false;shell('home',HH);
   $$('[data-exam]').forEach(b=>b.onclick=()=>{LS.set('exam',b.dataset.exam);render()});
+  if(window.updCount)updCount().then(n=>{const e=$('#updN');if(e&&n){e.textContent=n;e.hidden=false}}).catch(()=>{});
   $$('[data-go]').forEach(b=>b.onclick=()=>{Object.assign(Q.sel,{sec:b.dataset.go,set:'all',type:'all'});Q.auto=true;if(location.hash==='#quiz')render();else location.hash='#quiz'});
   $$('[data-type-go]').forEach(b=>b.onclick=()=>{const ty=b.dataset.typeGo;Object.assign(Q.sel,{sec:secOf(ty),set:'all',type:ty,order:'shuffle'});Q.auto=true;location.hash='#quiz'});
   $$('[data-cert]').forEach(b=>b.onclick=()=>{const st=secStats(b.dataset.cert==='kanji'?KANJI_T:MEAN_T);openCert(b.dataset.cert==='kanji'?'JLPT '+exam().toUpperCase()+' 漢字 Kanji Section':'JLPT '+exam().toUpperCase()+' 語彙 Vocabulary Section','Accuracy '+Math.round(st.ok/st.total*100)+'%')});
@@ -2242,5 +2245,5 @@ window.PSH={shell:(a,b)=>shell(a,b),be:()=>BE,toast:m=>toast(m)};
 boot();
 })();
 </script>
-<script src="pass.js"></script>
+<script src="pass.js"></script><script src="updates.js"></script>
 <script>if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{})</script>
