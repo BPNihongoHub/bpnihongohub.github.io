@@ -23,7 +23,7 @@ const TG={MajorWarning:['Major tsunami warning (大津波警報)','#7a0010'],War
 const jtime=t=>{const m=String(t||'').match(/(\d+)\/(\d+)\/(\d+) (\d+):(\d+)/);return m?`${+m[2]}/${+m[3]} ${m[4]}:${m[5]} JST`:esc(t)};
 let ND=null;
 async function news(){if(!ND)ND=await fetch('news.json',{cache:'no-cache'}).then(r=>r.json()).catch(()=>({items:[]}));return ND}
-const NC={weather:['🌦','Weather'],safety:['⚠️','Safety'],accident:['🚨','Accident'],foreigners:['🛂','Foreigners & visa'],politics:['🏛','Politics'],economy:['💴','Economy'],society:['👥','Society'],quake:['🌏','Earthquake']};
+const NC={weather:['🌦','Weather'],safety:['⚠️','Safety'],accident:['🚨','Accident'],foreigners:['🛂','Foreigners & visa'],politics:['🏛','Politics'],economy:['💴','Economy'],society:['👥','Society'],quake:['🌏','Earthquake'],health:['🏥','Health'],transport:['🚆','Transport'],education:['🎓','Education'],sports:['⚽','Sports'],culture:['🎎','Culture'],world:['🌐','World']};
 const NL={safety:['Be careful','#e5193f'],important:['Important','#c26a00'],info:['Info','#2443e8']};
 function newsHtml(d){const it=(d.items||[]).filter(x=>{const a=-dleft(x.d);return a>=0&&a<7}).sort((a,b)=>b.d.localeCompare(a.d)||((b.lv==='safety')-(a.lv==='safety')));
   if(!it.length)return '<section class="card"><p class="muted" style="margin:0">No news this week.</p></section>';
@@ -31,7 +31,7 @@ function newsHtml(d){const it=(d.items||[]).filter(x=>{const a=-dleft(x.d);retur
     return `<section class="card up-nw"><div class="up-nh"><span class="up-tag">${ic} ${cn}</span><span class="up-tag" style="background:${lc}1a;color:${lc}">${ln}</span><small class="muted">${fd(x.d)}</small></div>
     <p class="up-ja" lang="ja">${esc(x.ja)}</p>
     <details class="up-tr"><summary>Nepali · English</summary><p><b>NE</b> ${esc(x.ne)}</p><p><b>EN</b> ${esc(x.en)}</p></details>
-    <p class="up-src">Source: NHK News · <a class="up-lk" href="${esc(x.u)}" target="_blank" rel="noopener">Read the full story ↗</a></p></section>`}).join('')}
+    <p class="up-src">Source: ${esc(x.src||'NHK')} News · <a class="up-lk" href="${esc(x.u)}" target="_blank" rel="noopener">Read the full story ↗</a></p></section>`}).join('')}
 async function quakes(){const el=document.querySelector('#upQ');if(!el)return;
   try{const [q,ts]=await Promise.all([
       fetch('https://api.p2pquake.net/v2/history?codes=551&limit=40').then(r=>r.json()),
@@ -77,7 +77,7 @@ window.renderUpdates=async function(){
   <h2 class="up-sec">🌏 Earthquake & tsunami (live)</h2><section class="card"><div id="upQ"><p class="muted">Loading…</p></div>
    <p style="font-size:12px;margin:10px 0 0" class="muted">震度 (shindo) = how strong the shaking is, 1 (weak) to 7 (strongest). Data: JMA via P2P地震情報.</p>
    <p style="margin:6px 0 0"><a class="up-lk" href="https://www.jma.go.jp/bosai/map.html?contents=earthquake_map" target="_blank" rel="noopener">JMA earthquake map ↗</a> · <a class="up-lk" href="https://www.jma.go.jp/bosai/map.html?contents=tsunami" target="_blank" rel="noopener">JMA tsunami ↗</a> · <a class="up-lk" href="https://www.jnto.go.jp/safety-tips/eng/" target="_blank" rel="noopener">Safety tips app ↗</a></p></section>
-  <h2 class="up-sec">🗞 This week in Japan</h2><p class="muted" style="font-size:12px;margin:-4px 0 8px">Easy Japanese summaries of national news (NHK). Tap "Nepali · English" for the translation. Each news goes away after 7 days.</p>${newsHtml(N)}
+  <h2 class="up-sec">🗞 This week in Japan</h2><p class="muted" style="font-size:12px;margin:-4px 0 8px">Easy Japanese summaries of national news from Japanese TV and newspapers. Updated at 9 AM and 9 PM. Tap "Nepali · English" for the translation. Each news goes away after 7 days.</p>${newsHtml(N)}
   <h2 class="up-sec">📰 Rules & immigration</h2>${nw||'<section class="card"><p class="muted" style="margin:0">No news now.</p></section>'}
   <p style="margin:4px 0 0"><a class="up-lk" href="https://www.moj.go.jp/isa/publications/newslist/" target="_blank" rel="noopener">Immigration Services Agency news ↗</a></p>
   <h2 class="up-sec">🗓 Tests you can book any time</h2>${op}
