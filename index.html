@@ -654,6 +654,7 @@ details.codebox{margin-top:10px}details.codebox summary{cursor:pointer;color:var
 @media(max-width:480px){.tools .lockbtn{display:none}}
 .stbar{display:flex;align-items:center;gap:8px;max-width:1100px;margin:8px auto 0;padding:9px 14px;border-radius:12px;background:linear-gradient(90deg,#2443e8,#0a1440);color:#fff;font-size:.9rem;font-weight:600}.stbar.warn{background:linear-gradient(90deg,#e5193f,#a10f2c)}.stbar a{color:#fff;flex:1;text-decoration:none}.stbar button{background:none;border:0;color:#fff;font-size:1rem;cursor:pointer;opacity:.8}@media(max-width:1132px){.stbar{margin:8px 16px 0}}
 .plancard{display:flex;gap:16px;align-items:center;margin:14px 0;flex-wrap:wrap}.pc-l{text-align:center;min-width:92px}.pc-l span{font-size:.75rem;opacity:.75;display:block}.pc-big{font-size:2.4rem;font-weight:800;line-height:1;color:var(--shu,#e5193f)}.pc-big small{font-size:.8rem;margin-left:3px}.pc-r{flex:1;min-width:220px}.pc-r p{margin:6px 0 10px}.pc-date{font-size:.85rem;display:flex;gap:6px;align-items:center}.pc-date input{padding:6px;border-radius:8px;border:1px solid var(--line,#ccc);background:transparent;color:inherit}
+.repbtn{margin-top:10px;background:none;border:1px dashed var(--line,#999);color:inherit;opacity:.7;border-radius:8px;padding:4px 10px;font-size:.78rem;cursor:pointer}.repbtn:hover{opacity:1}.repbox{display:flex;flex-direction:column;gap:8px;margin-top:8px}.repbox textarea{width:100%;box-sizing:border-box;border-radius:10px;padding:8px;border:1px solid var(--line,#ccc);background:transparent;color:inherit;font:inherit}
 </style>
 <div id="app"><div class="loginwrap"><div class="aur a1"></div><div class="aur a2"></div></div></div>
 <div id="toast" class="toast" hidden></div>
@@ -1220,10 +1221,18 @@ async function loadEx1(c){if(EX[c]!==undefined)return EX[c];EX[c]=null;try{EX[c]
 async function loadEx(){const c=LANGS[LI][0];if(c!=='en')loadEx1('en').then(()=>{if(typeof Q!=='undefined'&&Q.checked)renderPage()});if(EX[c]!==undefined)return EX[c];EX[c]=null;try{EX[c]=await fetch((DX==='n5'?'ex5-':DX==='n4'?'ex4-':'ex-')+c+'.json').then(r=>r.ok?r.json():{})}catch(e){EX[c]={}}return EX[c]}
 function explain(q,i,ok,a){const c=LANGS[LI][0]==='ja'?'en':LANGS[LI][0],id_=qid(q),e=(EX[c]&&EX[c][id_])||(LX[c]&&LX[c][id_])||(EX.en&&EX.en[id_])||(LX.en&&LX.en[id_]);
   const head=`<div class="ex-h"><b>${ok?t('right'):t('wrong')}</b><span>${t('ans')} ${C[q.a-1]} <b class="jp">${esc(q.t==='usage'?q.q:q.o[q.a-1].replace(/[【】]/g,''))}</b></span>${a&&!ok?`<span class="muted">${t('youChose',{c:C[a-1]})}</span>`:(!a?`<span class="muted">${t('noAns')}</span>`:'')}</div>`;
-  if(!e)return `<div class="expl ${ok?'ok':'ng'}">${head}${q.m?`<div class="ex-m"><div><span class="tag">NE</span>${esc(q.m[0])}</div><div><span class="tag">EN</span>${esc(q.m[1])}</div></div>`:''}</div>`;
+  const rb=`<button class="repbtn" data-rep="${esc(id_)}" data-rq="${esc(String(q.q||'').replace(/<[^>]*>/g,'').slice(0,150))}">⚑ Report a mistake</button>`;
+  if(!e)return `<div class="expl ${ok?'ok':'ng'}">${head}${q.m?`<div class="ex-m"><div><span class="tag">NE</span>${esc(q.m[0])}</div><div><span class="tag">EN</span>${esc(q.m[1])}</div></div>`:''}${rb}</div>`;
   return `<div class="expl ${ok?'ok':'ng'}">${head}<div class="ex-sec"><span class="ex-l">${t('explQ')}</span>${esc(e[0])}</div><div class="ex-sec"><span class="ex-l">${t('explWhy')}</span>${esc(e[2])}</div>
-   <div class="ex-sec"><span class="ex-l">${t('explOpts')}</span><ul class="ex-o">${e[1].map((m,j)=>`<li class="${j+1===q.a?'r':a===j+1?'w':''}"><b>${C[j]}</b> <span class="jp">${esc(q.o[j].replace(/[【】]/g,''))}</span> · ${m==='∅'?`<i>${t('noMeaning')}</i>`:esc(m)}</li>`).join('')}</ul></div></div>`}
+   <div class="ex-sec"><span class="ex-l">${t('explOpts')}</span><ul class="ex-o">${e[1].map((m,j)=>`<li class="${j+1===q.a?'r':a===j+1?'w':''}"><b>${C[j]}</b> <span class="jp">${esc(q.o[j].replace(/[【】]/g,''))}</span> · ${m==='∅'?`<i>${t('noMeaning')}</i>`:esc(m)}</li>`).join('')}</ul></div>${rb}</div>`}
 
+document.addEventListener('click',async e=>{/* report a wrong question / answer / explanation to the teacher */
+  const b=e.target.closest('[data-rep]');if(b){e.preventDefault();e.stopPropagation();const box=b.nextElementSibling;if(box&&box.classList.contains('repbox')){box.parentNode.removeChild(box);return}
+    if(!BE.ok||!BE.user){toast('Please sign in first (Account) to send a report.');return}
+    b.insertAdjacentHTML('afterend',`<div class="repbox"><textarea maxlength="900" rows="3" placeholder="What is wrong? (question, answer, explanation, furigana…)"></textarea><button class="btn grad">Send to teacher</button></div>`);return}
+  const s=e.target.closest('.repbox button');if(s){e.preventDefault();e.stopPropagation();const box=s.parentNode,rb=box.previousElementSibling,tx=box.querySelector('textarea').value.trim();if(!tx){toast('Please write what is wrong.');return}
+    s.disabled=true;try{await BE.api.report({uid:BE.user.uid,email:String(BE.user.email||'').slice(0,200),course:dxOf(),qid:String(rb.dataset.rep).slice(0,40),q:String(rb.dataset.rq||'').slice(0,300),text:tx.slice(0,900)});box.innerHTML='<p class="muted">✓ Thank you! The teacher will check it.</p>'}catch(err){s.disabled=false;toast('Could not send. Please try again.')}}
+},true);
 /* ---------- quiz engine ---------- */
 const Q={sel:{sec:'kanji',set:'all',type:'all',order:'exam'},list:[],page:0,ans:{},checked:false,t0:0,mode:'normal',size:10,limit:0,
   start(o){o=o||{};this.mode=o.mode||'normal';this.size=10;this.limit=0;
@@ -1693,6 +1702,9 @@ function fbApi(){
     hwSend:(uid,o)=>F.collection('hw').add(Object.assign({},o,{uid,status:'new',created:TS()})),
     async myHw(uid){const q=await F.collection('hw').where('uid','==',uid).get();return q.docs.map(norm).sort((a,b)=>b.created-a.created)},
     async allHw(){const q=await F.collection('hw').get();return q.docs.map(norm).sort((a,b)=>b.created-a.created)},
+    report:o=>F.collection('reports').add(Object.assign({status:'new',created:TS()},o)),
+    async allRep(){const q=await F.collection('reports').get();return q.docs.map(norm).sort((a,b)=>b.created-a.created)},
+    repMark:(id,o)=>F.doc('reports/'+id).update(o),
     hwMark:(id,o)=>F.doc('hw/'+id).update(Object.assign({},o,{checked:TS()})),
     toMs
   };
@@ -1724,6 +1736,9 @@ function mockApi(){/* localhost test double with the same shape as fbApi */
     async myHw(uid){return Object.entries(db().hw||{}).map(([id,h])=>Object.assign({id},h)).filter(h=>h.uid===uid).sort((a,b)=>b.created-a.created)},
     async allHw(){return Object.entries(db().hw||{}).map(([id,h])=>Object.assign({id},h)).sort((a,b)=>b.created-a.created)},
     async hwMark(id,o){const d=db();Object.assign(d.hw[id],o,{checked:Date.now()});put(d)},
+    async report(o){const d=db();d.rep=d.rep||{};d.rep['r'+Date.now()]=Object.assign({status:'new',created:Date.now()},o);put(d)},
+    async allRep(){return Object.entries(db().rep||{}).map(([id,h])=>Object.assign({id},h)).sort((a,b)=>b.created-a.created)},
+    async repMark(id,o){const d=db();Object.assign(d.rep[id],o);put(d)},
     toMs:v=>v||0};
 }
 
@@ -1868,6 +1883,7 @@ async function renderTeacher(){
   const pr=u=>{const g=u.prog||{};return{d:g.done||0,a:g.done?Math.round((g.ok||0)*100/g.done):0,h:Object.values(g.hw||{}).filter(v=>v>=35).length}};
   let hk=true;try{hk=await BE.api.hasKey(tc)}catch(e){}
   let HW=null;try{HW=await BE.api.allHw()}catch(e){HW=null}
+  let RP=null;try{RP=await BE.api.allRep()}catch(e){RP=null}
   shell('teacher',`${ph('師',at('tT'),new Date().toISOString().slice(0,10))}
   <div class="erow" style="margin:0 0 12px">${['n5','n4','n3'].map(c=>`<button class="chip ${c===tc?'on':''}" data-tc="${c}">${PAYC(c)}</button>`).join('')}</div>
   ${(()=>{const ok=PH.filter(p=>p.status==='approved'),sum=a=>a.reduce((t,p)=>t+(+p.amount||0),0),yen=n=>PAY.cur+n.toLocaleString('en'),mo=new Date().toISOString().slice(0,7),tm=ok.filter(p=>fdate(p.decided||p.created).startsWith(mo)),tr=U.filter(u=>isTrialP(u)&&!['n5','n4','n3','n2','n1'].some(c=>isPaidP(u,c))).length;
@@ -1886,8 +1902,11 @@ async function renderTeacher(){
   </tbody></table></div>
   <h2 class="hsech"><i>★</i>${at('revs')} (${RV.length})</h2>
   ${RV.map(r=>`<div class="card trev"><div><span class="st">${stars(r.stars||0)}</span> <b>${esc(r.name||'')}</b><p>${esc(r.text||'')}</p><small>${fdate(r.created)}</small></div><button class="chip ${r.show?'on':''}" data-rv="${r.id}" data-v="${r.show?0:1}">${r.show?at('hide'):at('show')}</button></div>`).join('')||`<p class="muted">${at('none')}</p>`}
+  <h2 class="hsech"><i>⚑</i>Mistake reports (${RP?RP.filter(r=>r.status!=='fixed').length+' new / '+RP.length:'—'})</h2>
+  ${RP==null?`<p class="muted">To receive reports, paste the new Firebase rules (firebase-rules.txt).</p>`:RP.slice(0,80).map(r=>`<div class="card trev"><div style="flex:1"><b>${esc(String(r.course||'').toUpperCase())} · ${esc(r.qid||'')}</b> <small>${esc(r.email||'')}</small><p style="font-family:var(--f-jp)">${esc(r.q||'')}</p><p>${esc(r.text||'')}</p><small>${fdate(r.created)}</small></div><button class="chip ${r.status==='fixed'?'on':''}" data-rpf="${r.id}">${r.status==='fixed'?'✓ Fixed':'Mark fixed'}</button></div>`).join('')||`<p class="muted">${at('none')}</p>`}
   <h2 class="hsech"><i>宿</i>Homework (${HW?HW.filter(h=>h.status!=='checked').length+' new / '+HW.length:'—'})</h2>
   ${HW==null?`<p class="muted">To receive homework, paste the new Firebase rules (firebase-rules.txt).</p>`:HW.slice(0,80).map(h=>`<div class="card trev"><div style="flex:1"><b>${esc(h.name||h.email||'')}</b> <small>${esc(h.email||'')}</small><p style="font-family:var(--f-jp)"><a href="#pass/g/${esc(h.lv)}/${+h.gi}"><b>${esc(String(h.lv||'').toUpperCase())} · ${esc(h.gp||'')}</b></a></p><ol style="font-family:var(--f-jp);margin:4px 0">${(h.s||[]).filter(Boolean).map(t=>`<li>${esc(t)}</li>`).join('')}</ol><input data-hwc="${h.id}" placeholder="Comment for student" value="${esc(h.comment||'')}" style="width:100%"><small>${fdate(h.created)}</small></div><button class="chip ${h.status==='checked'?'on':''}" data-hw="${h.id}">${h.status==='checked'?'✓ Checked':'Mark checked'}</button></div>`).join('')||`<p class="muted">${at('none')}</p>`}`);
+  $$('[data-rpf]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await BE.api.repMark(b.dataset.rpf,{status:'fixed'});toast('✓')}catch(e){toast(at('err'))}renderTeacher()});
   $$('[data-hw]').forEach(b=>b.onclick=async()=>{const c=($(`[data-hwc="${b.dataset.hw}"]`)||{}).value||'';b.disabled=true;try{await BE.api.hwMark(b.dataset.hw,{status:'checked',comment:c});toast('✓')}catch(e){toast(at('err'))}renderTeacher()});
   $('#tq').oninput=e=>{TD.q=e.target.value;clearTimeout(TD.t);TD.t=setTimeout(()=>{renderTeacher().then(()=>{const i=$('#tq');i.focus();i.setSelectionRange(i.value.length,i.value.length)})},350)};
   const kf=$('#kF');if(kf)kf.onsubmit=async e=>{e.preventDefault();const c=$('#kC').value.toUpperCase().replace(/[^0-9A-Z]/g,'');if(c.length!==12){toast(at('err'));return}try{await BE.api.setKey(tc,c);toast('✓');renderTeacher()}catch(x){toast(at('err'))}};
