@@ -300,16 +300,16 @@ tr[data-kanji]:hover td{background:var(--ai-soft)}
 
 .sp-exams{margin-top:6px;opacity:0;animation:up .6s 2.5s ease-out forwards;font-size:12px;letter-spacing:.14em;color:#ffd166;font-weight:700}
 .lg-ex{text-align:center;font-size:11.5px;letter-spacing:.12em;color:#ffd166;font-weight:700;margin:-12px 0 18px}
-.hl-hero{position:relative;overflow:hidden;margin-top:14px!important;background:linear-gradient(135deg,#0d0b3a 0%,#2a1fb0 55%,#e81f55 120%);color:#fff;border-radius:26px;padding:22px 18px 18px;margin:8px 0 12px;box-shadow:0 18px 44px rgba(42,31,176,.28)}
-.hl-glow{position:absolute;right:-60px;top:-70px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(255,209,102,.45),transparent 70%);pointer-events:none}
-.hl-eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.8;font-weight:800}
-.hl-h{font-size:clamp(22px,6vw,32px);line-height:1.2;margin:6px 0 14px;max-width:16em;color:#fff}
+.hl-hero{position:relative;overflow:hidden;margin-top:14px!important;background:var(--paper);color:var(--ink);border:1.5px solid var(--line);border-radius:22px;padding:18px 16px 16px;margin:8px 0 12px;box-shadow:var(--shadow)}
+.hl-glow{display:none;position:absolute;right:-60px;top:-70px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(255,209,102,.45),transparent 70%);pointer-events:none}
+.hl-eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:800}
+.hl-h{font-size:clamp(22px,6vw,32px);line-height:1.2;margin:6px 0 14px;max-width:16em;color:var(--ink)}
 .hl-feat{display:grid;gap:10px;grid-template-columns:1fr 1fr}
 @media(max-width:560px){.hl-feat{grid-template-columns:1fr}}
-.hl-big{display:flex;align-items:center;gap:12px;padding:14px;border-radius:18px;text-decoration:none;color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);transition:transform .15s,background .15s;min-height:72px}
-.hl-big:hover{transform:translateY(-2px);background:rgba(255,255,255,.2)}
-.hl-big i{font:900 28px/1 var(--f-jp);font-style:normal;width:52px;height:52px;flex:none;display:grid;place-items:center;border-radius:14px;background:#fff;color:#2a1fb0}
-.hl-mock i{color:#e81f55}.hl-big div{flex:1;min-width:0}.hl-big b{display:block;font-size:18px}.hl-big span{display:block;font-size:13px;opacity:.88;line-height:1.35;margin-top:2px}.hl-big em{font-style:normal;font-size:22px;opacity:.8}
+.hl-big{display:flex;align-items:center;gap:12px;padding:14px;border-radius:18px;text-decoration:none;color:var(--ink);background:var(--paper);border:1.5px solid var(--line);transition:transform .15s,border-color .15s;min-height:72px}
+.hl-big:hover{transform:translateY(-2px);border-color:var(--ai)}
+.hl-big i{font:900 28px/1 var(--f-jp);font-style:normal;width:52px;height:52px;flex:none;display:grid;place-items:center;border-radius:14px;background:var(--grad);color:#fff}
+.hl-mock i{background:linear-gradient(135deg,#e81f55,#ff8a3d)}.hl-big div{flex:1;min-width:0}.hl-big b{display:block;font-size:18px}.hl-big span{display:block;font-size:13px;color:var(--muted);line-height:1.35;margin-top:2px}.hl-big em{font-style:normal;font-size:22px;color:var(--ai)}
 .hl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(78px,1fr));gap:8px;margin:0 0 6px}
 @media(max-width:560px){.hl-grid{grid-template-columns:repeat(4,1fr);gap:6px}.hl-grid a{padding:10px 2px}.hl-grid span{font-size:11.5px}}
 .hl-grid a{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px;border-radius:16px;background:var(--paper);border:1.5px solid var(--line);text-decoration:none;color:var(--ink);text-align:center;transition:transform .15s,border-color .15s}
@@ -354,9 +354,9 @@ tr[data-kanji]:hover td{background:var(--ai-soft)}
 .sp-exgrid button:hover{border-color:#ffd166}
 
 .unlockcard{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-top:14px;padding:16px 18px;border:1.5px dashed var(--gold)}
-.unlockcard{padding:22px 20px;border:2.5px solid var(--gold);background:linear-gradient(135deg,rgba(255,209,102,.24),rgba(255,61,110,.10));box-shadow:0 8px 24px rgba(200,150,40,.2)}
+.unlockcard{padding:20px 18px;border-width:2px}
 .unlockcard b{font-size:19px}
-.unlockcard p{margin:6px 0 0;font-size:15.5px}
+.unlockcard p{margin:6px 0 0;font-size:15px;color:var(--muted)}
 .unlockcard .btn{font-size:18px;padding:14px 22px;flex:1 1 220px;text-align:center;justify-content:center}
 .unlockpage{max-width:480px;margin:24px auto;text-align:center;display:grid;gap:12px;justify-items:center}
 .unlockpage form{display:grid;gap:10px;width:100%;text-align:left}
@@ -530,6 +530,7 @@ tr[data-kanji]:hover td{background:var(--ai-soft)}
 .qhead.setup #go{width:100%;padding:14px;font-size:16px}
 .emptyx{text-align:center;padding:36px 20px;margin-top:6px}.emptyx .ex-ic{font-size:46px}.emptyx p{margin:10px 0 18px;color:var(--muted)}
 .bnav button{font:inherit;background:none;border:0;color:inherit;cursor:pointer}
+.bnav button span{font-size:10px;font-weight:700}
 .bnav{grid-template-columns:repeat(5,1fr)!important}
 .bnav>*{display:flex;flex-direction:column;align-items:center;gap:2px}
 .moresheet{position:fixed;inset:0;z-index:60;background:rgba(6,7,26,.45);display:flex;align-items:flex-end;justify-content:center}
@@ -797,8 +798,8 @@ save:['⬇ 保存','⬇ Save','⬇ सेभ गर्नुहोस्','⬇ L
 lp:['画像を長押しして保存してください。','Long-press the image to save it.','तस्बिरमा थिचिराखेर सेभ गर्नुहोस्।','Nhấn giữ ảnh để lưu.','Tekan lama gambar untuk menyimpan.','ပုံကို ဖိထားပြီး သိမ်းပါ။','长按图片保存。','Pindutin nang matagal ang larawan para i-save.']
 };
 let LI=2;
-let HJ=false;const HKEEP=new Set(['freeDemo','lockedN','srsDue','srsHint','weakHint','certRule','soonNote','buyNote','weak']);
-function t(k,v){const a=I[k];let s=a?((HJ&&LI===2&&!HKEEP.has(k)&&a[0])||a[LI]||a[1]):k;if(v)for(const x in v)s=s.split('{'+x+'}').join(v[x]);return s}
+let HJ=false,HEN=false;const HKEEP=new Set(['freeDemo','lockedN','srsDue','srsHint','weakHint','certRule','soonNote','buyNote','weak']);
+function t(k,v){const a=I[k];let s=a?((HEN&&LI===2&&a[1])||(HJ&&LI===2&&!HKEEP.has(k)&&a[0])||a[LI]||a[1]):k;if(v)for(const x in v)s=s.split('{'+x+'}').join(v[x]);return s}
 
 (function(){
 const SALT='raku-nihongo|';
@@ -979,15 +980,15 @@ window.addEventListener('hashchange',()=>{Q.inPage=false;window.scrollTo(0,0);re
 const MORE={ja:'その他',en:'More',ne:'अरू',vi:'Thêm',id:'Lainnya',my:'နောက်ထပ်',zh:'更多',tl:'Iba pa'};
 const ph=(g,ti,sub)=>`<section class="phead"><i>${g}</i><div><h1>${ti}</h1>${sub?`<p>${sub}</p>`:''}</div></section>`;
 function shell(active,inner){
-  const tabs=[['home','家',t('navHome')],['pass','合','Pass? Try it'],['quiz','練',t('navQuiz')],['mock','試',t('navMock')],['srs','札',t('navSrs')],['review','誤',t('navRev')],['words','辞',t('navWords')]];
+  HEN=true;const tabs=[['home','家',t('navHome')],['pass','合','Pass? Try it'],['quiz','練',t('navQuiz')],['mock','試',t('navMock')],['srs','札',t('navSrs')],['review','誤',t('navRev')],['words','辞',t('navWords')]];
   if(exam()==='n3'||exam()==='n5')tabs.splice(1,0,['units','課',ut('nav')]);
   if(exam()==='n3'||exam()==='n5')tabs.push(['books','本',bt('lib')]);
   if(BE.admin)tabs.push(['teacher','師',at('tT')]);
-  if(isOwner)tabs.push(['admin','管',t('navAdmin')]);
+  if(isOwner)tabs.push(['admin','管',t('navAdmin')]);HEN=false;
   const lnk=([h,k,s])=>`<a href="#${h}" class="${h===active?'on':''}" ${h===active?'aria-current="page"':''}><i aria-hidden="true">${k}</i><span>${s}</span></a>`;
   const nav=cls=>`<nav class="${cls}">${tabs.map(lnk).join('')}</nav>`;
   const mainT=tabs.filter(x=>['home','pass','units','quiz','mock'].includes(x[0])),moreT=tabs.filter(x=>!mainT.includes(x));
-  const bnav=`<nav class="bnav">${mainT.map(lnk).join('')}<button class="${moreT.some(x=>x[0]===active)?'on':''}" id="moreBtn" aria-expanded="false"><i aria-hidden="true">⋯</i><span>${MORE[LANGS[LI][0]]||'More'}</span></button></nav><div class="moresheet" id="moreSheet" hidden><div class="ms-in">${moreT.map(lnk).join('')}</div></div>`;
+  const bnav=`<nav class="bnav">${mainT.map(lnk).join('')}<button class="${moreT.some(x=>x[0]===active)?'on':''}" id="moreBtn" aria-expanded="false"><i aria-hidden="true">⋯</i><span>${LANGS[LI][0]==='ne'?'More':MORE[LANGS[LI][0]]||'More'}</span></button></nav><div class="moresheet" id="moreSheet" hidden><div class="ms-in">${moreT.map(lnk).join('')}</div></div>`;
   $('#app').innerHTML=`<header class="top"><div class="in"><a class="brand" href="#home">${hanko('hk')}<div><b>BP Nihongo <em>Hub</em></b><small>日本語 · <strong>JLPT</strong></small></div></a>
   <div class="tools">${langSel('langTop')}<button class="iconbtn" id="themeBtn" aria-label="${t('theme')}">◐</button><a class="iconbtn accbtn ${BE.user?'in':''}" href="#acc" aria-label="${at('acc')}">${BE.user?esc(((BE.prof&&BE.prof.name)||BE.user.email||'?').trim().charAt(0).toUpperCase()||'人'):'人'}</a>${UNL?'':`<a class="iconbtn lockbtn" href="#unlock" aria-label="${t('unlockT')}">🔒</a>`}</div>
   ${nav('tabs')}</div></header><main class="wrap">${inner}</main>
@@ -1344,7 +1345,7 @@ const UT={nav:['宿題','Units','युनिट'],title:['ユニット別 宿�
  done:['回答','Answered','उत्तर दिइयो'],
  setsH:['模擬問題セット','Model question sets','मोडल प्रश्न सेट'],hwH:['宿題（ユニット別）','Homework (by unit)','गृहकार्य (युनिट अनुसार)'],
  l:['聴解','Listening','सुनाइ (Listening)'],ld:['近日公開','Coming soon','छिट्टै आउँदैछ'],units:['ユニット','units','युनिट']};
-const ut=(k,o)=>{const v=(exam()==='n5'&&UT5[k])||UT[k];const c=LANGS[LI][0];let s=c==='ja'||(HJ&&c==='ne')?v[0]:c==='ne'?v[2]:v[1];if(o)for(const x in o)s=s.replace('{'+x+'}',o[x]);return s};
+const ut=(k,o)=>{const v=(exam()==='n5'&&UT5[k])||UT[k];const c=LANGS[LI][0];let s=c==='ja'||(HJ&&c==='ne')?v[0]:c==='ne'&&!HEN?v[2]:v[1];if(o)for(const x in o)s=s.replace('{'+x+'}',o[x]);return s};
 const ulang=()=>LANGS[LI][0]==='ne'?'ne':'en';
 async function loadUnits(){if(UD&&UDE===exam())return;UDE=exam();try{UD=await fetch(exam()==='n5'?'units-n5.json':'units.json').then(r=>r.json())}catch(e){UD={k:[],v:[],g:[]};return}
   if(window.MK&&Object.values(UD).some(s=>s.some(x=>x.lk))){try{const L=await fetch(exam()==='n5'?'units-n5-locked.json':'units-locked.json').then(r=>r.json());
@@ -1423,7 +1424,7 @@ const BT={lib:['教材ライブラリー','Books','किताब'],
      '© Binod Paudel. View only. Downloading, copying, screenshots or sharing are not allowed. Doing so may lead to action under copyright law.',
      '© Binod Paudel. हेर्न मात्र। डाउनलोड, कपी, स्क्रिनसट वा अरूलाई सेयर गर्न पाइँदैन। त्यसो गरेमा प्रतिलिपि अधिकार (copyright) कानुनअनुसार कारबाही हुन सक्छ।'],
  loading:['読み込み中…','Loading…','लोड हुँदैछ…']};
-const bt=k=>{const v=BT[k];const c=LANGS[LI][0];return c==='ja'||(HJ&&c==='ne')?v[0]:c==='ne'?v[2]:v[1]};
+const bt=k=>{const v=BT[k];const c=LANGS[LI][0];return c==='ja'||(HJ&&c==='ne')?v[0]:c==='ne'&&!HEN?v[2]:v[1]};
 async function loadBooks(){if(BK)return;try{BK=await fetch('books/books.json').then(r=>r.json())}catch(e){BK={}}}
 const BICON={k:'漢',v:'語',g:'文',b:'練'};
 const bOf=b=>(b.x||'n3')===dxOf();const BSECS=()=>['k','v','g','b'].filter(s=>!BK||Object.values(BK).some(b=>bOf(b)&&b.sec===s)).filter(s=>BK||dxOf()==='n3'||s!=='b');
