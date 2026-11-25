@@ -12,7 +12,13 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="theme-color" content="#06071a">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Zen+Maru+Gothic:wght@700;900&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans+Devanagari:wght@400;500;700&family=Noto+Sans+Myanmar:wght@400;700&family=Kaushan+Script&family=Cinzel:wght@900&family=Playfair+Display:ital,wght@1,900&family=Noto+Serif+JP:wght@900&display=swap">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Zen+Maru+Gothic:wght@700;900&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans+Devanagari:wght@400;500;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Zen+Maru+Gothic:wght@700;900&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans+Devanagari:wght@400;500;700&display=swap"></noscript>
+<script>/* fonts: main text fonts load without blocking the first paint; logo/certificate fonts after load; Myanmar only when chosen */
+(function(){var add=function(h){var l=document.createElement('link');l.rel='stylesheet';l.href=h;document.head.appendChild(l)};
+var my=false;try{my=/^"?my"?$/.test(localStorage.getItem('rk_lang')||'')}catch(e){}if(my)add('https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@400;700&display=swap');
+window.addEventListener('load',function(){setTimeout(function(){add('https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Cinzel:wght@900&family=Playfair+Display:ital,wght@1,900&family=Noto+Serif+JP:wght@900&display=swap')},300)});window.BPFontMy=function(){if(!my){my=true;add('https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@400;700&display=swap')}};})();</script>
 <style>
 /* Binod Paudel site v6: midnight aurora + ink-drawn hanko. Indigo→crimson gradient brand, glass surfaces, kanji-glyph navigation. */
 :root{
@@ -922,7 +928,7 @@ const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth
 const dayNum=()=>Math.floor((Date.now()-new Date().getTimezoneOffset()*6e4)/864e5);
 
 /* language */
-function setLang(code){const i=LANGS.findIndex(l=>l[0]===code);LI=i<0?2:i;LS.set('lang',LANGS[LI][0]);document.documentElement.lang=LANGS[LI][0]}
+function setLang(code){const i=LANGS.findIndex(l=>l[0]===code);LI=i<0?2:i;LS.set('lang',LANGS[LI][0]);document.documentElement.lang=LANGS[LI][0];if(LANGS[LI][0]==='my'&&window.BPFontMy)BPFontMy()}
 (function(){let c=LS.get('lang',null);if(!c){const n=(navigator.language||'').slice(0,2).toLowerCase();c=({ja:'ja',en:'en',ne:'ne',vi:'vi',id:'id',ms:'id',my:'my',zh:'zh',tl:'tl',fil:'tl'})[n]||'ne'}setLang(c)})();
 const langSel=id=>`<label class="langsel" title="${t('lang')}"><span aria-hidden="true">🌐</span><select id="${id}" aria-label="${t('lang')}">${LANGS.map(([c,n],i)=>`<option value="${c}" ${i===LI?'selected':''}>${n}</option>`).join('')}</select></label>`;
 function bindLang(id){const s=document.getElementById(id);if(s)s.onchange=e=>{setLang(e.target.value);render()}}
