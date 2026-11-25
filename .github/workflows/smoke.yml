@@ -1,0 +1,19 @@
+name: smoke test
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['books/**']
+  workflow_dispatch:
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm i --no-save playwright@1.48.2 && npx playwright install --with-deps chromium
+      - run: (python3 -m http.server 8765 >/dev/null 2>&1 &) && sleep 2 && node tests/smoke.js
