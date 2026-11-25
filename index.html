@@ -665,6 +665,7 @@ details.codebox{margin-top:10px}details.codebox summary{cursor:pointer;color:var
 .ttodo{margin:0 0 12px;border:1.5px solid var(--gold,#e3a200)}.ttodo summary{cursor:pointer}.ttodo ol{margin:10px 0 0;padding-left:20px;display:grid;gap:10px}.ttodo li small{display:block;opacity:.8;margin-top:2px}.ttodo li.dn b{text-decoration:line-through;opacity:.55}
 .lbcard{margin:14px 0}.lb-h{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline}.lb-h span{font-weight:700;color:var(--gold,#e3a200)}.lb-bar{height:10px;border-radius:99px;background:rgba(127,127,127,.2);margin:8px 0 10px;overflow:hidden}.lb-bar i{display:block;height:100%;background:linear-gradient(90deg,#e3a200,#e5193f);border-radius:99px}.lb-l{list-style:none;margin:6px 0 10px;padding:0;display:grid;gap:4px}.lb-l li{display:flex;gap:10px;align-items:center;padding:6px 10px;border-radius:10px;background:rgba(127,127,127,.08)}.lb-l li span{width:28px;text-align:center}.lb-l li b{flex:1}.lb-l li em{font-style:normal;font-weight:800}.lb-l li.me{outline:2px solid var(--gold,#e3a200)}
 .instcard{margin:14px 0;border:1.5px dashed var(--gold,#e3a200)}.instcard:empty{display:none}.in-row{display:flex;gap:12px;align-items:center;margin-bottom:10px}.in-ic{font-size:2rem}.in-row small{display:block;opacity:.8}
+.storyc .st-lv{font-weight:800;color:var(--gold,#e3a200);margin-bottom:6px}#storyHome .btn{margin-top:10px}
 </style>
 <div id="app"><div class="loginwrap"><div class="aur a1"></div><div class="aur a2"></div></div></div>
 <div id="toast" class="toast" hidden></div>
@@ -1049,7 +1050,7 @@ function render(){
   if(['n3','n4','n5'].includes(exam())&&DX!==dxOf()){BPLoad(true,'Loading '+exam().toUpperCase()+'…');ensureData().then(()=>{BPLoad(false);render()}).catch(()=>BPLoad(false));return}
   if(false&&['drive','bjt'].includes(exam())&&['home','quiz','mock','review','words','srs','unlock'].includes(r))return driveRoute(r);
   const views={home:renderHome,quiz:renderQuiz,mock:renderMock,review:()=>Q.start({mode:'review'}),words:renderWords,srs:renderSRS,admin:renderAdmin,unlock:renderUnlock};
-  if(r==='acc')return renderAccount();if(r==='pay')return renderPay();if(r==='rate')return renderReview();if(r==='teacher')return renderTeacher();
+  if(r==='acc')return renderAccount();if(r==='pay')return renderPay();if(r==='rate')return renderReview();if(r==='story')return renderStory();if(r==='teacher')return renderTeacher();
   if(r==='pass'||r.startsWith('pass/'))return window.renderPass?renderPass():null;
   if(r==='units')return renderUnits();
   if(r==='books')return renderBooks();
@@ -1202,7 +1203,7 @@ function renderHome(){
   <h2 class="hsech"><i>試</i>${ut('setsH')}<small>${D.total||D.q.length} 問</small></h2>
   <div class="setgrid">${[['kanji','漢','STEP 1',t('kanji'),k],['mean','語','STEP 2',t('mean'),m],...[['gram','文',GRAM_T],['read','読',READ_T],['listen','聴',LISTEN_T]].map(([kk,g,T],x)=>[kk,g,'STEP '+(x+3),t(kk),secStats(T)])].filter(r=>r[4].total).map(([kk,g,st,ti,s])=>`<button class="card setc" data-go="${kk}"><span class="sg">${g}</span><small>${st}</small><b>${ti}</b><span class="sn">${s.total} 問</span><span class="sbar"><i style="width:${pct(s)}%"></i></span><span class="sp">${s.done}/${s.total} · ${pct(s)}%</span></button>`).join('')}</div>
   ${['n3','n4','n5'].includes(exam())?hwHome()+booksHome():''}
-  <section id="revHome" class="revhome"></section>
+  <section id="storyHome" class="revhome"></section><section id="revHome" class="revhome"></section>
   <div class="grid2">
    <section class="card wotd"><div class="eyebrow">${t('wotd')} · 今日の単語</div><div class="w">${esc(w[0])}</div><div class="r">${esc(w[1])}</div><div class="mn"><span class="tag">NE</span>${esc(w[2])}</div><div class="mn"><span class="tag">EN</span>${esc(w[3])}</div>
    <div class="row" style="margin-top:12px"><button class="speak inv" data-say="${esc(w[1])}">▶ ${t('say')}</button><button class="speak inv" data-kanji="${esc(w[0])}">漢 ${t('kcard')}</button></div></section>
@@ -1220,7 +1221,7 @@ function renderHome(){
   {const g=$('#pcGoal');if(g)g.onclick=()=>{S.goal=+g.dataset.g;saveS();renderHome()};const pd=$('#pcDate');if(pd)pd.onchange=()=>{LS.set('examdate',pd.value===ymd(jlptNext())?'':pd.value);renderHome()}}
   $$('[data-bsec]').forEach(b=>b.onclick=()=>{BS.sec=b.dataset.bsec});
   $$('[data-hsec]').forEach(b=>b.onclick=()=>{US.sec=b.dataset.hsec;US.inPage=false});
-  bindCommon();reviewsHome();bindHomeTop();
+  bindCommon();reviewsHome();storiesHome();bindHomeTop();
 }
 
 function bindCommon(){
@@ -1745,6 +1746,10 @@ function fbApi(){
       b.update(F.doc('pay/'+p.id),ok?{status:'approved',decided:TS(),until}:{status:'rejected',decided:TS()});await b.commit()},
     setPaid:(uid,v,c)=>F.doc('users/'+uid).update((c||'n3')==='n3'?(v?{paid:true,paidAt:firebase.firestore.FieldValue.serverTimestamp(),paidUntil:firebase.firestore.Timestamp.fromMillis(Date.now()+SIXM())}:{paid:false,paidUntil:null}):{['pu.'+c]:v?firebase.firestore.Timestamp.fromMillis(Date.now()+SIXM()):null}),
     showReview:(id,v)=>F.doc('reviews/'+id).update({show:v}),
+    story:(uid,o)=>F.doc('stories/'+uid).set(Object.assign({uid,show:false,created:TS()},o)),
+    async myStory(uid){try{const s=await F.doc('stories/'+uid).get();return s.exists?s.data():null}catch(e){return null}},
+    async stories(all){const q=all?await F.collection('stories').get():await F.collection('stories').where('show','==',true).get();return q.docs.map(norm).sort((a,b)=>b.created-a.created)},
+    showStory:(id,v)=>F.doc('stories/'+id).update({show:v}),
     reviewsPublic:async()=>{try{const q=await F.collection('reviews').where('show','==',true).get();return q.docs.map(norm)}catch(e){return[]}},
     hwSend:(uid,o)=>F.collection('hw').add(Object.assign({},o,{uid,status:'new',created:TS()})),
     async myHw(uid){const q=await F.collection('hw').where('uid','==',uid).get();return q.docs.map(norm).sort((a,b)=>b.created-a.created)},
@@ -1782,6 +1787,10 @@ function mockApi(){/* localhost test double with the same shape as fbApi */
     async decide(p,ok){const d=db();d.pay[p.id].status=ok?'approved':'rejected';d.pay[p.id].decided=Date.now();if(ok){const u=d.users[p.uid],c=p.course||'n3',t=Math.max(Date.now(),untilOf(u,c))+SIXM();d.pay[p.id].until=t;if(c==='n3'){u.paid=true;u.paidUntil=t}else{u.pu=u.pu||{};u.pu[c]=t}}put(d)},
     async setPaid(uid,v,c){const d=db();const u=d.users[uid];c=c||'n3';if(c==='n3'){u.paid=v;u.paidUntil=v?Date.now()+SIXM():null}else{u.pu=u.pu||{};u.pu[c]=v?Date.now()+SIXM():null}put(d)},
     async showReview(id,v){const d=db();d.reviews[id].show=v;put(d)},
+    async story(uid,o){const d=db();d.stories=d.stories||{};d.stories[uid]=Object.assign({uid,show:false,created:Date.now()},o);put(d)},
+    async myStory(uid){return (db().stories||{})[uid]||null},
+    async stories(all){return Object.entries(db().stories||{}).map(([id,r])=>Object.assign({id},r)).filter(r=>all||r.show)},
+    async showStory(id,v){const d=db();d.stories[id].show=v;put(d)},
     async reviewsPublic(){return Object.values(db().reviews).filter(r=>r.show)},
     async hwSend(uid,o){const d=db();d.hw=d.hw||{};d.hw['h'+Date.now()]=Object.assign({},o,{uid,status:'new',created:Date.now()});put(d)},
     async myHw(uid){return Object.entries(db().hw||{}).map(([id,h])=>Object.assign({id},h)).filter(h=>h.uid===uid).sort((a,b)=>b.created-a.created)},
@@ -1827,6 +1836,7 @@ async function renderAccount(){
   ${nv?`<section class="card accbox" style="border:1.5px solid #e3a200"><b>📧 Please verify your email · メール確認</b><p class="muted">We sent a link to <b>${esc(BE.user.email||'')}</b>. Open it, then tap "I verified". Your 3-day free trial starts after this.</p><div class="erow"><button class="btn grad" id="vDone">✓ I verified</button><button class="btn ghost" id="vSend">Resend email</button></div><div class="err" id="vErr"></div></section>`:''}
   <section class="card accbox"><div class="plan ${isPaidP(p)?'ok':isTrialP(p)?'trial':'lock'}"><b>${PAYC()}</b> · ${isPaidP(p)?at('paid')+`<small>${at('until')}: ${fdate(untilOf(p))}</small>`:pend?at('pending'):isTrialP(p)?`🎁 Free trial: everything open<small>${trialLeft(p)} day(s) left · until ${fdate(trialEnd(p))}. Pay before it ends to keep everything open.</small>`:untilOf(p)?at('expired'):`🔒 Locked${trialEnd(p)?'<small>Your 3-day free trial has ended. Pay to open everything.</small>':''}`}</div>
    ${!isPaidP(p)&&PAY.on&&!pend?`<a class="btn grad" href="#pay">💳 ${at('payT')} · ${PAY.cur}${PAY.price.toLocaleString('en')} · ${at('per6')}</a>`:''}
+   <a class="btn ghost" href="#story" style="margin:8px 0">🎉 I passed! Share my story</a>
    <form id="pForm" class="eform"><label>${at('name')}<input id="pName" value="${esc(p.name||'')}"></label><label>${at('phone')}<input id="pPhone" type="tel" value="${esc(p.phone||'')}"></label><label>🏫 Class code (from your teacher, optional)<input id="pCls" value="${esc(p.cls||'')}" placeholder="e.g. TOKYO-N3" autocomplete="off"></label>
    <button class="btn ghost">${at('save')}</button></form></section>
   ${mine.length?`<section class="card accbox"><h3>🧾 My payments · 支払い履歴</h3><table class="ptbl" style="width:100%;font-size:13px;border-collapse:collapse">${mine.map(x=>`<tr style="border-top:1px solid #e3e8f2"><td style="white-space:nowrap">${fdate(x.created)}</td><td>${PAYC(x.course||'n3')}</td><td>${PAY.cur}${(+x.amount||PAY.price).toLocaleString('en')}</td><td>${x.status==='approved'?'✅ Approved':x.status==='rejected'?'✕ Rejected':'⏳ Checking'}</td><td>${x.status==='approved'?`<button class="chip" data-rc="${x.id}">🧾 Receipt</button>`:''}</td></tr>`).join('')}</table><p class="muted" style="font-size:12px;margin:6px 0 0">🧾 Receipt = your bill (save as PDF or screenshot). ✅ = all sets, units and books of that course open for 6 months on this account. No code needed.</p></section>`:''}
@@ -1867,6 +1877,23 @@ function renderReview(){
   $$('[data-s]').forEach(b=>b.onclick=()=>{s=+b.dataset.s;paint()});
   $('#rvB').onclick=async()=>{try{await BE.api.review(BE.user.uid,{name:(BE.prof&&BE.prof.name)||'',stars:s,text:$('#rvT').value.trim()});toast(at('revOk'));location.hash='#acc'}catch(x){toast(at('err'))}};
 }
+/* ---- 合格 pass stories: students write, teacher approves, shown on Home ---- */
+const STLV=['N5','N4','N3','N2','N1','JFT-Basic','介護 (Nursing care)','特定技能 (SSW)','BJT'];
+async function renderStory(){
+  if(!BE.ready){shell('acc',`<div class="card empty">…</div>`);return}
+  if(!BE.ok||!BE.user){location.hash='#acc';return}
+  const old=await BE.api.myStory(BE.user.uid)||{};
+  shell('acc',`${ph('祝','I passed! · 合格しました','')}<section class="card accbox"><h3>🎉 Congratulations! Tell other students your story</h3>
+   <p class="muted">Your story helps others study. The teacher checks it first. Only your first name is shown.${old.created?` <b>${old.show?'✓ Shown on the site':'⏳ Waiting for the teacher'}</b>`:''}</p>
+   <form id="stF" class="eform"><label>Exam passed<select id="stL">${STLV.map(l=>`<option ${old.lv===l?'selected':''}>${l}</option>`).join('')}</select></label>
+   <label>When (e.g. 2026 Dec)<input id="stW" maxlength="20" value="${esc(old.when||'')}"></label>
+   <label>Your score (optional)<input id="stS" maxlength="20" value="${esc(old.score||'')}" placeholder="e.g. 128/180"></label>
+   <label>Your story: how did you study? (any language)<textarea id="stT" rows="5" maxlength="800">${esc(old.text||'')}</textarea></label>
+   <button class="btn grad">Send</button><div class="err" id="stE"></div></form></section>`);
+  $('#stF').onsubmit=async e=>{e.preventDefault();const tx=$('#stT').value.trim();if(tx.length<10){$('#stE').textContent='Please write a little more.';return}
+    try{await BE.api.story(BE.user.uid,{name:lbName(),lv:$('#stL').value,when:$('#stW').value.trim().slice(0,20),score:$('#stS').value.trim().slice(0,20),text:tx.slice(0,800)});toast('✓ Thank you! The teacher will check it.');location.hash='#acc'}catch(x){$('#stE').textContent=at('err')}}}
+async function storiesHome(){const el=$('#storyHome');if(!el||!BE.ok)return;let r=[];try{r=await BE.api.stories(false)}catch(e){}
+  el.innerHTML=`<h2 class="hsech"><i>祝</i>Pass stories · 合格体験記</h2>${r.length?`<div class="revrow">${r.slice(0,12).map(x=>`<div class="card revc storyc"><div class="st-lv">🎉 ${esc(x.lv||'')} 合格${x.when?' · '+esc(x.when):''}${x.score?' · '+esc(x.score):''}</div><p>${esc(x.text||'')}</p><b>${esc(x.name||'')}</b></div>`).join('')}</div>`:'<p class="muted">Be the first pass story on BP Nihongo Hub!</p>'}<a class="btn ghost" href="#story">🎉 I passed! Share my story</a>`}
 async function reviewsHome(){/* approved reviews block on the home page */
   const el=$('#revHome');if(!el||!BE.ok)return;let r=[];try{r=await BE.api.reviewsPublic()}catch(e){}
   if(!r.length){el.remove();return}
@@ -1952,6 +1979,7 @@ async function renderTeacher(){
   let hk=true;try{hk=await BE.api.hasKey(tc)}catch(e){}
   let HW=null;try{HW=await BE.api.allHw()}catch(e){HW=null}
   let RP=null;try{RP=await BE.api.allRep()}catch(e){RP=null}
+  let ST=null;try{ST=await BE.api.stories(true)}catch(e){ST=null}
   let TDN=LS.get('todo',{});try{TDN=Object.assign({},TDN,await BE.api.todoGet())}catch(e){}
   shell('teacher',`${ph('師',at('tT'),new Date().toISOString().slice(0,10))}
   <div class="erow" style="margin:0 0 12px">${['n5','n4','n3'].map(c=>`<button class="chip ${c===tc?'on':''}" data-tc="${c}">${PAYC(c)}</button>`).join('')}</div>
@@ -1989,6 +2017,8 @@ async function renderTeacher(){
   <h2 class="hsech"><i>★</i>${at('revs')} (${RV.length})</h2>
   ${RV.map(r=>`<div class="card trev"><div><span class="st">${stars(r.stars||0)}</span> <b>${esc(r.name||'')}</b><p>${esc(r.text||'')}</p><small>${fdate(r.created)}</small></div><button class="chip ${r.show?'on':''}" data-rv="${r.id}" data-v="${r.show?0:1}">${r.show?at('hide'):at('show')}</button></div>`).join('')||`<p class="muted">${at('none')}</p>`}
   <section class="card" style="margin:12px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><div style="flex:1;min-width:200px"><b>💾 Backup</b><p class="muted" style="margin:4px 0 0">Download all students, payments, reviews, homework and reports as one file. Do it once a month and keep it in Google Drive.</p></div><button class="btn ghost" id="tBak">⬇ Download backup (JSON)</button><a class="btn grad" href="tools/post.html" target="_blank" rel="noopener">📸 Daily post maker</a></section>
+  <h2 class="hsech"><i>祝</i>Pass stories (${ST?ST.filter(s=>!s.show).length+' new / '+ST.length:'—'})</h2>
+  ${ST==null?`<p class="muted">To receive pass stories, paste the new Firebase rules (firebase-rules.txt).</p>`:ST.map(s=>`<div class="card trev"><div style="flex:1"><b>🎉 ${esc(s.lv||'')} ${esc(s.when||'')} ${esc(s.score||'')}</b> · ${esc(s.name||'')}<p>${esc(s.text||'')}</p><small>${fdate(s.created)}</small></div><button class="chip ${s.show?'on':''}" data-stv="${s.id}" data-v="${s.show?0:1}">${s.show?at('hide'):at('show')}</button></div>`).join('')||`<p class="muted">${at('none')}</p>`}
   <h2 class="hsech"><i>⚑</i>Mistake reports (${RP?RP.filter(r=>r.status!=='fixed').length+' new / '+RP.length:'—'})</h2>
   ${RP==null?`<p class="muted">To receive reports, paste the new Firebase rules (firebase-rules.txt).</p>`:RP.slice(0,80).map(r=>`<div class="card trev"><div style="flex:1"><b>${esc(String(r.course||'').toUpperCase())} · ${esc(r.qid||'')}</b> <small>${esc(r.email||'')}</small><p style="font-family:var(--f-jp)">${esc(r.q||'')}</p><p>${esc(r.text||'')}</p><small>${fdate(r.created)}</small></div><button class="chip ${r.status==='fixed'?'on':''}" data-rpf="${r.id}">${r.status==='fixed'?'✓ Fixed':'Mark fixed'}</button></div>`).join('')||`<p class="muted">${at('none')}</p>`}
   <h2 class="hsech"><i>宿</i>Homework (${HW?HW.filter(h=>h.status!=='checked').length+' new / '+HW.length:'—'})</h2>
@@ -1997,6 +2027,7 @@ async function renderTeacher(){
   $('#tBak').onclick=async()=>{const b=$('#tBak');b.disabled=true;try{const o={site:'bpnihongohub.github.io',at:new Date().toISOString(),users:U,pay:PH.length?PH:PY,reviews:RV,hw:HW||[],reports:RP||[]};
     const blob=new Blob([JSON.stringify(o,(k,v)=>v&&v.toMillis?v.toMillis():v,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='bp-nihongo-hub-backup-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.parentNode.removeChild(a)},500);toast('✓')}catch(e){toast(at('err'))}b.disabled=false};
   $$('[data-cls]').forEach(b=>b.onclick=()=>{TD.cls=b.dataset.cls;renderTeacher()});
+  $$('[data-stv]').forEach(b=>b.onclick=async()=>{try{await BE.api.showStory(b.dataset.stv,b.dataset.v==='1')}catch(e){toast(at('err'))}renderTeacher()});
   $$('[data-rpf]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await BE.api.repMark(b.dataset.rpf,{status:'fixed'});toast('✓')}catch(e){toast(at('err'))}renderTeacher()});
   $$('[data-hw]').forEach(b=>b.onclick=async()=>{const c=($(`[data-hwc="${b.dataset.hw}"]`)||{}).value||'';b.disabled=true;try{await BE.api.hwMark(b.dataset.hw,{status:'checked',comment:c});toast('✓')}catch(e){toast(at('err'))}renderTeacher()});
   $('#tq').oninput=e=>{TD.q=e.target.value;clearTimeout(TD.t);TD.t=setTimeout(()=>{renderTeacher().then(()=>{const i=$('#tq');i.focus();i.setSelectionRange(i.value.length,i.value.length)})},350)};
