@@ -652,6 +652,7 @@ tr[data-kanji]:hover td{background:var(--ai-soft)}
 .paybox{display:grid;gap:10px;text-align:center}.paybox .big{font-size:34px;font-weight:900}.paybox ol{text-align:left;margin:0;padding-left:20px;line-height:1.8}
 details.codebox{margin-top:10px}details.codebox summary{cursor:pointer;color:var(--muted);font-size:13px}
 @media(max-width:480px){.tools .lockbtn{display:none}}
+.stbar{display:flex;align-items:center;gap:8px;max-width:1100px;margin:8px auto 0;padding:9px 14px;border-radius:12px;background:linear-gradient(90deg,#2443e8,#0a1440);color:#fff;font-size:.9rem;font-weight:600}.stbar.warn{background:linear-gradient(90deg,#e5193f,#a10f2c)}.stbar a{color:#fff;flex:1;text-decoration:none}.stbar button{background:none;border:0;color:#fff;font-size:1rem;cursor:pointer;opacity:.8}@media(max-width:1132px){.stbar{margin:8px 16px 0}}
 </style>
 <div id="app"><div class="loginwrap"><div class="aur a1"></div><div class="aur a2"></div></div></div>
 <div id="toast" class="toast" hidden></div>
@@ -1049,6 +1050,15 @@ window.addEventListener('hashchange',()=>{Q.inPage=false;window.scrollTo(0,0);re
 
 const MORE={ja:'その他',en:'More',ne:'अरू',vi:'Thêm',id:'Lainnya',my:'နောက်ထပ်',zh:'更多',tl:'Iba pa'};
 const ph=(g,ti,sub)=>`<section class="phead"><i>${g}</i><div><h1>${ti}</h1>${sub?`<p>${sub}</p>`:''}</div></section>`;
+function stBar(active){/* site-wide account notice: verify email / trial days left / renew before paid access ends */
+  if(!BE.user||['pay','acc','teacher','admin'].includes(active))return '';const p=BE.prof||{},c=dxOf(),now=Date.now(),day=864e5;
+  let m='',h='#pay',cls='';
+  if(BE.user.emailVerified===false){m='📧 Verify your email to start your 3-day free trial';h='#acc'}
+  else if(isPaidP(p,c)){const d=Math.ceil((untilOf(p,c)-now)/day);if(d<=7){m=`⏰ Your ${PAYC(c)} access ends in ${d} day(s) · ${fdate(untilOf(p,c))}. Renew now`;cls='warn'}}
+  else if(isTrialP(p)){const d=trialLeft(p);m=`🎁 Free trial: ${d} day(s) left. Pay for ${PAYC(c)} to keep everything open`;cls=d<=1?'warn':''}
+  else if(untilOf(p,c)&&now-untilOf(p,c)<30*day){m=`🔒 Your ${PAYC(c)} access has ended. Renew to open everything again`;cls='warn'}
+  if(!m)return '';const k='stbar_'+c+'_'+new Date().toDateString()+'_'+m.slice(0,2);if(LS.get(k,0))return '';
+  return `<div class="stbar ${cls}" id="stbar"><a href="${h}">${esc(m)} →</a><button aria-label="Close" data-k="${k}">✕</button></div>`}
 function shell(active,inner){
   HEN=true;const tabs=[['home','家',t('navHome')],['pass','合','Pass? Try it'],['quiz','練',t('navQuiz')],['mock','試',t('navMock')],['srs','札',t('navSrs')],['review','誤',t('navRev')],['words','辞',t('navWords')]];
   if(['n3','n4','n5'].includes(exam()))tabs.splice(1,0,['units','課',ut('nav')]);
@@ -1061,9 +1071,10 @@ function shell(active,inner){
   const bnav=`<nav class="bnav">${mainT.map(lnk).join('')}<button class="${moreT.some(x=>x[0]===active)?'on':''}" id="moreBtn" aria-expanded="false"><i aria-hidden="true">⋯</i><span>${LANGS[LI][0]==='ne'?'More':MORE[LANGS[LI][0]]||'More'}</span></button></nav><div class="moresheet" id="moreSheet" hidden><div class="ms-in">${moreT.map(lnk).join('')}</div></div>`;
   $('#app').innerHTML=`<header class="top"><div class="in"><a class="brand" href="#home">${hanko('hk')}<div><b>BP Nihongo <em>Hub</em></b><small>日本語 · <strong>JLPT</strong></small></div></a>
   <div class="tools">${langSel('langTop')}<button class="iconbtn" id="themeBtn" aria-label="${t('theme')}">◐</button><a class="iconbtn accbtn ${BE.user?'in':''}" href="#acc" aria-label="${at('acc')}">${BE.user?esc(((BE.prof&&BE.prof.name)||BE.user.email||'?').trim().charAt(0).toUpperCase()||'人'):'人'}</a>${UNL?'':`<a class="iconbtn lockbtn" href="#unlock" aria-label="${t('unlockT')}">🔒</a>`}</div>
-  ${nav('tabs')}</div></header><main class="wrap">${inner}</main>
+  ${nav('tabs')}</div></header>${stBar(active)}<main class="wrap">${inner}</main>
   <footer class="wrap foot-note">© BP Nihongo Hub · Binod Paudel · <a href="legal.html" style="color:inherit">Terms · Privacy · 特定商取引法</a></footer>${bnav}`;
   bindLang('langTop');
+  const sb=$('#stbar button');if(sb)sb.onclick=()=>{LS.set(sb.dataset.k,1);sb.parentNode.remove()};
   const mb=$('#moreBtn'),ms=$('#moreSheet');if(mb){mb.onclick=e=>{e.stopPropagation();ms.hidden=!ms.hidden;mb.setAttribute('aria-expanded',!ms.hidden)};ms.onclick=e=>{if(e.target===ms)ms.hidden=true};ms.querySelectorAll('a').forEach(x=>x.onclick=()=>{ms.hidden=true})}
   $('#themeBtn').onclick=()=>{const dark=matchMedia('(prefers-color-scheme: dark)').matches;const cur=document.documentElement.getAttribute('data-theme')||'dark';setTheme(cur==='dark'?'light':'dark')};
   const o=$('#outBtn');if(o)o.onclick=()=>{LS.set('auth','');render()};
