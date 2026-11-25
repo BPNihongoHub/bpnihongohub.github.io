@@ -653,6 +653,7 @@ tr[data-kanji]:hover td{background:var(--ai-soft)}
 details.codebox{margin-top:10px}details.codebox summary{cursor:pointer;color:var(--muted);font-size:13px}
 @media(max-width:480px){.tools .lockbtn{display:none}}
 .stbar{display:flex;align-items:center;gap:8px;max-width:1100px;margin:8px auto 0;padding:9px 14px;border-radius:12px;background:linear-gradient(90deg,#2443e8,#0a1440);color:#fff;font-size:.9rem;font-weight:600}.stbar.warn{background:linear-gradient(90deg,#e5193f,#a10f2c)}.stbar a{color:#fff;flex:1;text-decoration:none}.stbar button{background:none;border:0;color:#fff;font-size:1rem;cursor:pointer;opacity:.8}@media(max-width:1132px){.stbar{margin:8px 16px 0}}
+.plancard{display:flex;gap:16px;align-items:center;margin:14px 0;flex-wrap:wrap}.pc-l{text-align:center;min-width:92px}.pc-l span{font-size:.75rem;opacity:.75;display:block}.pc-big{font-size:2.4rem;font-weight:800;line-height:1;color:var(--shu,#e5193f)}.pc-big small{font-size:.8rem;margin-left:3px}.pc-r{flex:1;min-width:220px}.pc-r p{margin:6px 0 10px}.pc-date{font-size:.85rem;display:flex;gap:6px;align-items:center}.pc-date input{padding:6px;border-radius:8px;border:1px solid var(--line,#ccc);background:transparent;color:inherit}
 </style>
 <div id="app"><div class="loginwrap"><div class="aur a1"></div><div class="aur a2"></div></div></div>
 <div id="toast" class="toast" hidden></div>
@@ -1137,6 +1138,17 @@ function homeTop(){const L=LANGS[LI][0],ne=L==='ne',lv=(COURSES.find(c=>c[0]===e
   <nav class="hl-grid" aria-label="Sections">${secs.map(([k,g,n])=>`<a href="${hl(k)}" ${k==='course'?'data-tocourse="1"':''}><i>${g}</i><span>${esc(n)}</span></a>`).join('')}</nav>`}
 function homeCards(){return `<h2 class="hsech"><i>全</i>${['ne','ja'].includes(LANGS[LI][0])?'すべてのセクション':'All sections'}</h2><div class="hl-cards">${homeSecs().map(([k,g,n],i)=>`<a class="card hl-card" href="${k==='course'?'#courses':'#'+k}" ${k==='course'?'data-tocourse="1"':''}><i>${g}</i><div><small>${String(i+1).padStart(2,'0')}</small><b>${esc(n)}</b><span>${hdx(k)}</span></div><em>→</em></a>`).join('')}</div>`}
 function bindHomeTop(){$$('[data-tocourse]').forEach(a=>a.onclick=e=>{e.preventDefault();const c=$('#courses');if(c)c.scrollIntoView({behavior:'smooth',block:'start'})})}
+function jlptNext(){/* JLPT in Japan: first Sunday of July and of December */
+  const now=new Date(),y=now.getFullYear(),fs=(y,m)=>{const d=new Date(y,m,1);d.setDate(1+(7-d.getDay())%7);return d};
+  return [fs(y,6),fs(y,11),fs(y+1,6)].find(d=>d.getTime()+864e5>now.getTime())}
+const ymd=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+function planCard(done){if(!/^n[1-5]$/.test(exam()))return '';
+  const own=LS.get('examdate',''),d=own?new Date(own+'T09:00'):jlptNext();const days=Math.ceil((d-Date.now())/864e5);
+  const total=D.total||D.q.length,left=Math.max(0,total-done),rsv=days>=30?7:Math.max(1,Math.floor(days/4)),study=Math.max(1,days-rsv),need=Math.ceil(left/study),daily=Math.min(150,Math.max(5,need));
+  const msg=days<0?'Your exam date has passed. Set your next exam date.':days<=7?'Last week: do mock tests and redo your mistakes every day. 試験直前：模試と復習！':
+   left?(need>150?`Short time: do <b>${daily} questions a day</b>, red (important) items first, and a mock test every few days. 時間が少ない！`:`Plan: <b>${daily} questions a day</b> to finish all ${total} by ${ymd(new Date(Date.now()+study*864e5))}, then mock tests + mistakes in the last ${rsv} day(s).`):'You have done every question. Now: mock tests + mistakes every day.';
+  return `<section class="card plancard"><div class="pc-l"><div class="pc-big">${Math.max(0,days)}<small>days</small></div><span>${esc(PAYC())} · ${ymd(d)}</span></div>
+   <div class="pc-r"><b>📅 Study plan · 学習プラン</b><p>${msg}</p><div class="erow">${days>7&&left?`<button class="btn grad" id="pcGoal" data-g="${daily}">Set ${daily}/day as my goal</button>`:''}<label class="pc-date">Exam date <input type="date" id="pcDate" value="${ymd(d)}"></label></div></div></section>`}
 function renderHome(){
   const k=secStats(KANJI_T),m=secStats(MEAN_T);const done=k.done+m.done,ok=k.ok+m.ok;
   const weak=Object.values(P.res).filter(v=>v===0).length,tcount=P.log[today()]||0;
@@ -1147,8 +1159,8 @@ function renderHome(){
   HJ=true;const HH=`<section class="courses" id="courses"><div class="eyebrow">${t('courses')}</div><div class="crow">${COURSES.map(([k,n,sub,on])=>`<button class="course ${on?'on':''} ${exam()===k?'sel':''}" data-exam="${k}" aria-pressed="${exam()===k}"><b>${n}</b><small>${sub}</small><span class="st">${on?t('open'):t('soon')}</span></button>`).join('')}</div>${(COURSES.find(c=>c[0]===exam())||[0,0,0,1])[3]?'':`<div class="card soonnote">${t('soonNote',{c:(COURSES.find(c=>c[0]===exam())||[])[1]})}</div>`}</section>${UNL?'':`<section class="card unlockcard"><div><b>🎁 ${t('freeDemo')}</b><p>${t('lockedN',{n:(D.sets||[]).length-(D.free||[]).length})}${SHOWPRICE?' · N5–N3 ¥2,000 · N2–N1 ¥3,000':''}</p></div><a class="btn grad" href="#unlock">🔓 ${t('unlockBtn')}</a></section>`}${homeTop()}
   <section class="dash"><div class="d-top"><div class="d-l"><div class="h-hello">${t('hello')}${me()?', <b>'+esc(me())+'</b>':''} 👋</div><h1>${t('goalT',{n:S.goal})}</h1>
    <div class="row d-btns"><button class="btn light" data-go="kanji">${t('startP')} →</button><a class="btn glass" href="#mock">${t('navMock')}</a></div></div>
-   <div class="d-r">${ring(tcount,S.goal,t('today'))}<label class="d-goal">${t('goalL')} <select id="goalSel" class="glass">${[10,20,30,50,100].map(g=>`<option ${g==S.goal?'selected':''}>${g}</option>`).join('')}</select></label></div></div>
-   <div class="d-stats"><div><b>${done}</b><span>${t('stDone')}</span></div><div><b>${done?Math.round(ok/done*100):0}%</b><span>${t('stAcc')}</span></div><div><b>${streak()}🔥</b><span>${t('stStreak')}</span></div><a href="#review"><b>${weak}</b><span>${t('stWeak')}</span></a></div></section>
+   <div class="d-r">${ring(tcount,S.goal,t('today'))}<label class="d-goal">${t('goalL')} <select id="goalSel" class="glass">${[...new Set([10,20,30,50,100,+S.goal])].sort((a,b)=>a-b).map(g=>`<option ${g==S.goal?'selected':''}>${g}</option>`).join('')}</select></label></div></div>
+   <div class="d-stats"><div><b>${done}</b><span>${t('stDone')}</span></div><div><b>${done?Math.round(ok/done*100):0}%</b><span>${t('stAcc')}</span></div><div><b>${streak()}🔥</b><span>${t('stStreak')}</span></div><a href="#review"><b>${weak}</b><span>${t('stWeak')}</span></a></div></section>${planCard(done)}
   <h2 class="hsech"><i>試</i>${ut('setsH')}<small>${D.total||D.q.length} 問</small></h2>
   <div class="setgrid">${[['kanji','漢','STEP 1',t('kanji'),k],['mean','語','STEP 2',t('mean'),m],...[['gram','文',GRAM_T],['read','読',READ_T],['listen','聴',LISTEN_T]].map(([kk,g,T],x)=>[kk,g,'STEP '+(x+3),t(kk),secStats(T)])].filter(r=>r[4].total).map(([kk,g,st,ti,s])=>`<button class="card setc" data-go="${kk}"><span class="sg">${g}</span><small>${st}</small><b>${ti}</b><span class="sn">${s.total} 問</span><span class="sbar"><i style="width:${pct(s)}%"></i></span><span class="sp">${s.done}/${s.total} · ${pct(s)}%</span></button>`).join('')}</div>
   ${['n3','n4','n5'].includes(exam())?hwHome()+booksHome():''}
@@ -1166,6 +1178,7 @@ function renderHome(){
   $$('[data-type-go]').forEach(b=>b.onclick=()=>{const ty=b.dataset.typeGo;Object.assign(Q.sel,{sec:secOf(ty),set:'all',type:ty,order:'shuffle'});Q.auto=true;location.hash='#quiz'});
   $$('[data-cert]').forEach(b=>b.onclick=()=>{const st=secStats(b.dataset.cert==='kanji'?KANJI_T:MEAN_T);openCert(b.dataset.cert==='kanji'?'JLPT '+exam().toUpperCase()+' 漢字 Kanji Section':'JLPT '+exam().toUpperCase()+' 語彙 Vocabulary Section','Accuracy '+Math.round(st.ok/st.total*100)+'%')});
   $('#goalSel').onchange=e=>{S.goal=+e.target.value;saveS();renderHome()};
+  {const g=$('#pcGoal');if(g)g.onclick=()=>{S.goal=+g.dataset.g;saveS();renderHome()};const pd=$('#pcDate');if(pd)pd.onchange=()=>{LS.set('examdate',pd.value===ymd(jlptNext())?'':pd.value);renderHome()}}
   $$('[data-bsec]').forEach(b=>b.onclick=()=>{BS.sec=b.dataset.bsec});
   $$('[data-hsec]').forEach(b=>b.onclick=()=>{US.sec=b.dataset.hsec;US.inPage=false});
   bindCommon();reviewsHome();bindHomeTop();
