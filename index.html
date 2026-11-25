@@ -1032,7 +1032,8 @@ const CDOM='@code.bpnihongohub.app',isCodeAcc=u=>!!(u&&/@code\.bpnihongohub\.app
 async function codeLogin(code,name,pw){code=(code||'').toUpperCase().replace(/[^0-9A-Z]/g,'');const K=KEYS;
   if(code.length!==12||!K||!K.w||!K.w[code.slice(0,4)])return t('codeErr');
   if((pw||'').length<6)return 'Password must be 6 letters or more.';
-  const em='c'+code.toLowerCase()+CDOM;
+  let gen=0;try{gen=((BE.api.codeGen?await BE.api.codeGen():{})[code.slice(0,4)])||0}catch(e){}/* teacher 'Free code' bumps this, so a new password/account can be made */
+  const em='c'+code.toLowerCase()+(gen?'-'+gen:'')+CDOM;
   try{await BE.api.signin(em,pw)}catch(x){const c=(x&&x.code)||'';
     if(/user-not-found|invalid-credential|invalid-login/.test(c)){try{await BE.api.signup(em,pw,(name||'').trim().slice(0,60))}catch(y){return /email-already-in-use/.test((y&&y.code)||'')?'Wrong password for this code. Use the same password you made the first time (ask Binod sensei if you forgot).':authMsg(y)}}
     else if(/wrong-password/.test(c))return 'Wrong password for this code. Use the same password you made the first time.';else return authMsg(x)}
@@ -1756,6 +1757,7 @@ function fbApi(){
     reset:e=>A.sendPasswordResetEmail(e),
     async codeGet(id){const s=await F.doc('codes/'+id).get();return s.exists?s.data():null},codeSet:(id,o)=>F.doc('codes/'+id).set(o),
     async codes(){const q=await F.collection('codes').get();return q.docs.map(norm)},codeDel:id=>F.doc('codes/'+id).delete(),
+    async codeGen(){try{const s=await F.doc('pub/codegen').get();return s.exists?(s.data().g||{}):{}}catch(e){return {}}},setCodeGen:g=>F.doc('pub/codegen').set({g}),
     signin:(e,p)=>A.signInWithEmailAndPassword(e,p),
     signup:async(e,p,n)=>{const c=await A.createUserWithEmailAndPassword(e,p);if(n)await c.user.updateProfile({displayName:n});if(!/@code\.bpnihongohub\.app$/.test(e))try{await c.user.sendEmailVerification()}catch(x){}return c},
     verify:()=>A.currentUser.sendEmailVerification(),
@@ -1813,7 +1815,7 @@ function mockApi(){/* localhost test double with the same shape as fbApi */
   const fire=()=>{const d=db();cb&&cb(d.me?{uid:d.me,email:d.users[d.me].email,displayName:d.users[d.me].name}:null)};
   const login=(e,n)=>{const d=db();const id='u_'+e.replace(/\W/g,'');if(!d.users[id])d.users[id]={name:n||e.split('@')[0],email:e,phone:'',created:Date.now(),last:Date.now(),paid:false,prog:{}};d.me=id;put(d);fire()};
   return{onAuth:f=>{cb=f;setTimeout(fire,0)},google:async()=>login('google.student@example.com','Google Student'),signin:async e=>login(e),reset:async()=>{},
-    async codeGet(id){return (db().codes||{})[id]||null},async codeSet(id,o){const d=db();d.codes=d.codes||{};d.codes[id]=o;put(d)},async codes(){return Object.entries(db().codes||{}).map(([id,c])=>Object.assign({id},c))},async codeDel(id){const d=db();delete (d.codes||{})[id];put(d)},signup:async(e,p,n)=>login(e,n),
+    async codeGet(id){return (db().codes||{})[id]||null},async codeSet(id,o){const d=db();d.codes=d.codes||{};d.codes[id]=o;put(d)},async codes(){return Object.entries(db().codes||{}).map(([id,c])=>Object.assign({id},c))},async codeDel(id){const d=db();delete (d.codes||{})[id];put(d)},async codeGen(){return db().cgen||{}},async setCodeGen(g){const d=db();d.cgen=g;put(d)},signup:async(e,p,n)=>login(e,n),
     out:async()=>{const d=db();d.me=null;put(d);fire()},
     async touch(u){const d=db();d.users[u.uid].last=Date.now();put(d);return Object.assign({},d.users[u.uid])},
     async saveProf(uid,o){const d=db();Object.assign(d.users[uid],o);put(d)},
@@ -2100,7 +2102,7 @@ async function codesBox(){const el=$('#tCodes');if(!el||!BE.api.codes)return;let
   ${C.length?`<table class="ptbl" style="width:100%;font-size:13px;border-collapse:collapse"><tr><th>Course</th><th>Code</th><th>Account</th><th>Devices</th><th>Until</th><th></th></tr>${C.map(c=>`<tr style="border-top:1px solid #e3e8f2"><td>${esc(c.id.split('_')[0].toUpperCase())}</td><td>${esc(c.id.split('_')[1]||'')}…</td><td>${esc(c.email||c.uid||'')}</td><td>${(c.dev||[]).length}/3</td><td>${c.at?fdate(c.at+SIXM()):''}${c.at&&Date.now()>c.at+SIXM()?' ⛔':''}</td><td><button class="chip" data-cdv="${esc(c.id)}">Reset devices</button> <button class="chip" data-cdl="${esc(c.id)}">Free code</button></td></tr>`).join('')}</table>`:'<p class="muted">No code used yet.</p>'}
   <p class="muted" style="font-size:12px">Reset devices = same account can open it on 3 new devices. Free code = the next account that types it gets it.</p></details></section>`;
   $$('[data-cdv]').forEach(b=>b.onclick=async()=>{const c=C.find(x=>x.id===b.dataset.cdv);try{await BE.api.codeSet(c.id,{uid:c.uid,email:c.email||'',dev:[],at:c.at||Date.now()});toast('✓');codesBox()}catch(e){toast(at('err'))}});
-  $$('[data-cdl]').forEach(b=>b.onclick=async()=>{if(!confirm('Free this code?'))return;try{await BE.api.codeDel(b.dataset.cdl);toast('✓');codesBox()}catch(e){toast(at('err'))}})}
+  $$('[data-cdl]').forEach(b=>b.onclick=async()=>{if(!confirm('Free this code?'))return;try{await BE.api.codeDel(b.dataset.cdl);try{const id4=b.dataset.cdl.split('_')[1],g=await BE.api.codeGen();g[id4]=(g[id4]||0)+1;await BE.api.setCodeGen(g)}catch(e){}toast('✓');codesBox()}catch(e){toast(at('err'))}})}
 async function renderTeacher(){
   if(!BE.ok||!BE.admin){location.hash='#acc';return}
   shell('teacher',`${ph('師',at('tT'),'')}<div class="card empty">…</div>`);
