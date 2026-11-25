@@ -1691,7 +1691,7 @@ function stPush(force){if(!_stReady||!BE.api.stPut||!BE.user)return;const now=Da
 function beSync(force){/* push a small progress summary, at most once a minute */
   if(!BE.ok||!BE.user)return;const now=Date.now();if(!force&&now-_syncT<60000)return;_syncT=now;
   const res=P.res,vals=Object.values(res),ures=LS.get('ures',{});
-  const sum={done:vals.length,ok:vals.filter(v=>v===1).length,days:(P.days||[]).length,hw:Object.fromEntries(Object.entries(ures).map(([k,v])=>[k,v.b||0]))};
+  const sum={done:vals.length,ok:vals.filter(v=>v===1).length,days:(P.days||[]).length,hw:Object.fromEntries(Object.entries(ures).map(([k,v])=>[k,v.b||0])),ty:Object.fromEntries(ALL_T.map(ty=>{const s=typeStats(ty);return [ty,[s.ok,s.done]]}).filter(x=>x[1][1])),ex:exam()};
   BE.api.progress(BE.user.uid,sum).catch(()=>{});stPush(force);lbPush();
 }
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')beSync(true)});
@@ -1713,7 +1713,7 @@ function fbApi(){
     async touch(u){const r=F.doc('users/'+u.uid),s=await r.get();
       if(!s.exists){const p={name:u.displayName||'',email:u.email||'',phone:'',created:TS(),last:TS(),lastDay:day(),paid:false,prog:{}};await r.set(p);return Object.assign(p,{created:Date.now(),last:Date.now()})}
       const p=norm(s);if(p.lastDay!==day()){await r.update({last:TS(),lastDay:day()});p.last=Date.now()}return p},
-    saveProf:(uid,o)=>F.doc('users/'+uid).update({name:o.name,phone:o.phone}),
+    saveProf:(uid,o)=>F.doc('users/'+uid).update(Object.assign({name:o.name,phone:o.phone},'cls' in o?{cls:o.cls}:{})),
     progress:(uid,sum)=>F.doc('users/'+uid).update({prog:sum,last:TS(),lastDay:day()}),
     async stGet(uid){const s=await F.doc('users/'+uid+'/st/main').get();return s.exists?s.data():null},
     stPut:(uid,v)=>F.doc('users/'+uid+'/st/main').set({v,t:Date.now()}),
@@ -1815,7 +1815,7 @@ async function renderAccount(){
   ${nv?`<section class="card accbox" style="border:1.5px solid #e3a200"><b>📧 Please verify your email · メール確認</b><p class="muted">We sent a link to <b>${esc(BE.user.email||'')}</b>. Open it, then tap "I verified". Your 3-day free trial starts after this.</p><div class="erow"><button class="btn grad" id="vDone">✓ I verified</button><button class="btn ghost" id="vSend">Resend email</button></div><div class="err" id="vErr"></div></section>`:''}
   <section class="card accbox"><div class="plan ${isPaidP(p)?'ok':isTrialP(p)?'trial':'lock'}"><b>${PAYC()}</b> · ${isPaidP(p)?at('paid')+`<small>${at('until')}: ${fdate(untilOf(p))}</small>`:pend?at('pending'):isTrialP(p)?`🎁 Free trial: everything open<small>${trialLeft(p)} day(s) left · until ${fdate(trialEnd(p))}. Pay before it ends to keep everything open.</small>`:untilOf(p)?at('expired'):`🔒 Locked${trialEnd(p)?'<small>Your 3-day free trial has ended. Pay to open everything.</small>':''}`}</div>
    ${!isPaidP(p)&&PAY.on&&!pend?`<a class="btn grad" href="#pay">💳 ${at('payT')} · ${PAY.cur}${PAY.price.toLocaleString('en')} · ${at('per6')}</a>`:''}
-   <form id="pForm" class="eform"><label>${at('name')}<input id="pName" value="${esc(p.name||'')}"></label><label>${at('phone')}<input id="pPhone" type="tel" value="${esc(p.phone||'')}"></label>
+   <form id="pForm" class="eform"><label>${at('name')}<input id="pName" value="${esc(p.name||'')}"></label><label>${at('phone')}<input id="pPhone" type="tel" value="${esc(p.phone||'')}"></label><label>🏫 Class code (from your teacher, optional)<input id="pCls" value="${esc(p.cls||'')}" placeholder="e.g. TOKYO-N3" autocomplete="off"></label>
    <button class="btn ghost">${at('save')}</button></form></section>
   ${mine.length?`<section class="card accbox"><h3>🧾 My payments · 支払い履歴</h3><table class="ptbl" style="width:100%;font-size:13px;border-collapse:collapse">${mine.map(x=>`<tr style="border-top:1px solid #e3e8f2"><td style="white-space:nowrap">${fdate(x.created)}</td><td>${PAYC(x.course||'n3')}</td><td>${PAY.cur}${(+x.amount||PAY.price).toLocaleString('en')}</td><td>${x.status==='approved'?'✅ Approved':x.status==='rejected'?'✕ Rejected':'⏳ Checking'}</td><td>${x.status==='approved'?`<button class="chip" data-rc="${x.id}">🧾 Receipt</button>`:''}</td></tr>`).join('')}</table><p class="muted" style="font-size:12px;margin:6px 0 0">🧾 Receipt = your bill (save as PDF or screenshot). ✅ = all sets, units and books of that course open for 6 months on this account. No code needed.</p></section>`:''}
   <section class="card accbox"><h3>${at('prog')}</h3><div class="astats"><div><b>${done}</b><span>${at('done')}</span></div><div><b>${done?Math.round(ok*100/done):0}%</b><span>${at('acc2')}</span></div><div><b>${hwp}</b><span>${at('hw')} ✓</span></div></div></section>
@@ -1823,7 +1823,7 @@ async function renderAccount(){
   <div class="erow" style="justify-content:center;margin:14px 0"><a class="btn ghost" href="#rate">★ ${at('rev')}</a>${BE.admin?`<a class="btn ghost" href="#teacher">師 ${at('tT')}</a>`:''}<button class="btn ghost" id="outB">${at('logout')}</button></div>`);
   if($('#vDone')){$('#vDone').onclick=async()=>{try{const u=await BE.api.reloadUser();if(u.emailVerified){await u.getIdToken(true);BE.user=u;toast('✓ Email verified');if(isTrialP(BE.prof))beKey();render()}else $('#vErr').textContent='Not verified yet. Open the link in your email (check Spam too).'}catch(e){$('#vErr').textContent=at('err')}};
     $('#vSend').onclick=async()=>{try{await BE.api.verify();$('#vErr').textContent='✓ Sent. Check your inbox and Spam folder.'}catch(e){$('#vErr').textContent='Please wait a few minutes and try again.'}}}
-  $('#pForm').onsubmit=async e=>{e.preventDefault();const o={name:$('#pName').value.trim().slice(0,60),phone:$('#pPhone').value.trim().slice(0,30)};try{await BE.api.saveProf(BE.user.uid,o);Object.assign(BE.prof,o);toast('✓')}catch(x){toast(at('err'))}};
+  $('#pForm').onsubmit=async e=>{e.preventDefault();const o={name:$('#pName').value.trim().slice(0,60),phone:$('#pPhone').value.trim().slice(0,30),cls:($('#pCls')?$('#pCls').value:'').toUpperCase().replace(/[^0-9A-Z-]/g,'').slice(0,20)};try{await BE.api.saveProf(BE.user.uid,o);Object.assign(BE.prof,o);toast('✓')}catch(x){toast(at('err'))}};
   $('#outB').onclick=()=>BE.api.out();
   $$('[data-rc]').forEach(b=>b.onclick=()=>showReceipt(mine.find(x=>x.id===b.dataset.rc),BE.prof));
   if(BE.admin)BE.api.pays().then(p=>{if(p.length){toast('🔔 '+p.length+' payment(s) to check');const a=document.querySelector('a[href="#teacher"]');if(a)a.textContent+=' 🔔'+p.length}}).catch(()=>{});
@@ -1913,7 +1913,7 @@ function renderBills(ALL,U){const box=$('#billBox');if(!box)return;
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='bp-nihongo-hub-bills-'+new Date().toISOString().slice(0,10)+'.csv';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.parentNode.removeChild(a)},500)};
   draw()}
 /* ---- teacher dashboard ---- */
-const TD={q:'',sort:'last',c:null};
+const TD={q:'',sort:'last',c:null,cls:''};
 const TODO=[/* [id, text, how / link] — only things that need Binod himself (his login, money, or info) */
  ['rules','Paste the new Firebase rules','Firebase console → Firestore Database → Rules → paste all of private/firebase-rules.txt → Publish. Needed for: progress backup, mistake reports, homework, email-verified trial.','https://console.firebase.google.com/project/binod-paudel/firestore/rules'],
  ['keys','Save the N5 and N4 Teacher 🔑 keys','On this page: choose the N5 chip, paste row 2 code of private/n5-unlock-codes.xlsx in 🔑, Save. Same for N4. Without it paid N5/N4 students cannot open sets.',''],
@@ -1933,7 +1933,8 @@ async function renderTeacher(){
   shell('teacher',`${ph('師',at('tT'),'')}<div class="card empty">…</div>`);
   let U=[],PY=[],RV=[],PH=[];try{[U,PY,RV]=await Promise.all([BE.api.users(),BE.api.pays(),BE.api.reviews(true)]);PH=await BE.api.payHist().catch(()=>[])}catch(e){shell('teacher',`${ph('師',at('tT'),'')}<div class="card empty">${at('err')}</div>`);return}
   const wk=Date.now()-7*864e5,act=U.filter(u=>(u.last||0)>=wk).length,tc=TD.c||dxOf(),paid=U.filter(u=>isPaidP(u,tc)).length,avg=RV.length?(RV.reduce((a,r)=>a+(r.stars||0),0)/RV.length).toFixed(1):'—';
-  const q=TD.q.toLowerCase(),L=U.filter(u=>!q||(u.name+' '+u.email+' '+u.phone).toLowerCase().includes(q))
+  const CLS=[...new Set(U.map(u=>u.cls).filter(Boolean))].sort();if(TD.cls&&!CLS.includes(TD.cls))TD.cls='';
+  const q=TD.q.toLowerCase(),L=U.filter(u=>(!TD.cls||u.cls===TD.cls)&&(!q||(u.name+' '+u.email+' '+u.phone).toLowerCase().includes(q)))
     .sort((a,b)=>TD.sort==='name'?String(a.name).localeCompare(b.name):TD.sort==='done'?((b.prog||{}).done||0)-((a.prog||{}).done||0):TD.sort==='joined'?(b.created||0)-(a.created||0):(b.last||0)-(a.last||0));
   const pr=u=>{const g=u.prog||{};return{d:g.done||0,a:g.done?Math.round((g.ok||0)*100/g.done):0,h:Object.values(g.hw||{}).filter(v=>v>=35).length}};
   let hk=true;try{hk=await BE.api.hasKey(tc)}catch(e){}
@@ -1963,6 +1964,12 @@ async function renderTeacher(){
     ${p.img&&/^data:image\/jpeg;base64,/.test(p.img)?`<a href="#" data-img="${p.id}"><img src="${p.img}" alt="screenshot"></a>`:''}<div class="tbtn"><button class="btn grad" data-ok="${p.id}">✓ ${at('approve')}</button><button class="btn ghost" data-no="${p.id}">✕ ${at('reject')}</button></div></div>`).join(''):`<p class="muted">${at('none')}</p>`}
   <h2 class="hsech"><i>🧾</i>Bills · 支払い履歴 · All payments</h2><div id="billBox"></div>
   <h2 class="hsech"><i>人</i>${at('students')} (${U.length})</h2>
+  <div class="erow" style="margin:0 0 10px;flex-wrap:wrap;gap:6px"><span class="muted">🏫 Class:</span><button class="chip ${TD.cls?'':'on'}" data-cls="">All</button>${CLS.map(c=>`<button class="chip ${TD.cls===c?'on':''}" data-cls="${esc(c)}">${esc(c)} (${U.filter(u=>u.cls===c).length})</button>`).join('')}<span class="muted" style="font-size:12px">Tell students a class code (e.g. TOKYO-N3); they type it on their Account page.</span></div>
+  ${TD.cls?(()=>{const M=L,agg={};M.forEach(u=>Object.entries((u.prog||{}).ty||{}).forEach(([k,[o,d]])=>{agg[k]=agg[k]||[0,0];agg[k][0]+=o;agg[k][1]+=d}));
+    const ws=Object.entries(agg).filter(([,v])=>v[1]>=10).map(([k,v])=>[k,Math.round(v[0]*100/v[1])]).sort((a,b)=>a[1]-b[1]);
+    const weak=u=>{const e=Object.entries((u.prog||{}).ty||{}).filter(([,v])=>v[1]>=5).map(([k,v])=>[k,v[0]/v[1]]).sort((a,b)=>a[1]-b[1])[0];return e?(TL[e[0]]||e[0])+' '+Math.round(e[1]*100)+'%':'—'};
+    return `<section class="card tday"><b>🏫 Class ${esc(TD.cls)} report · ${M.length} students</b><p class="muted" style="margin:6px 0">Class accuracy by part (weakest first): ${ws.map(([k,a])=>`<b style="color:${a<60?'var(--shu,#e5193f)':a<80?'#e3a200':'inherit'}">${TL[k]||k} ${a}%</b>`).join(' · ')||'not enough answers yet'}</p>
+     <div class="tscroll"><table class="ttab"><thead><tr><th>Student</th><th>Answered</th><th>Accuracy</th><th>Weakest part</th><th>Homework ✓</th><th>Last seen</th></tr></thead><tbody>${M.map(u=>{const r=pr(u);return `<tr><td>${esc(u.name||u.email||'')}</td><td>${r.d}</td><td>${r.a}%</td><td>${weak(u)}</td><td>${r.h}</td><td>${ago(u.last)}</td></tr>`}).join('')}</tbody></table></div></section>`})():''}
   <div class="ttools"><input id="tq" placeholder="${at('search')}" value="${esc(TD.q)}"><select id="tsort">${[['last',at('last')],['joined',at('joined')],['done',at('done')],['name',at('name')]].map(([k,l])=>`<option value="${k}" ${TD.sort===k?'selected':''}>${l}</option>`).join('')}</select></div>
   <div class="tscroll"><table class="ttab"><thead><tr><th>${at('name')}</th><th>${at('last')}</th><th>${at('done')}</th><th>${at('acc2')}</th><th>${at('hw')} ✓</th><th>${at('joined')}</th><th></th></tr></thead><tbody>
   ${L.map(u=>{const x=pr(u),on=(u.last||0)>=wk;return `<tr><td><b>${esc(u.name||'—')}</b><small>${esc(u.email||'')}${u.phone?' · '+esc(u.phone):''}</small></td><td><span class="dot ${on?'on':''}"></span>${ago(u.last)}</td><td>${x.d}</td><td>${x.a}%</td><td>${x.h}</td><td>${fdate(u.created)}</td><td>${!isPaidP(u,tc)&&isTrialP(u)?`<span class="paidtag" style="background:#e3a200">🎁 trial ${trialLeft(u)}d</span> `:''}${isPaidP(u,tc)?`<span class="paidtag">¥ ✓ ${fdate(untilOf(u,tc))}</span>`:(untilOf(u,tc)?'<span class="muted">⌛ '+fdate(untilOf(u,tc))+'</span> ':'')}<button class="chip" data-pd="${u.id}" data-v="${isPaidP(u,tc)?0:1}">${PAYC(tc)} ${isPaidP(u,tc)?at('takePaid'):at('givePaid')}</button></td></tr>`}).join('')||`<tr><td colspan="7" class="muted">${at('none')}</td></tr>`}
@@ -1977,6 +1984,7 @@ async function renderTeacher(){
   $$('[data-td]').forEach(c=>c.onchange=async()=>{TDN[c.dataset.td]=c.checked;if(!c.checked)delete TDN[c.dataset.td];LS.set('todo',TDN);c.closest('li').classList.toggle('dn',c.checked);try{await BE.api.todoSet(TDN)}catch(e){}});
   $('#tBak').onclick=async()=>{const b=$('#tBak');b.disabled=true;try{const o={site:'bpnihongohub.github.io',at:new Date().toISOString(),users:U,pay:PH.length?PH:PY,reviews:RV,hw:HW||[],reports:RP||[]};
     const blob=new Blob([JSON.stringify(o,(k,v)=>v&&v.toMillis?v.toMillis():v,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='bp-nihongo-hub-backup-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.parentNode.removeChild(a)},500);toast('✓')}catch(e){toast(at('err'))}b.disabled=false};
+  $$('[data-cls]').forEach(b=>b.onclick=()=>{TD.cls=b.dataset.cls;renderTeacher()});
   $$('[data-rpf]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await BE.api.repMark(b.dataset.rpf,{status:'fixed'});toast('✓')}catch(e){toast(at('err'))}renderTeacher()});
   $$('[data-hw]').forEach(b=>b.onclick=async()=>{const c=($(`[data-hwc="${b.dataset.hw}"]`)||{}).value||'';b.disabled=true;try{await BE.api.hwMark(b.dataset.hw,{status:'checked',comment:c});toast('✓')}catch(e){toast(at('err'))}renderTeacher()});
   $('#tq').oninput=e=>{TD.q=e.target.value;clearTimeout(TD.t);TD.t=setTimeout(()=>{renderTeacher().then(()=>{const i=$('#tq');i.focus();i.setSelectionRange(i.value.length,i.value.length)})},350)};
