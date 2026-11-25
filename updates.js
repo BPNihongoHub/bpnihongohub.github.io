@@ -14,6 +14,15 @@ async function data(){if(!UD)UD=await fetch('updates.json',{cache:'no-cache'}).t
 // items to show: test/result day within 30 days, or application period open / opening within 30 days
 function soon(ev){return ev.map(e=>{const a=dleft(e.date),b=e.end?dleft(e.end):a;return {...e,a,b}})
   .filter(e=>(e.kind==='apply'?e.b>=-7:e.b>=0)&&e.a<=30).sort((x,y)=>(x.b<0)-(y.b<0)||Math.max(x.a,0)-Math.max(y.a,0))}
+/* traffic-light board: one signal per exam (green = form open / book any time, yellow = opens within 30 days, red = closed) */
+const BOARD=[['JLPT','JLPT'],['JFT-Basic','JFT-Basic'],['BJT','BJT'],['介護福祉士','介護福祉士 (national exam)'],['介護','介護 SSW test'],['Food SSW','Food SSW test']];
+function board(d){const ev=(d.ev||[]).filter(e=>e.kind==='apply').map(e=>({...e,a:dleft(e.date),b:dleft(e.end||e.date)}));
+  return BOARD.map(([k,n])=>{const ap=ev.filter(e=>e.cat===k);let st='r',tx='Closed',f=null,u=null;
+    const op=ap.find(e=>e.a<=0&&e.b>=0),so=ap.filter(e=>e.a>0&&e.a<=30).sort((x,y)=>x.a-y.a)[0],any=(d.open||[]).find(e=>e.cat===k);
+    if(op){st='g';tx='Open · until '+fd(op.end||op.date);f=op.f;u=op.u}else if(any){st='g';tx='Book any time';u=any.u}else if(so){st='y';tx='Opens in '+so.a+' days';u=so.u}
+    return {n,st,tx,f,u}})}
+function boardHtml(d){return `<section class="card up-bd">${board(d).map(x=>`<a class="up-bi" href="${esc(x.f||x.u||'#updates')}" ${x.f||x.u?'target="_blank" rel="noopener"':''}><span class="up-sig ${x.st}"></span><b>${esc(x.n)}</b><small>${esc(x.tx)}</small></a>`).join('')}
+  <p class="muted" style="font-size:11px;margin:8px 0 0">🟢 form open now · 🟡 opens soon · 🔴 closed</p></section>`}
 window.updCount=async()=>{const d=await data();return soon(d.ev||[]).filter(e=>e.b>=0).length};
 
 const SC={10:'1',20:'2',30:'3',40:'4',45:'5-',50:'5+',55:'6-',60:'6+',70:'7'};
@@ -58,6 +67,11 @@ const CSS=`.up-h{background:var(--grad,linear-gradient(135deg,#0a1440,#2443e8));
 .up-sc{color:#fff;border-radius:10px;min-width:46px;text-align:center;font-size:10px;padding:4px 2px;line-height:1.1}.up-sc b{font-size:18px}
 .up-alert{color:#1a1f36;border-left:5px solid;padding:8px 10px;margin:6px 0;background:#fff5f6;border-radius:8px;display:flex;flex-direction:column;gap:2px;font-size:13px}
 .up-ok{margin:0 0 6px}
+.up-bd{display:grid;grid-template-columns:1fr 1fr;gap:8px}.up-bd p{grid-column:1/-1}
+.up-bi{display:grid;grid-template-columns:auto 1fr;column-gap:8px;align-items:center;text-decoration:none;color:inherit;padding:8px;border:1px solid var(--line,#e3e8f2);border-radius:12px}
+.up-bi b{font-size:13px}.up-bi small{grid-column:2;font-size:11px;opacity:.8}
+.up-sig{grid-row:span 2;width:18px;height:18px;border-radius:50%;box-shadow:0 0 0 3px rgba(0,0,0,.06)}
+.up-sig.g{background:#18b45b;box-shadow:0 0 10px #18b45b99}.up-sig.y{background:#f2b705;box-shadow:0 0 10px #f2b70599}.up-sig.r{background:#e5193f;box-shadow:0 0 8px #e5193f77}
 .up-ap{display:inline-block;margin:2px 0 8px;padding:9px 16px;font-size:14px;text-decoration:none}
 .up-st{display:inline-block;font-size:12px;font-weight:800;padding:3px 10px;border-radius:99px;margin:0 0 6px}.up-st.op{background:#e6f7ee;color:#0a7a3e}.up-st.cl{background:#fdeaea;color:#c0001a}.up-st.so{background:#fff3d6;color:#7a5200}
 .up-nh{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-bottom:6px}.up-nh small{margin-left:auto;font-size:11px}
@@ -76,6 +90,7 @@ window.renderUpdates=async function(){
   const op=(d.open||[]).map(e=>`<section class="card up-ev"><div class="up-dl" style="background:#e6f7ee;color:#0a7a3e"><b>✓</b><small>any time</small></div><div><span class="up-tag">${esc(e.cat)}</span><h3>${esc(e.t)}</h3><p>${esc(e.s)}</p><a class="up-lk" href="${esc(e.u)}" target="_blank" rel="noopener">Official page ↗</a></div></section>`).join('');
   const nw=(d.news||[]).map(e=>`<section class="card up-ev"><div class="up-dl" style="background:#e8edff;color:#2443e8"><small>${dleft(e.date)>0?'starts in':'since'}</small><b>${Math.abs(dleft(e.date))}</b><small>days</small></div><div><span class="up-tag" style="background:#fff0f2;color:#e5193f">${esc(e.lv)}</span><h3>${esc(e.t)}</h3><p>${esc(e.s)}</p><p class="muted" style="font-size:12px">📅 ${fd(e.date)}</p><a class="up-lk" href="${esc(e.u)}" target="_blank" rel="noopener">Full information (official) ↗</a></div></section>`).join('');
   shell('updates',`<section class="up-h"><small>⋮ UPDATES</small><h1>Exams · News · Safety</h1><p>Exam days, applications and results in the next 30 days, Japan news, and live earthquake / tsunami info. Always check the official page.</p></section>
+  <h2 class="up-sec">🚦 Application forms</h2>${boardHtml(d)}
   <h2 class="up-sec">📅 Next 30 days</h2>${ev||'<section class="card"><p class="muted" style="margin:0">No exam, application or result in the next 30 days.</p></section>'}
   <h2 class="up-sec">🌏 Earthquake & tsunami (live)</h2><section class="card"><div id="upQ"><p class="muted">Loading…</p></div>
    <p style="font-size:12px;margin:10px 0 0" class="muted">震度 (shindo) = how strong the shaking is, 1 (weak) to 7 (strongest). Data: JMA via P2P地震情報.</p>
