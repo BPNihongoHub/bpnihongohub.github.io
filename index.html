@@ -531,6 +531,12 @@ tr[data-kanji]:hover td{background:var(--ai-soft)}
 .emptyx{text-align:center;padding:36px 20px;margin-top:6px}.emptyx .ex-ic{font-size:46px}.emptyx p{margin:10px 0 18px;color:var(--muted)}
 .bnav button{font:inherit;background:none;border:0;color:inherit;cursor:pointer}
 .bnav button span{font-size:10px;font-weight:700}
+.bp-spin{width:34px;height:34px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--shu,#e81f55);border-right-color:var(--ai,#3527c9);animation:bpspin .8s linear infinite;flex:none}
+@keyframes bpspin{to{transform:rotate(360deg)}}
+.bp-load{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:rgba(10,10,40,.18);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+.bp-load>div{display:flex;align-items:center;gap:14px;background:var(--paper);color:var(--ink);border:1.5px solid var(--line);border-radius:18px;padding:16px 22px;box-shadow:var(--shadow);font-weight:800;font-size:16px}
+.bp-load small{display:block;font-weight:600;font-size:12.5px;color:var(--muted)}
+.bp-inl{display:flex;align-items:center;justify-content:center;gap:12px;padding:40px 0;font-weight:800;color:var(--muted)}
 .bnav{grid-template-columns:repeat(5,1fr)!important}
 .bnav>*{display:flex;flex-direction:column;align-items:center;gap:2px}
 .moresheet{position:fixed;inset:0;z-index:60;background:rgba(6,7,26,.45);display:flex;align-items:flex-end;justify-content:center}
@@ -960,10 +966,11 @@ async function unlock(code,silent,nosave){const cx=DX,K=KEYS;
 }
 const me=()=>isOwner?'Binod Paudel':'';
 
+window.BPLoad=function(on,txt){let o=document.getElementById('bpLoad');if(!on){if(o)o.remove();return}if(!o){o=document.createElement('div');o.id='bpLoad';o.className='bp-load';o.setAttribute('role','status');document.body.appendChild(o)}o.innerHTML=`<div><span class="bp-spin"></span><span>${txt||'Loading…'}<small>Please wait a moment</small></span></div>`};
 function render(){
   if(!D)return;
   const r=(location.hash||'#home').slice(1);
-  if(['n3','n5'].includes(exam())&&DX!==dxOf()){ensureData().then(render).catch(()=>{});return}
+  if(['n3','n5'].includes(exam())&&DX!==dxOf()){BPLoad(true,'Loading '+exam().toUpperCase()+'…');ensureData().then(()=>{BPLoad(false);render()}).catch(()=>BPLoad(false));return}
   if(false&&['drive','bjt'].includes(exam())&&['home','quiz','mock','review','words','srs','unlock'].includes(r))return driveRoute(r);
   const views={home:renderHome,quiz:renderQuiz,mock:renderMock,review:()=>Q.start({mode:'review'}),words:renderWords,srs:renderSRS,admin:renderAdmin,unlock:renderUnlock};
   if(r==='acc')return renderAccount();if(r==='pay')return renderPay();if(r==='rate')return renderReview();if(r==='teacher')return renderTeacher();

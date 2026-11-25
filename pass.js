@@ -23,7 +23,8 @@ const CSS=`
 .ps-hero h1{margin:0 0 4px;font-size:clamp(20px,5.4vw,28px)}.ps-hero p{margin:0;opacity:.9;font-size:14px;line-height:1.55}
 .ps-row{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}
 .ps-row button{border:1.5px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:8px 14px;font-weight:800;font-size:14px;cursor:pointer}
-.ps-row button.on{background:var(--ai);border-color:var(--ai);color:#fff}
+.ps-row button.on{background:var(--grad,var(--ai));border-color:transparent;color:#fff;box-shadow:0 6px 16px rgba(53,39,201,.35);transform:scale(1.06)}
+.ps-row button[data-lv].on::before{content:'✓ '}
 .ps-note{font-size:13px;color:var(--muted);margin:4px 0 10px;line-height:1.5}
 .ps-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));border:2px solid #555;border-radius:4px;overflow:hidden;gap:2px;background:#555}
 .ps-cell{background:#cfe3fb;padding:7px 8px 9px;min-height:66px;display:flex;flex-direction:column;gap:3px;cursor:pointer;position:relative}
@@ -112,7 +113,7 @@ window.renderPass=async function(){
   css();
   const parts=(location.hash.slice(1)).split('/');
   if(parts[1]==='g'&&parts[2]&&parts[3]!=null)return grammarPage(parts[2],+parts[3]);
-  shell('pass',head()+tabs()+'<div id="psBody"><div class="ps-note">Loading…</div></div>');
+  shell('pass',head()+tabs()+'<div id="psBody"><div class="bp-inl"><span class="bp-spin"></span>Loading… please wait</div></div>');
   bindTabs();
   if(PS.kind==='r')return results();
   let d;try{d=await load(PS.lv)}catch(e){$('#psBody').innerHTML='<p class="ps-note">Could not load the data. Please check your internet.</p>';return}
@@ -141,8 +142,8 @@ window.renderPass=async function(){
 };
 function nextU(UN,p){return `<div class="ps-pager" style="justify-content:space-between">${p>0?`<button data-pg="${p-1}">← ${E(UN[p-1][0])}</button>`:"<span></span>"}${p<UN.length-1?`<button data-pg="${p+1}" class="on">${E(UN[p+1][0])} →</button>`:""}</div>`}
 function bindTabs(){
-  document.querySelectorAll('[data-lv]').forEach(x=>x.onclick=()=>{PS.lv=x.dataset.lv;PS.page=0;saveUI();renderPass()});
-  document.querySelectorAll('[data-kind]').forEach(x=>x.onclick=()=>{PS.kind=x.dataset.kind;PS.page=0;saveUI();renderPass()});
+  document.querySelectorAll('[data-lv]').forEach(x=>x.onclick=()=>{if(PS.lv===x.dataset.lv)return;PS.lv=x.dataset.lv;PS.page=0;saveUI();const big=!PD[PS.lv];if(big&&window.BPLoad)BPLoad(true,'Loading '+PS.lv.toUpperCase()+'…');Promise.resolve(renderPass()).finally(()=>{window.BPLoad&&BPLoad(false)})});
+  document.querySelectorAll('[data-kind]').forEach(x=>x.onclick=()=>{PS.kind=x.dataset.kind;PS.page=0;saveUI();if(!PD[PS.lv]&&window.BPLoad)BPLoad(true);Promise.resolve(renderPass()).finally(()=>{window.BPLoad&&BPLoad(false)})});
 }
 function credit(){return `<p class="ps-credit">स्रोत: कान्जी सूची <a href="https://github.com/davidluzgouveia/kanji-data">kanji-data</a> (MIT), शब्द सूची <a href="https://github.com/jamsinclair/open-anki-jlpt-decks">open-anki-jlpt-decks</a> (MIT), लेख्ने क्रम <a href="https://kanjivg.tagaini.net">KanjiVG</a> © Ulrich Apel (CC BY-SA 3.0)। नेपाली अर्थ र व्याकरण: BP Nihongo Hub।</p>`}
 
@@ -235,7 +236,7 @@ const GD={};
 async function gdata(lv){if(!(lv in GD))GD[lv]=await fetch('pass/gd-'+lv+'.json').then(r=>r.ok?r.json():{}).catch(()=>({}));return GD[lv]}
 function nrm(t){return String(t||'').replace(/[\s　。、,，．.！!？?「」]/g,'').replace(/[ァ-ヶ]/g,c=>String.fromCharCode(c.charCodeAt(0)-96)).replace(/[xX✕✖]/g,'×').replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-65248))}
 async function grammarPage(lv,i){
-  shell('pass','<div id="psBody"><p class="ps-note">Loading…</p></div>');
+  shell('pass','<div id="psBody"><div class="bp-inl"><span class="bp-spin"></span>Loading… please wait</div></div>');
   const [d,G]=await Promise.all([load(lv).catch(()=>null),gdata(lv)]);const x=d&&d.g[i];
   if(!x){$('#psBody').innerHTML='<p>Not found.</p>';return}
   const S=getSet(lv,'g'),g=G[i];
