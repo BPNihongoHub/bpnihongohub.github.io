@@ -490,6 +490,19 @@ tr[data-kanji]:hover td{background:var(--ai-soft)}
 .bstrip{width:100%;background:#f3f3f3 center top/100% auto no-repeat;pointer-events:none}
 .bwm{position:absolute;inset:0;pointer-events:none;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='360' height='260'><text x='20' y='160' transform='rotate(-28 180 130)' font-family='sans-serif' font-weight='800' font-size='18' letter-spacing='3' fill='rgba(200,20,60,0.10)'>© BINOD PAUDEL · VIEW ONLY</text></svg>") repeat}
 @media print{.bview{display:none!important}}
+.rcpt-ov{position:fixed;inset:0;z-index:300;background:rgba(6,10,30,.72);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:24px 16px}
+.rcpt{background:#fff;color:#0a1440;width:100%;max-width:420px;border-radius:20px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4);font-size:14px}
+.rc-hd{display:flex;align-items:center;gap:12px;background:linear-gradient(120deg,#0a1440,#2443e8);color:#fff;padding:14px 18px}
+.rc-hd svg{width:52px;height:52px;flex:none}.rc-hd b{display:block;font-size:18px}.rc-hd small{opacity:.85;font-size:12px}
+.rc-ok{text-align:center;padding:18px 16px 12px;border-bottom:2px dashed #d7ddea}
+.rc-ok i{display:inline-grid;place-items:center;width:46px;height:46px;border-radius:50%;background:#12a150;color:#fff;font-style:normal;font-size:26px;font-weight:800}
+.rc-ok b{display:block;font-size:18px;margin-top:6px;color:#12a150}.rc-ok small{color:#5a6488}
+.rc-amt{font-size:34px;font-weight:800;margin-top:6px;letter-spacing:.02em}
+.rc-t{width:100%;border-collapse:collapse;margin:6px 0}.rc-t th,.rc-t td{padding:7px 18px;border-bottom:1px solid #eef1f7;text-align:left;vertical-align:top}
+.rc-t th{color:#5a6488;font-weight:500;width:40%;white-space:nowrap}.rc-t td{overflow-wrap:anywhere}
+.rc-paid{background:#12a150;color:#fff;border-radius:6px;padding:2px 8px;font-weight:800;font-size:12px}
+.rc-ft{text-align:center;color:#5a6488;font-size:12px;margin:12px 16px}.rc-btn{display:flex;gap:10px;padding:0 16px 16px}.rc-btn .btn{flex:1}
+@media print{body.rc-open>*:not(#rcptOv){display:none!important}body.rc-open{background:#fff!important}.rcpt-ov{position:static;background:none;padding:0}.rcpt{box-shadow:none;margin:0 auto}.rc-btn{display:none}.rc-hd,.rc-ok i,.rc-paid{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 
 /* v57: pro home — compact dashboard, set tiles, consistent section headers */
 .dash{background:var(--grad);color:#fff;border-radius:24px;padding:20px 20px 0;margin:6px 0 8px;box-shadow:0 18px 40px rgba(53,39,201,.25);overflow:hidden;position:relative}
@@ -1596,9 +1609,10 @@ function fbApi(){
     async users(){const q=await F.collection('users').get();return q.docs.map(norm)},
     async pays(){const q=await F.collection('pay').where('status','==','pending').get();return q.docs.map(norm)},
     async payHist(){const q=await F.collection('pay').where('status','in',['approved','rejected']).get();return q.docs.map(norm).sort((a,b)=>(b.decided||b.created)-(a.decided||a.created))},
-    async decide(p,ok){const b=F.batch();b.update(F.doc('pay/'+p.id),{status:ok?'approved':'rejected',decided:TS()});
-      if(ok){const c=p.course||'n3',s=await F.doc('users/'+p.uid).get(),cur=s.exists?untilOf(s.data(),c):0,until=firebase.firestore.Timestamp.fromMillis(Math.max(Date.now(),cur)+SIXM());
-        b.update(F.doc('users/'+p.uid),c==='n3'?{paid:true,paidAt:TS(),paidUntil:until}:{['pu.'+c]:until})}await b.commit()},
+    async decide(p,ok){const b=F.batch();let until=null;
+      if(ok){const c=p.course||'n3',s=await F.doc('users/'+p.uid).get(),cur=s.exists?untilOf(s.data(),c):0;until=firebase.firestore.Timestamp.fromMillis(Math.max(Date.now(),cur)+SIXM());
+        b.update(F.doc('users/'+p.uid),c==='n3'?{paid:true,paidAt:TS(),paidUntil:until}:{['pu.'+c]:until})}
+      b.update(F.doc('pay/'+p.id),ok?{status:'approved',decided:TS(),until}:{status:'rejected',decided:TS()});await b.commit()},
     setPaid:(uid,v,c)=>F.doc('users/'+uid).update((c||'n3')==='n3'?(v?{paid:true,paidAt:firebase.firestore.FieldValue.serverTimestamp(),paidUntil:firebase.firestore.Timestamp.fromMillis(Date.now()+SIXM())}:{paid:false,paidUntil:null}):{['pu.'+c]:v?firebase.firestore.Timestamp.fromMillis(Date.now()+SIXM()):null}),
     showReview:(id,v)=>F.doc('reviews/'+id).update({show:v}),
     reviewsPublic:async()=>{try{const q=await F.collection('reviews').where('show','==',true).get();return q.docs.map(norm)}catch(e){return[]}},
@@ -1627,7 +1641,7 @@ function mockApi(){/* localhost test double with the same shape as fbApi */
     async users(){return Object.entries(db().users).map(([id,u])=>Object.assign({id},u))},
     async pays(){return Object.entries(db().pay).map(([id,p])=>Object.assign({id},p)).filter(p=>p.status==='pending')},
     async payHist(){return Object.entries(db().pay).map(([id,p])=>Object.assign({id},p)).filter(p=>p.status!=='pending').sort((a,b)=>(b.decided||b.created)-(a.decided||a.created))},
-    async decide(p,ok){const d=db();d.pay[p.id].status=ok?'approved':'rejected';if(ok){const u=d.users[p.uid],c=p.course||'n3',t=Math.max(Date.now(),untilOf(u,c))+SIXM();if(c==='n3'){u.paid=true;u.paidUntil=t}else{u.pu=u.pu||{};u.pu[c]=t}}put(d)},
+    async decide(p,ok){const d=db();d.pay[p.id].status=ok?'approved':'rejected';d.pay[p.id].decided=Date.now();if(ok){const u=d.users[p.uid],c=p.course||'n3',t=Math.max(Date.now(),untilOf(u,c))+SIXM();d.pay[p.id].until=t;if(c==='n3'){u.paid=true;u.paidUntil=t}else{u.pu=u.pu||{};u.pu[c]=t}}put(d)},
     async setPaid(uid,v,c){const d=db();const u=d.users[uid];c=c||'n3';if(c==='n3'){u.paid=v;u.paidUntil=v?Date.now()+SIXM():null}else{u.pu=u.pu||{};u.pu[c]=v?Date.now()+SIXM():null}put(d)},
     async showReview(id,v){const d=db();d.reviews[id].show=v;put(d)},
     async reviewsPublic(){return Object.values(db().reviews).filter(r=>r.show)},
@@ -1670,12 +1684,13 @@ async function renderAccount(){
    ${!isPaidP(p)&&PAY.on&&!pend?`<a class="btn grad" href="#pay">💳 ${at('payT')} · ${PAY.cur}${PAY.price.toLocaleString('en')} · ${at('per6')}</a>`:''}
    <form id="pForm" class="eform"><label>${at('name')}<input id="pName" value="${esc(p.name||'')}"></label><label>${at('phone')}<input id="pPhone" type="tel" value="${esc(p.phone||'')}"></label>
    <button class="btn ghost">${at('save')}</button></form></section>
-  ${mine.length?`<section class="card accbox"><h3>🧾 My payments · 支払い履歴</h3><table class="ptbl" style="width:100%;font-size:13px;border-collapse:collapse">${mine.map(x=>`<tr style="border-top:1px solid #e3e8f2"><td>${fdate(x.created)}</td><td>${PAYC(x.course||'n3')}</td><td>${PAY.cur}${(+x.amount||PAY.price).toLocaleString('en')}</td><td>${x.status==='approved'?'✅ Approved':x.status==='rejected'?'✕ Rejected':'⏳ Checking'}</td></tr>`).join('')}</table><p class="muted" style="font-size:12px;margin:6px 0 0">✅ = all sets, units and books of that course open for 6 months on this account. No code needed.</p></section>`:''}
+  ${mine.length?`<section class="card accbox"><h3>🧾 My payments · 支払い履歴</h3><table class="ptbl" style="width:100%;font-size:13px;border-collapse:collapse">${mine.map(x=>`<tr style="border-top:1px solid #e3e8f2"><td style="white-space:nowrap">${fdate(x.created)}</td><td>${PAYC(x.course||'n3')}</td><td>${PAY.cur}${(+x.amount||PAY.price).toLocaleString('en')}</td><td>${x.status==='approved'?'✅ Approved':x.status==='rejected'?'✕ Rejected':'⏳ Checking'}</td><td>${x.status==='approved'?`<button class="chip" data-rc="${x.id}">🧾 Receipt</button>`:''}</td></tr>`).join('')}</table><p class="muted" style="font-size:12px;margin:6px 0 0">🧾 Receipt = your bill (save as PDF or screenshot). ✅ = all sets, units and books of that course open for 6 months on this account. No code needed.</p></section>`:''}
   <section class="card accbox"><h3>${at('prog')}</h3><div class="astats"><div><b>${done}</b><span>${at('done')}</span></div><div><b>${done?Math.round(ok*100/done):0}%</b><span>${at('acc2')}</span></div><div><b>${hwp}</b><span>${at('hw')} ✓</span></div></div></section>
   ${BE.err?`<p class="muted" style="text-align:center;font-size:12px;color:var(--shu)">⚠ ${esc(BE.err)}</p>`:''}
   <div class="erow" style="justify-content:center;margin:14px 0"><a class="btn ghost" href="#rate">★ ${at('rev')}</a>${BE.admin?`<a class="btn ghost" href="#teacher">師 ${at('tT')}</a>`:''}<button class="btn ghost" id="outB">${at('logout')}</button></div>`);
   $('#pForm').onsubmit=async e=>{e.preventDefault();const o={name:$('#pName').value.trim().slice(0,60),phone:$('#pPhone').value.trim().slice(0,30)};try{await BE.api.saveProf(BE.user.uid,o);Object.assign(BE.prof,o);toast('✓')}catch(x){toast(at('err'))}};
   $('#outB').onclick=()=>BE.api.out();
+  $$('[data-rc]').forEach(b=>b.onclick=()=>showReceipt(mine.find(x=>x.id===b.dataset.rc),BE.prof));
   if(BE.admin)BE.api.pays().then(p=>{if(p.length){toast('🔔 '+p.length+' payment(s) to check');const a=document.querySelector('a[href="#teacher"]');if(a)a.textContent+=' 🔔'+p.length}}).catch(()=>{});
   try{const seen=LS.get('payseen',{}),nw=mine.filter(x=>x.status==='approved'&&!seen[x.id]);if(nw.length){nw.forEach(x=>seen[x.id]=1);LS.set('payseen',seen);toast('✅ Payment approved! '+PAYC(nw[0].course||'n3')+' is open for 6 months.');beKey()}}catch(e){}
   beSync(true);
@@ -1711,6 +1726,57 @@ async function reviewsHome(){/* approved reviews block on the home page */
   el.innerHTML=`<h2 class="hsech"><i>声</i>${at('revH')}</h2><div class="revrow">${r.slice(0,10).map(x=>`<div class="card revc"><div class="st">${stars(x.stars||5)}</div><p>${esc(x.text||'')}</p><b>${esc(x.name||'')}</b></div>`).join('')}</div>`;
 }
 
+/* ---- receipt (bill) for an approved payment: printable / save as PDF ---- */
+function showReceipt(x,u){if(!x)return;u=u||{};const c=x.course||'n3',from=x.decided||x.created,until=x.until||(from?from+SIXM():0);
+  const no=rcNo(x);
+  const ft=ms=>ms?new Date(ms).toLocaleString('en-GB',{timeZone:'Asia/Tokyo',year:'numeric',month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
+  const amt=PAY.cur+(+x.amount||PAY.price).toLocaleString('en');
+  const row=(k,v)=>v?`<tr><th>${k}</th><td>${v}</td></tr>`:'';
+  const old=document.getElementById('rcptOv');if(old)old.parentNode.removeChild(old);
+  const ov=document.createElement('div');ov.id='rcptOv';ov.className='rcpt-ov';
+  ov.innerHTML=`<div class="rcpt" id="rcptBox"><div class="rc-hd">${bpLogo('rc-logo')}<div><b>BP Nihongo Hub</b><small>Binod Paudel · bpnihongohub.github.io</small></div></div>
+   <div class="rc-ok"><i>✓</i><b>Payment successful</b><small>支払い完了 · Receipt 領収書</small><div class="rc-amt">${amt}</div></div>
+   <table class="rc-t">${row('Receipt No.',no)}${row('Student',esc(x.name||u.name||''))}${row('Email',esc(x.email||u.email||''))}${row('Phone',esc(u.phone||''))}
+   ${row('Course',PAYC(c)+' · all sets, units and books')}${row('Plan','6 months')}${row('Paid on',ft(x.created))}${row('Approved on',ft(x.decided))}
+   ${row('Valid from',fdate(from))}${row('Valid until','<b>'+fdate(until)+'</b>')}${row('Method',esc(x.method||'PayPay'))}${row('Transaction ID',esc(x.txn||''))}
+   ${row('Amount','<b>'+amt+'</b>')}${row('Status','<span class="rc-paid">PAID ✓</span>')}</table>
+   <p class="rc-ft">Received by <b>Binod Paudel</b> · BP Nihongo Hub<br>Thank you for studying with us! ありがとうございました。</p>
+   <div class="rc-btn"><button class="btn grad" id="rcPr">⬇ Save PDF / Print</button><button class="btn ghost" id="rcX">Close</button></div></div>`;
+  document.body.appendChild(ov);document.body.classList.add('rc-open');
+  const close=()=>{ov.parentNode&&ov.parentNode.removeChild(ov);document.body.classList.remove('rc-open')};
+  ov.onclick=e=>{if(e.target===ov)close()};$('#rcX').onclick=close;window.addEventListener('hashchange',close,{once:true});$('#rcPr').onclick=()=>window.print()}
+/* ---- teacher: full bill ledger (every payment ever, newest first) with search, filters, totals, CSV ---- */
+const BF={q:'',c:'',m:'',s:''};
+const rcNo=x=>'BP-'+fdate(x.created).replace(/-/g,'')+'-'+String(x.id).slice(-6).toUpperCase();
+function renderBills(ALL,U){const box=$('#billBox');if(!box)return;
+  const uOf=x=>U.find(u=>u.id===x.uid)||{};const mon=x=>fdate(x.created).slice(0,7);
+  const months=[...new Set(ALL.map(mon))].filter(m=>m!=='—').sort().reverse();
+  const st=x=>x.status==='approved'?'approved':x.status==='rejected'?'rejected':'pending';
+  const draw=()=>{const q=BF.q.toLowerCase();
+    const R=ALL.filter(x=>(!BF.c||(x.course||'n3')===BF.c)&&(!BF.m||mon(x)===BF.m)&&(!BF.s||st(x)===BF.s)&&(!q||[x.name,x.email,x.txn,uOf(x).phone,rcNo(x)].join(' ').toLowerCase().includes(q))).sort((a,b)=>(b.created||0)-(a.created||0));
+    const ok=R.filter(x=>st(x)==='approved'),tot=ok.reduce((a,x)=>a+(+x.amount||0),0);
+    const byC=['n5','n4','n3','n2','n1'].map(c=>[c,ok.filter(x=>(x.course||'n3')===c)]).filter(([,a])=>a.length);
+    const yen=n=>PAY.cur+(+n||0).toLocaleString('en');
+    box.querySelector('#bfSum').innerHTML=`<div class="astats"><div><b>${R.length}</b><span>Bills</span></div><div><b>${ok.length}</b><span>✅ Approved</span></div><div><b>${yen(tot)}</b><span>Total received</span></div></div>
+      <p class="muted" style="font-size:12px;margin:8px 4px 0">${byC.map(([c,a])=>PAYC(c)+': '+a.length+' · '+yen(a.reduce((s,x)=>s+(+x.amount||0),0))).join(' &nbsp;|&nbsp; ')||'—'}</p>`;
+    box.querySelector('#bfTb').innerHTML=R.map(x=>{const u=uOf(x),s=st(x);return `<tr><td><b>${rcNo(x)}</b><small>Paid ${fdate(x.created)}${x.decided?'<br>Checked '+fdate(x.decided):''}</small>${s==='approved'?`<button class="chip" data-rc="${x.id}" style="margin-top:6px">🧾 Receipt</button>`:''}</td><td><b>${esc(x.name||u.name||'—')}</b><small>${esc(x.email||u.email||'')}${u.phone?'<br>'+esc(u.phone):''}</small></td><td>${PAYC(x.course||'n3')}</td><td>${esc(x.method||'')}${x.txn?`<small>${esc(x.txn)}</small>`:''}</td><td><b>${yen(x.amount)}</b></td><td>${s==='approved'?fdate(x.until||((x.decided||x.created)+SIXM())):'—'}</td><td>${s==='approved'?'<span class="paidtag">✅ Approved</span>':s==='rejected'?'✕ Rejected':'⏳ Waiting'}</td></tr>`}).join('')||`<tr><td colspan="7" class="muted">—</td></tr>`;
+    box.querySelectorAll('[data-rc]').forEach(b=>b.onclick=()=>{const x=ALL.find(p=>p.id===b.dataset.rc);showReceipt(x,uOf(x))});
+    box._rows=R};
+  const opt=(v,l,cur)=>`<option value="${v}" ${v===cur?'selected':''}>${l}</option>`;
+  box.innerHTML=`<div class="ttools" style="flex-wrap:wrap"><input id="bfQ" style="flex:1 1 100%" placeholder="Search name, email, phone, ID…" value="${esc(BF.q)}">
+    <select id="bfC">${opt('','All courses',BF.c)}${['n5','n4','n3'].map(c=>opt(c,PAYC(c),BF.c)).join('')}</select>
+    <select id="bfM">${opt('','All months',BF.m)}${months.map(m=>opt(m,m,BF.m)).join('')}</select>
+    <select id="bfS">${opt('','All status',BF.s)}${opt('approved','✅ Approved',BF.s)}${opt('pending','⏳ Waiting',BF.s)}${opt('rejected','✕ Rejected',BF.s)}</select>
+    <button class="btn ghost" id="bfX">⬇ Excel (CSV)</button></div>
+    <section class="card" id="bfSum"></section>
+    <div class="tscroll"><table class="ttab"><thead><tr><th>Receipt No.</th><th>Student</th><th>Course</th><th>Method</th><th>Amount</th><th>Valid until</th><th>Status</th></tr></thead><tbody id="bfTb"></tbody></table></div>`;
+  $('#bfQ').oninput=e=>{BF.q=e.target.value;draw()};
+  [['#bfC','c'],['#bfM','m'],['#bfS','s']].forEach(([id,k])=>$(id).onchange=e=>{BF[k]=e.target.value;draw()});
+  $('#bfX').onclick=()=>{const cs=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+    const rows=[['Receipt No','Paid on','Checked on','Student','Email','Phone','Course','Method','Transaction ID','Amount','Valid until','Status']].concat((box._rows||[]).map(x=>{const u=uOf(x),s=st(x);return [rcNo(x),fdate(x.created),fdate(x.decided),x.name||u.name||'',x.email||u.email||'',u.phone||'',PAYC(x.course||'n3'),x.method||'',x.txn||'',+x.amount||0,s==='approved'?fdate(x.until||((x.decided||x.created)+SIXM())):'',s]}));
+    const blob=new Blob(['\ufeff'+rows.map(r=>r.map(cs).join(',')).join('\r\n')],{type:'text/csv'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='bp-nihongo-hub-bills-'+new Date().toISOString().slice(0,10)+'.csv';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.parentNode.removeChild(a)},500)};
+  draw()}
 /* ---- teacher dashboard ---- */
 const TD={q:'',sort:'last',c:null};
 async function renderTeacher(){
@@ -1730,8 +1796,7 @@ async function renderTeacher(){
   <h2 class="hsech"><i>¥</i>${at('pays')} (${PY.length})</h2>
   ${PY.length?PY.map(p=>`<div class="card tpay"><div><b>${esc(p.name||p.email||'')}</b><small><b>${PAYC(p.course||'n3')}</b> · ${esc(p.email||'')} · ${esc(p.method||'')} · ${PAY.cur}${esc(p.amount||'')}</small>${p.txn?`<small>ID: ${esc(p.txn)}</small>`:''}${p.note?`<small>${esc(p.note)}</small>`:''}<small>${fdate(p.created)}</small></div>
     ${p.img&&/^data:image\/jpeg;base64,/.test(p.img)?`<a href="#" data-img="${p.id}"><img src="${p.img}" alt="screenshot"></a>`:''}<div class="tbtn"><button class="btn grad" data-ok="${p.id}">✓ ${at('approve')}</button><button class="btn ghost" data-no="${p.id}">✕ ${at('reject')}</button></div></div>`).join(''):`<p class="muted">${at('none')}</p>`}
-  <h2 class="hsech"><i>🧾</i>Bills · 支払い履歴 (${PH.length}) · Total ✅ ${PAY.cur}${PH.filter(p=>p.status==='approved').reduce((a,p)=>a+(+p.amount||0),0).toLocaleString('en')}</h2>
-  ${PH.length?`<div class="card" style="overflow-x:auto"><table style="width:100%;font-size:13px;border-collapse:collapse"><tr><th align="left">Date</th><th align="left">Student</th><th align="left">Course</th><th align="left">Method</th><th align="left">Amount</th><th align="left">Status</th></tr>${PH.slice(0,200).map(p=>`<tr style="border-top:1px solid #e3e8f2"><td>${fdate(p.decided||p.created)}</td><td>${esc(p.name||'')}<br><small class="muted">${esc(p.email||'')}</small></td><td>${PAYC(p.course||'n3')}</td><td>${esc(p.method||'')}${p.txn?`<br><small class="muted">${esc(p.txn)}</small>`:''}</td><td>${PAY.cur}${(+p.amount||0).toLocaleString('en')}</td><td>${p.status==='approved'?'✅':'✕'}</td></tr>`).join('')}</table></div>`:`<p class="muted">—</p>`}
+  <h2 class="hsech"><i>🧾</i>Bills · 支払い履歴 · All payments</h2><div id="billBox"></div>
   <h2 class="hsech"><i>人</i>${at('students')} (${U.length})</h2>
   <div class="ttools"><input id="tq" placeholder="${at('search')}" value="${esc(TD.q)}"><select id="tsort">${[['last',at('last')],['joined',at('joined')],['done',at('done')],['name',at('name')]].map(([k,l])=>`<option value="${k}" ${TD.sort===k?'selected':''}>${l}</option>`).join('')}</select></div>
   <div class="tscroll"><table class="ttab"><thead><tr><th>${at('name')}</th><th>${at('last')}</th><th>${at('done')}</th><th>${at('acc2')}</th><th>${at('hw')} ✓</th><th>${at('joined')}</th><th></th></tr></thead><tbody>
@@ -1747,6 +1812,7 @@ async function renderTeacher(){
   $('#tsort').onchange=e=>{TD.sort=e.target.value;renderTeacher()};
   $$('[data-tc]').forEach(b=>b.onclick=()=>{TD.c=b.dataset.tc;renderTeacher()});
   const byId=id=>PY.find(p=>p.id===id);
+  renderBills(PH.concat(PY.filter(p=>!PH.some(h=>h.id===p.id))),U);
   $$('[data-ok]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await BE.api.decide(byId(b.dataset.ok),true);toast('✓')}catch(e){toast(at('err'))}renderTeacher()});
   $$('[data-no]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await BE.api.decide(byId(b.dataset.no),false)}catch(e){toast(at('err'))}renderTeacher()});
   $$('[data-pd]').forEach(b=>b.onclick=async()=>{try{await BE.api.setPaid(b.dataset.pd,b.dataset.v==='1',tc)}catch(e){toast(at('err'))}renderTeacher()});
