@@ -586,6 +586,7 @@ tr[data-kanji]:hover td{background:var(--ai-soft)}
 :root:not([data-theme="light"]) body{background:#0b0d1a;background-image:radial-gradient(600px 420px at 90% 0%,rgba(123,92,255,.35),transparent 60%),radial-gradient(520px 420px at 0% 40%,rgba(0,220,255,.16),transparent 60%),radial-gradient(520px 420px at 100% 85%,rgba(255,77,141,.20),transparent 60%);background-attachment:fixed}
 :root:not([data-theme="light"]) .card,:root:not([data-theme="light"]) .hl-grid a,:root:not([data-theme="light"]) .course:not(.on){background:rgba(255,255,255,.06);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 :root:not([data-theme="light"]) header,:root:not([data-theme="light"]) nav.bnav{background:rgba(11,13,26,.72)!important;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+:root:not([data-theme="light"]) .subcard{background:rgba(255,210,63,.08)!important;border-color:rgba(255,210,63,.55)!important}:root:not([data-theme="light"]) .subp b{color:#fff}:root:not([data-theme="light"]) .subeb{color:#ffd23f}
 :root:not([data-theme="light"]) .unlockcard{background:rgba(255,210,63,.08)!important;border:1.5px solid rgba(255,210,63,.55)!important;box-shadow:0 10px 30px rgba(0,0,0,.35)!important}:root:not([data-theme="light"]) .unlockcard b{color:#fff!important}:root:not([data-theme="light"]) .unlockcard p{color:#efe2b0!important}
 :root:not([data-theme="light"]) .hl-hero{background:linear-gradient(135deg,rgba(123,92,255,.38),rgba(255,77,141,.26))!important;border:1px solid rgba(255,255,255,.16)!important;box-shadow:0 18px 44px rgba(0,0,0,.4)!important}
 :root:not([data-theme="light"]) .hl-hero .hl-big{background:rgba(255,255,255,.10)!important;border-color:rgba(255,255,255,.22)!important}:root:not([data-theme="light"]) .hl-hero .hl-big i{color:#5b3fff!important}:root:not([data-theme="light"]) .hl-hero .hl-mock i{color:#ff3d7f!important}:root:not([data-theme="light"]) .hl-hero .hl-glow{background:radial-gradient(circle,rgba(255,176,63,.45),transparent 70%)!important}
@@ -655,6 +656,7 @@ tr[data-kanji]:hover td{background:var(--ai-soft)}
 .lockbtn{background:#e5193f!important;color:#fff!important}
 .plan small{display:block;font-weight:600;font-size:12px;margin-top:4px;opacity:.85}
 .ucard.ulock{opacity:.75}.ucard.ulock .btn{width:100%}
+.subcard{border:2px solid #e3a200;background:linear-gradient(135deg,#fff8e6,#fff);gap:8px}.subeb{font-weight:800;color:#b07a00;font-size:13px;letter-spacing:.3px}.subp{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}.subp b{font-size:40px;font-weight:900;color:var(--ink,#0a1440)}.subp span{font-weight:700}.substeps{list-style:none;padding:0;margin:4px 0 0;display:grid;gap:6px}.substeps li{display:flex;gap:8px;align-items:center}.substeps i{font-style:normal;font-weight:900;color:#fff;background:#2443e8;border-radius:50%;width:24px;height:24px;display:inline-grid;place-items:center;flex:none}.signbox{max-width:440px;font-size:14px}.signbox h3{margin:0;font-size:16px}.inapp{border:2px solid #e5193f}.subcard,.inapp,.signbox{padding:16px 18px}
 .paybox{display:grid;gap:10px;text-align:center}.paybox .big{font-size:34px;font-weight:900}.paybox ol{text-align:left;margin:0;padding-left:20px;line-height:1.8}
 details.codebox{margin-top:10px}details.codebox summary{cursor:pointer;color:var(--muted);font-size:13px}
 @media(max-width:480px){.tools .lockbtn{display:none}}
@@ -1024,6 +1026,18 @@ function normLogin(l){if(l&&l.users)return l;if(l&&l.h)return{users:[{id:'',h:l.
 const authed=()=>true;
 const b64d=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 const isLocked=n=>!UNL&&!(D.free||[]).includes(+n);
+let UERR='';
+const UMSG={signin:'Please sign in first (Google or email). A code works only on one account.',other:'This code is already used by another account. Ask Binod sensei.',dev3:'This code is already open on 3 devices. Ask Binod sensei to reset it.'};
+const uerrMsg=()=>UMSG[UERR]?UMSG[UERR]+(UERR==='signin'?' <a href="#acc">Sign in →</a>':''):t('codeErr');
+function beWait(){return new Promise(r=>{if(BE.ready)return r();let n=0;const iv=setInterval(()=>{if(BE.ready||++n>100){clearInterval(iv);r()}},150)})}
+function devId(){let d=LS.get('devid','');if(!d){d=Math.random().toString(36).slice(2,10)+Date.now().toString(36);LS.set('devid',d)}return d}
+async function codeBind(cx,code){await beWait();if(!BE.ok||!BE.api||!BE.api.codeGet)return true;if(!BE.user)return 'signin';if(BE.admin)return true;
+  const id=cx+'_'+code.slice(0,4),dv=devId(),uid=BE.user.uid;
+  try{const d=await BE.api.codeGet(id);
+    if(!d){await BE.api.codeSet(id,{uid,email:(BE.user.email||'').slice(0,120),dev:[dv],at:Date.now()});return true}
+    if(d.uid!==uid)return 'other';const ds=d.dev||[];if(ds.includes(dv))return true;if(ds.length>=3)return 'dev3';
+    await BE.api.codeSet(id,{uid,email:d.email||'',dev:ds.concat(dv),at:d.at||Date.now()});return true}
+  catch(e){return true}}/* offline or rules not pasted yet: do not block */
 async function unlock(code,silent,nosave){const cx=DX,K=KEYS;
   code=(code||'').toUpperCase().replace(/[^0-9A-Z]/g,'');const w=K&&K.w&&K.w[code.slice(0,4)];
   if(!nosave&&LS.get('blk',[]).includes(code.slice(0,4))){LS.set(codeKey(cx),'');return false}/* account keys work only through a signed-in paid/trial account */
@@ -1032,8 +1046,10 @@ async function unlock(code,silent,nosave){const cx=DX,K=KEYS;
   try{const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(code),'PBKDF2',false,['deriveKey']);
     const k=await crypto.subtle.deriveKey({name:'PBKDF2',salt:b64d(w[0]),iterations:K.it,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['decrypt']);
     const raw=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64d(w[1])},k,b64d(w[2]));
-    mk=await crypto.subtle.importKey('raw',raw,'AES-GCM',false,['decrypt']);MKC[cx]=mk;if(DX===cx)window.MK=mk}
+    mk=await crypto.subtle.importKey('raw',raw,'AES-GCM',false,['decrypt'])}
   catch(e){if(silent)LS.set(codeKey(cx),'');return false}
+  UERR='';if(!nosave){const r=await codeBind(cx,code);if(r!==true){UERR=r;if(r!=='signin'&&silent)LS.set(codeKey(cx),'');return false}}/* a typed code belongs to the first account that uses it, max 3 devices */
+  MKC[cx]=mk;if(DX===cx)window.MK=mk;
   try{const L=await fetch(cx==='n3'?'locked.json':'locked-'+cx+'.json').then(r=>r.json());
     const raw=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64d(L.iv)},mk,b64d(L.ct));
     const B=JSON.parse(new TextDecoder().decode(raw));
@@ -1115,14 +1131,14 @@ function renderUnlock(){
     <ol><li>${BE.user?'✓ ':''}${at('login')} (Google / Email)</li><li>${at('st2')}</li><li>${at('st3')}</li><li>${at('st4')}</li></ol>
     ${BE.user?(isPaidP(BE.prof)?`<p>${at('paid')}</p>`:`<a class="btn grad" href="#pay">💳 ${at('payT')}</a>`):`<a class="btn grad" href="#acc">${at('login')} →</a>`}
     <details class="codebox"><summary>Code?</summary><form id="uf"><input id="ucode" placeholder="XXXX-XXXXXXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="16" required><div class="err" id="uerr" role="alert"></div><button class="btn ghost" id="ubtn">🔓 ${t('unlockBtn')}</button></form></details></section>`);
-    $('#uf').onsubmit=async e=>{e.preventDefault();const bt_=$('#ubtn');bt_.disabled=true;const ok=await unlock($('#ucode').value,false);if(!ok){bt_.disabled=false;$('#uerr').textContent=t('codeErr')}else toast(t('unlocked'))};return}
+    $('#uf').onsubmit=async e=>{e.preventDefault();const bt_=$('#ubtn');bt_.disabled=true;const ok=await unlock($('#ucode').value,false);if(!ok){bt_.disabled=false;$('#uerr').innerHTML=uerrMsg()}else toast(t('unlocked'))};return}
   if(UNL){shell('home',`<section class="card unlockpage"><h2>✓ ${t('unlocked')}</h2><p><a class="btn" href="#quiz">${t('startP')} →</a></p></section>`);return}
   shell('home',`<section class="card unlockpage">${hanko('hk')}<h2>🔒 ${t('unlockT')}</h2><p class="muted">${t('freeDemo')} ${t('lockedN',{n:(D.sets||[]).length-(D.free||[]).length})}</p>
   <form id="uf"><label for="ucode">${t('enterCode')}</label><input id="ucode" placeholder="XXXX-XXXXXXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="16" required>
   <div class="err" id="uerr" role="alert"></div><button class="btn grad" id="ubtn">🔓 ${t('unlockBtn')}</button></form>
   ${priceBox()}<p class="note">${t('buyNote')}</p></section>`);
   $('#uf').onsubmit=async e=>{e.preventDefault();const b=$('#ubtn');b.disabled=true;b.textContent='…';$('#uerr').textContent='';
-    const ok=await unlock($('#ucode').value,false);if(!ok){b.disabled=false;b.textContent='🔓 '+t('unlockBtn');$('#uerr').textContent=t('codeErr')}else{toast(t('unlocked'))}};
+    const ok=await unlock($('#ucode').value,false);if(!ok){b.disabled=false;b.textContent='🔓 '+t('unlockBtn');$('#uerr').innerHTML=uerrMsg()}else{toast(t('unlocked'))}};
 }
 /* ---------- home ---------- */
 const COURSES=[['n5','JLPT N5','入門',1],['n4','JLPT N4','初級',1],['n3','JLPT N3','中級',1],['n2','JLPT N2','中上級',0],['n1','JLPT N1','上級',0],['jft','JFT-Basic','A2',0],['bjt','BJT','Business',0],['ssw','SSW 特定技能','Skills',0],['food','Food 外食','SSW',0],['care','Nursing 介護','SSW',0],['drive','Driving licence','運転免許',0]];
@@ -1677,7 +1693,7 @@ async function beInit(){
   BE.api.onAuth(async u=>{BE.user=u;BE.prof=null;BE.admin=false;
     if(u){BE.err='';try{BE.prof=await BE.api.touch(u)}catch(e){BE.err='profile: '+((e&&(e.code||e.message))||e)}try{BE.admin=await BE.api.isAdmin()}catch(e){}
       if(BE.admin)beBlk();
-      if(BE.admin||isTrialP(BE.prof)||isPaidP(BE.prof,DX))beKey();stPull()}
+      if(BE.admin||isTrialP(BE.prof)||isPaidP(BE.prof,DX))beKey();else if(!MKC[DX]){const cc=LS.get(codeKey(DX),'');if(cc)unlock(cc,true)}stPull()}
     BE.ready=true;render()});
 }
 async function beBlk(){/* teacher: publish the ids of the account keys so they cannot be typed in or saved on a phone */
@@ -1687,7 +1703,7 @@ async function beKey(){/* paid account: fetch the course unlock code (readable o
   const cx=DX;if(MKC[cx])return;try{const c=await BE.api.key(cx);if(c&&DX===cx)await unlock(c,true,true)}catch(e){}}/* not saved locally: access ends when the 6 months end */
 let _syncT=0,_stT=0,_stReady=false;
 /* full study progress backup in the account (users/{uid}/st/main), so a new phone gets the same results */
-const stSkip=k=>/^rk_(auth|bemock|blk|payseen|lang_ok|theme|splash)$|code|key|^rk_stbar_/i.test(k);
+const stSkip=k=>/^rk_(auth|bemock|blk|payseen|lang_ok|theme|splash|devid)$|code|key|^rk_stbar_/i.test(k);
 function stDump(){const o={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('rk_')&&!stSkip(k))o[k]=localStorage.getItem(k)}return JSON.stringify(o)}
 function stMerge(js){let o;try{o=JSON.parse(js)}catch(e){return false}let ch=false;
   for(const [k,cv] of Object.entries(o)){if(stSkip(k)||!k.startsWith('rk_'))continue;const lv=localStorage.getItem(k);let nv=cv;
@@ -1717,7 +1733,10 @@ function fbApi(){
   const norm=d=>{const x=d.data();Object.keys(x).forEach(k=>{if(x[k]&&x[k].toMillis)x[k]=x[k].toMillis()});x.id=d.id;return x};
   return{
     onAuth:f=>A.onAuthStateChanged(f),
-    google:()=>A.signInWithPopup(new firebase.auth.GoogleAuthProvider()),
+    google:()=>{const g=new firebase.auth.GoogleAuthProvider();return A.signInWithPopup(g).catch(e=>{if(e&&/popup-blocked|operation-not-supported/.test(e.code||''))return A.signInWithRedirect(g);throw e})},
+    reset:e=>A.sendPasswordResetEmail(e),
+    async codeGet(id){const s=await F.doc('codes/'+id).get();return s.exists?s.data():null},codeSet:(id,o)=>F.doc('codes/'+id).set(o),
+    async codes(){const q=await F.collection('codes').get();return q.docs.map(norm)},codeDel:id=>F.doc('codes/'+id).delete(),
     signin:(e,p)=>A.signInWithEmailAndPassword(e,p),
     signup:async(e,p,n)=>{const c=await A.createUserWithEmailAndPassword(e,p);if(n)await c.user.updateProfile({displayName:n});try{await c.user.sendEmailVerification()}catch(x){}return c},
     verify:()=>A.currentUser.sendEmailVerification(),
@@ -1773,7 +1792,8 @@ function mockApi(){/* localhost test double with the same shape as fbApi */
   const K='bemock',db=()=>LS.get(K,{users:{},pay:{},reviews:{},me:null}),put=d=>LS.set(K,d);let cb=null;
   const fire=()=>{const d=db();cb&&cb(d.me?{uid:d.me,email:d.users[d.me].email,displayName:d.users[d.me].name}:null)};
   const login=(e,n)=>{const d=db();const id='u_'+e.replace(/\W/g,'');if(!d.users[id])d.users[id]={name:n||e.split('@')[0],email:e,phone:'',created:Date.now(),last:Date.now(),paid:false,prog:{}};d.me=id;put(d);fire()};
-  return{onAuth:f=>{cb=f;setTimeout(fire,0)},google:async()=>login('google.student@example.com','Google Student'),signin:async e=>login(e),signup:async(e,p,n)=>login(e,n),
+  return{onAuth:f=>{cb=f;setTimeout(fire,0)},google:async()=>login('google.student@example.com','Google Student'),signin:async e=>login(e),reset:async()=>{},
+    async codeGet(id){return (db().codes||{})[id]||null},async codeSet(id,o){const d=db();d.codes=d.codes||{};d.codes[id]=o;put(d)},async codes(){return Object.entries(db().codes||{}).map(([id,c])=>Object.assign({id},c))},async codeDel(id){const d=db();delete (d.codes||{})[id];put(d)},signup:async(e,p,n)=>login(e,n),
     out:async()=>{const d=db();d.me=null;put(d);fire()},
     async touch(u){const d=db();d.users[u.uid].last=Date.now();put(d);return Object.assign({},d.users[u.uid])},
     async saveProf(uid,o){const d=db();Object.assign(d.users[uid],o);put(d)},
@@ -1818,22 +1838,46 @@ function shrinkImg(file,max=1100,q=.6){return new Promise((res,rej)=>{const fr=n
 const stars=n=>'★★★★★'.slice(0,n)+'☆☆☆☆☆'.slice(0,5-n);
 
 /* ---- account page ---- */
+function authMsg(x){const c=(x&&x.code)||'';
+  if(/invalid-credential|wrong-password|user-not-found|invalid-login/.test(c))return 'Email or password is wrong. <b>New here?</b> Tap <b>Create account</b> first, or use <b>Google</b>. Forgot it? Tap "Forgot password?".';
+  if(/email-already-in-use/.test(c))return 'This email already has an account. Tap <b>Sign in</b> (not Create account).';
+  if(/weak-password/.test(c))return 'Password must be 6 letters or more.';
+  if(/invalid-email/.test(c))return 'This email address is not correct. Please check it.';
+  if(/too-many-requests/.test(c))return 'Too many tries. Please wait a few minutes, or tap "Forgot password?".';
+  if(/popup-closed|cancelled-popup/.test(c))return 'Google sign-in was closed. Please try again.';
+  if(/popup-blocked|operation-not-supported|web-storage|disallowed|internal-error/.test(c)||isInApp())return 'Google sign-in does not work inside Messenger/Facebook. Open this page in <b>Chrome</b> or <b>Safari</b>, or use email.';
+  if(/network/.test(c))return 'No internet. Please check your connection.';
+  return at('err')}
+const isInApp=()=>/FBAN|FBAV|FB_IAB|Messenger|Instagram|Line\/|MicroMessenger|TikTok|musical_ly|Snapchat|Viber/i.test(navigator.userAgent||'');
+function inAppBox(){if(!isInApp())return '';const and=/Android/i.test(navigator.userAgent);
+  return `<section class="card accbox inapp"><b>⚠ Please open in Chrome or Safari</b><p class="muted" style="margin:0">You opened this page inside an app (Messenger / Facebook). Sign-in often fails here.</p>
+  <div class="erow">${and?`<a class="btn grad" href="intent://bpnihongohub.github.io/#acc#Intent;scheme=https;package=com.android.chrome;end">Open in Chrome</a>`:''}<button class="btn ghost" id="iaCp">📋 Copy link</button></div>
+  ${and?'':'<p class="muted" style="font-size:12px;margin:0">iPhone: tap ⋯ (top right) → "Open in Safari" / "Open in browser".</p>'}</section>`}
+function inAppWire(){const b=$('#iaCp');if(b)b.onclick=()=>{const u='https://bpnihongohub.github.io/#acc';(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>toast('Copied. Paste it in Chrome / Safari.')).catch(()=>prompt('Copy this link',u))}}
+function subCard(){return `<section class="card accbox subcard"><span class="subeb">⭐ Subscription · 受講料</span>
+  <div class="subp"><b>${PAY.cur}${PAY.price.toLocaleString('en')}</b><span>${at('per6')} · ${PAYC()}</span></div>
+  <ul class="clsl"><li>✅ All model sets, mock tests and listening</li><li>✅ All units, homework and books</li><li>✅ Nepali explanation for every question</li><li>🎁 New account: 3 days everything free</li></ul>
+  <ol class="substeps"><li><i>1</i>Sign in (Google or email)</li><li><i>2</i>Pay with PayPay (the QR shows after sign-in)</li><li><i>3</i>Binod checks it → everything opens on your account</li></ol></section>`}
 async function renderAccount(){
   if(!BE.ok){shell('acc',`${ph('人',at('acc'),'')}<div class="card emptyx"><div class="ex-ic">🔐</div><p>${at('soon')}</p></div>`);return}
   if(!BE.ready){shell('acc',`<div class="card empty">…</div>`);return}
   if(!BE.user){
-    shell('acc',`${ph('人',at('acc'),at('why'))}<section class="card accbox">
-      <button class="btn gbtn" id="gIn"><b>G</b> ${at('google')}</button><div class="or"><span>or</span></div>
-      <form id="eForm" class="eform"><input id="eName" placeholder="${at('name')}" autocomplete="name">
+    shell('acc',`${ph('人',at('acc'),'')}${inAppBox()}${subCard()}<section class="card accbox signbox"><h3>👤 Sign in · ログイン</h3>
+      <button class="btn gbtn" id="gIn"><b>G</b> ${at('google')}</button><div class="or"><span>or email</span></div>
+      <form id="eForm" class="eform"><input id="eName" placeholder="${at('name')} (new account only)" autocomplete="name">
       <input id="eMail" type="email" placeholder="${at('email')}" autocomplete="email" required>
       <input id="ePw" type="password" placeholder="${at('pw')}" minlength="6" autocomplete="current-password" required>
       <div class="err" id="eErr" role="alert"></div>
-      <div class="erow"><button class="btn grad" data-m="in">${at('login')}</button><button class="btn ghost" data-m="up">${at('signup')}</button></div></form></section>`);
-    $('#gIn').onclick=()=>BE.api.google().catch(e=>{$('#eErr').textContent=at('err')});
+      <div class="erow"><button class="btn grad" data-m="in">${at('login')}</button><button class="btn ghost" data-m="up">${at('signup')}</button></div>
+      <p class="muted" style="font-size:12px;margin:0">First time? Tap <b>Create account</b>. <a href="#" id="eFor">Forgot password?</a></p></form></section>`);
+    inAppWire();
+    $('#gIn').onclick=()=>BE.api.google().catch(e=>{$('#eErr').innerHTML=authMsg(e)});
     let mode='in';$$('#eForm [data-m]').forEach(b=>b.onclick=()=>mode=b.dataset.m);
+    $('#eFor').onclick=async e=>{e.preventDefault();const m=$('#eMail').value.trim();if(!m){$('#eErr').textContent='Write your email above, then tap "Forgot password?" again.';return}
+      try{await BE.api.reset(m);$('#eErr').textContent='✓ We sent a password reset link to '+m+'. Check Inbox and Spam.'}catch(x){$('#eErr').innerHTML=authMsg(x)}};
     $('#eForm').onsubmit=async e=>{e.preventDefault();$('#eErr').textContent='';
       try{mode==='up'?await BE.api.signup($('#eMail').value.trim(),$('#ePw').value,$('#eName').value.trim()):await BE.api.signin($('#eMail').value.trim(),$('#ePw').value)}
-      catch(x){$('#eErr').textContent=(x&&x.message)||at('err')}};
+      catch(x){$('#eErr').innerHTML=authMsg(x)}};
     return}
   const p=BE.prof||{},sum=p.prog||{};let mine=[];try{mine=await BE.api.myPay(BE.user.uid)}catch(e){}
   const pend=mine.some(x=>x.status==='pending'&&(x.course||'n3')===dxOf());
@@ -1862,7 +1906,9 @@ async function renderAccount(){
 
 /* ---- payment page ---- */
 function renderPay(){
-  if(!BE.ok||!BE.user){location.hash='#acc';return}
+  if(!BE.ok){location.hash='#acc';return}
+  if(!BE.ready){shell('acc',`<div class="card empty">…</div>`);return}
+  if(!BE.user){shell('acc',`${ph('¥',at('payT'),'')}${inAppBox()}${subCard()}<section class="card accbox signbox"><p style="margin:0">🔒 The PayPay QR shows after you sign in, so your payment is saved to your own account.</p><a class="btn grad" href="#acc">👤 Sign in first →</a></section>`);inAppWire();return}
   shell('acc',`${ph('¥',at('payT'),PAYC()+' · '+PAY.cur+PAY.price.toLocaleString('en')+' · '+at('per6'))}
   ${PAY.link&&/^https:\/\/buy\.stripe\.com\//.test(PAY.link)?`<section class="card accbox"><b>💳 ${at('cardT')}</b><p class="muted" style="margin:0">${at('cardS')}</p><a class="btn grad" target="_blank" rel="noopener" href="${PAY.link}?client_reference_id=${encodeURIComponent(BE.user.uid)}${BE.user.email?'&prefilled_email='+encodeURIComponent(BE.user.email):''}">💳 ${at('cardB')}</a></section>`:''}
   <section class="card accbox"><b>📱 PayPay</b><p>${at('payS')}</p><div class="qrbox"><a href="${PAY.pp||PAY.qr}" target="_blank" rel="noopener" title="PayPay"><img src="${PAY.qr}" alt="QR" onerror="this.replaceWith(Object.assign(document.createElement('p'),{className:'muted',textContent:'${at('noqr')}'}))"></a></div>${PAY.pp?`<a class="btn grad" style="display:block;text-align:center;margin:10px auto 0;max-width:320px;background:#ff0033" target="_blank" rel="noopener" href="${PAY.pp}">📱 PayPay で払う · Pay with PayPay</a>`:''}${PAY.ppid?`<p style="text-align:center;margin:10px 0 0">PayPay ID: <b style="font-size:17px;letter-spacing:.5px">${PAY.ppid}</b> <button class="chip" onclick="navigator.clipboard&&navigator.clipboard.writeText('${PAY.ppid}').then(()=>toast('Copied: ${PAY.ppid}'))">📋 Copy</button></p>`:''}
@@ -1981,7 +2027,7 @@ function renderBills(ALL,U){const box=$('#billBox');if(!box)return;
 /* ---- teacher dashboard ---- */
 const TD={q:'',sort:'last',c:null,cls:''};
 const TODO=[/* [id, text, how / link] — only things that need Binod himself (his login, money, or info) */
- ['rules','Paste the new Firebase rules','Firebase console → Firestore Database → Rules → paste all of private/firebase-rules.txt → Publish. Needed for: progress backup, mistake reports, homework, email-verified trial.','https://console.firebase.google.com/project/binod-paudel/firestore/rules'],
+ ['rules3','Paste the new Firebase rules (updated 11-25 night)','Firebase console → Firestore Database → Rules → paste all of private/firebase-rules.txt → Publish. Needed for: one code = one account (3 devices), progress backup, mistake reports, homework, email-verified trial.','https://console.firebase.google.com/project/binod-paudel/firestore/rules'],
  ['keys','Save the N5 and N4 Teacher 🔑 keys','On this page: choose the N5 chip, paste row 2 code of private/n5-unlock-codes.xlsx in 🔑, Save. Same for N4. Without it paid N5/N4 students cannot open sets.',''],
  ['legal','Send the email address for the legal page (特定商取引法)','Write it in the chat. It will be shown on legal.html as the contact.',''],
  ['paypay','Get a new PayPay link before 12/9','PayPay app → 受け取る → link. Send it in the chat; the site QR/button will be changed.',''],
@@ -1999,6 +2045,13 @@ const TODO=[/* [id, text, how / link] — only things that need Binod himself (h
  ['later','Later (costs money): Blaze plan, own domain, card payment, automatic emails, AI teacher, Play Store / App Store app','Decide when you are ready. Nothing to do now.','']];
 function todoBox(done){const n=TODO.filter(x=>!done[x[0]]).length;
   return `<section class="card ttodo"><details ${n?'open':''}><summary><b>📝 My to-do · Binod (${n} left)</b></summary><ol>${TODO.map(([id,tx,how,url])=>`<li class="${done[id]?'dn':''}"><label><input type="checkbox" data-td="${id}" ${done[id]?'checked':''}> <b>${esc(tx)}</b></label><small>${esc(how)}${url?` <a href="${url}" target="_blank" rel="noopener">Open →</a>`:''}</small></li>`).join('')}</ol></details></section>`}
+async function codesBox(){const el=$('#tCodes');if(!el||!BE.api.codes)return;let C;try{C=await BE.api.codes()}catch(e){el.innerHTML='<section class="card"><b>🔑 Used codes</b><p class="muted">Not available yet. Paste the new Firebase rules (to-do list).</p></section>';return}
+  C.sort((a,b)=>(b.at||0)-(a.at||0));
+  el.innerHTML=`<section class="card"><details><summary><b>🔑 Used codes (${C.length})</b> · one code = one account, max 3 devices</summary>
+  ${C.length?`<table class="ptbl" style="width:100%;font-size:13px;border-collapse:collapse"><tr><th>Course</th><th>Code</th><th>Account</th><th>Devices</th><th></th></tr>${C.map(c=>`<tr style="border-top:1px solid #e3e8f2"><td>${esc(c.id.split('_')[0].toUpperCase())}</td><td>${esc(c.id.split('_')[1]||'')}…</td><td>${esc(c.email||c.uid||'')}</td><td>${(c.dev||[]).length}/3</td><td><button class="chip" data-cdv="${esc(c.id)}">Reset devices</button> <button class="chip" data-cdl="${esc(c.id)}">Free code</button></td></tr>`).join('')}</table>`:'<p class="muted">No code used yet.</p>'}
+  <p class="muted" style="font-size:12px">Reset devices = same account can open it on 3 new devices. Free code = the next account that types it gets it.</p></details></section>`;
+  $$('[data-cdv]').forEach(b=>b.onclick=async()=>{const c=C.find(x=>x.id===b.dataset.cdv);try{await BE.api.codeSet(c.id,{uid:c.uid,email:c.email||'',dev:[],at:c.at||Date.now()});toast('✓');codesBox()}catch(e){toast(at('err'))}});
+  $$('[data-cdl]').forEach(b=>b.onclick=async()=>{if(!confirm('Free this code?'))return;try{await BE.api.codeDel(b.dataset.cdl);toast('✓');codesBox()}catch(e){toast(at('err'))}})}
 async function renderTeacher(){
   if(!BE.ok||!BE.admin){location.hash='#acc';return}
   shell('teacher',`${ph('師',at('tT'),'')}<div class="card empty">…</div>`);
@@ -2020,7 +2073,7 @@ async function renderTeacher(){
     return `<section class="card money"><div class="mtop"><div><small>💰 Total received · 合計</small><b>${yen(sum(ok))}</b><span>${ok.length} approved payment(s)</span></div><div><small>📅 This month (${mo})</small><b>${yen(sum(tm))}</b><span>${tm.length} payment(s)</span></div><div><small>⏳ Waiting to check</small><b>${PY.length}</b><span>🎁 On free trial: ${tr}</span></div></div>
     <div class="mgrid">${['n5','n4','n3','n2','n1'].map(c=>{const a=ok.filter(p=>(p.course||'n3')===c);return `<div class="mc"><b>${PAYC(c)}</b><i>${yen(sum(a))}</i><span>${a.length} student(s)</span></div>`}).join('')}</div></section>`})()}
   ${hk?'':`<section class="card accbox"><b>🔑 ${at('keyT')} · ${PAYC(tc)}</b><p class="muted" style="margin:0">${at('keyS')}</p><form id="kF" class="erow"><input id="kC" placeholder="XXXX-XXXXXXXX" autocomplete="off" style="flex:2"><button class="btn grad">${at('save')}</button></form></section>`}
-  ${todoBox(TDN)}
+  ${todoBox(TDN)}<div id="tCodes"></div>
   ${(()=>{const d0=new Date();d0.setHours(0,0,0,0);const T0=d0.getTime(),W0=T0-6*864e5,ms=v=>tms(v)||+v||0;
     const nT=U.filter(u=>ms(u.created)>=T0).length,nW=U.filter(u=>ms(u.created)>=W0).length,aT=U.filter(u=>ms(u.last)>=T0).length,tr=U.filter(u=>!isPaidP(u,tc)&&isTrialP(u)).length;
     const soon=U.filter(u=>isPaidP(u,tc)&&untilOf(u,tc)-Date.now()<14*864e5),pT=PH.filter(x=>ms(x.created)>=T0),pW=PH.filter(x=>x.status==='approved'&&ms(x.decided||x.created)>=W0);
@@ -2070,7 +2123,7 @@ async function renderTeacher(){
   const kf=$('#kF');if(kf)kf.onsubmit=async e=>{e.preventDefault();const c=$('#kC').value.toUpperCase().replace(/[^0-9A-Z]/g,'');if(c.length!==12){toast(at('err'));return}try{await BE.api.setKey(tc,c);toast('✓');renderTeacher()}catch(x){toast(at('err'))}};
   $('#tsort').onchange=e=>{TD.sort=e.target.value;renderTeacher()};
   $$('[data-tc]').forEach(b=>b.onclick=()=>{TD.c=b.dataset.tc;renderTeacher()});
-  const byId=id=>PY.find(p=>p.id===id);
+  const byId=id=>PY.find(p=>p.id===id);codesBox();
   renderBills(PH.concat(PY.filter(p=>!PH.some(h=>h.id===p.id))),U);
   $$('[data-ok]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await BE.api.decide(byId(b.dataset.ok),true);toast('✓')}catch(e){toast(at('err'))}renderTeacher()});
   $$('[data-no]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await BE.api.decide(byId(b.dataset.no),false)}catch(e){toast(at('err'))}renderTeacher()});
