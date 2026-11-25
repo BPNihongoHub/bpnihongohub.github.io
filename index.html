@@ -1496,7 +1496,7 @@ async function decStrip(src){const buf=new Uint8Array(await fetch(src).then(r=>r
    FBCONF stays null until Binod creates his Firebase project; then paste the config here.
    PAY.on stays false until Binod confirms price + free rules (locks are OFF meanwhile). */
 const FBCONF={apiKey:"AIzaSyDe-FSQzW7RaAMCAS81ghbBLYMI5kB-zzk",authDomain:"binod-paudel.firebaseapp.com",projectId:"binod-paudel",storageBucket:"binod-paudel.firebasestorage.app",messagingSenderId:"589004931560",appId:"1:589004931560:web:a7a205b8ef231749dbe45d"};/* public web config (not a secret) */
-const PAY={on:true,price:2000,cur:'¥',course:'JLPT N3',months:6,qr:'pay/qr.png',pp:'https://qr.paypay.ne.jp/p2p01_htOOOeFgxhhKfySh',link:''};/* link = Stripe Payment Link (card + konbini) once Binod creates it */
+const PAY={on:true,price:2000,cur:'¥',course:'JLPT N3',months:6,qr:'pay/qr.png',pp:'https://qr.paypay.ne.jp/p2p01_qBJtme3wtzK9CSCZ',link:''};/* link = Stripe Payment Link (card + konbini) once Binod creates it */
 const SIXM=()=>183*864e5;
 const tms=v=>v&&v.toMillis?v.toMillis():(+v||0);
 const untilOf=(p,c)=>{c=c||dxOf();return p?(c==='n3'?tms(p.paidUntil):tms((p.pu||{})[c])):0};
@@ -1680,7 +1680,7 @@ function renderPay(){
   if(!BE.ok||!BE.user){location.hash='#acc';return}
   shell('acc',`${ph('¥',at('payT'),PAYC()+' · '+PAY.cur+PAY.price.toLocaleString('en')+' · '+at('per6'))}
   ${PAY.link&&/^https:\/\/buy\.stripe\.com\//.test(PAY.link)?`<section class="card accbox"><b>💳 ${at('cardT')}</b><p class="muted" style="margin:0">${at('cardS')}</p><a class="btn grad" target="_blank" rel="noopener" href="${PAY.link}?client_reference_id=${encodeURIComponent(BE.user.uid)}${BE.user.email?'&prefilled_email='+encodeURIComponent(BE.user.email):''}">💳 ${at('cardB')}</a></section>`:''}
-  <section class="card accbox"><b>📱 PayPay</b><p>${at('payS')}</p><div class="qrbox"><a href="${PAY.pp||PAY.qr}" target="_blank" rel="noopener" title="PayPay"><img src="${PAY.qr}" alt="QR" onerror="this.replaceWith(Object.assign(document.createElement('p'),{className:'muted',textContent:'${at('noqr')}'}))"></a></div>
+  <section class="card accbox"><b>📱 PayPay</b><p>${at('payS')}</p><div class="qrbox"><a href="${PAY.pp||PAY.qr}" target="_blank" rel="noopener" title="PayPay"><img src="${PAY.qr}" alt="QR" onerror="this.replaceWith(Object.assign(document.createElement('p'),{className:'muted',textContent:'${at('noqr')}'}))"></a></div>${PAY.pp?`<a class="btn grad" style="display:block;text-align:center;margin:10px auto 0;max-width:320px;background:#ff0033" target="_blank" rel="noopener" href="${PAY.pp}">📱 PayPay で払う · Pay with PayPay</a>`:''}
   <form id="payF" class="eform"><label>${at('method')}<select id="pyM"><option>PayPay</option><option>Bank transfer</option><option>eSewa / Khalti</option><option>Cash</option></select></label>
   <label>${at('txn')}<input id="pyT" maxlength="80"></label><label>${at('shot')}<input id="pyS" type="file" accept="image/*"></label><img id="pyPrev" class="pyprev" hidden alt="">
   <label>${at('note')}<input id="pyN" maxlength="200"></label><div class="err" id="pyE" role="alert"></div><button class="btn grad" id="pyB">${at('send')}</button></form></section>`);
