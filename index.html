@@ -354,7 +354,10 @@ tr[data-kanji]:hover td{background:var(--ai-soft)}
 .sp-exgrid button:hover{border-color:#ffd166}
 
 .unlockcard{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-top:14px;padding:16px 18px;border:1.5px dashed var(--gold)}
-.unlockcard p{margin:4px 0 0;color:var(--muted);font-size:14px}
+.unlockcard{padding:22px 20px;border:2.5px solid var(--gold);background:linear-gradient(135deg,rgba(255,209,102,.24),rgba(255,61,110,.10));box-shadow:0 8px 24px rgba(200,150,40,.2)}
+.unlockcard b{font-size:19px}
+.unlockcard p{margin:6px 0 0;font-size:15.5px}
+.unlockcard .btn{font-size:18px;padding:14px 22px;flex:1 1 220px;text-align:center;justify-content:center}
 .unlockpage{max-width:480px;margin:24px auto;text-align:center;display:grid;gap:12px;justify-items:center}
 .unlockpage form{display:grid;gap:10px;width:100%;text-align:left}
 .unlockpage input{font:700 20px/1.2 ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;padding:12px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--paper);color:inherit;width:100%}
@@ -794,14 +797,15 @@ save:['⬇ 保存','⬇ Save','⬇ सेभ गर्नुहोस्','⬇ L
 lp:['画像を長押しして保存してください。','Long-press the image to save it.','तस्बिरमा थिचिराखेर सेभ गर्नुहोस्।','Nhấn giữ ảnh để lưu.','Tekan lama gambar untuk menyimpan.','ပုံကို ဖိထားပြီး သိမ်းပါ။','长按图片保存。','Pindutin nang matagal ang larawan para i-save.']
 };
 let LI=2;
-function t(k,v){const a=I[k];let s=a?(a[LI]||a[1]):k;if(v)for(const x in v)s=s.split('{'+x+'}').join(v[x]);return s}
+let HJ=false;const HKEEP=new Set(['freeDemo','lockedN','srsDue','srsHint','weakHint','certRule','soonNote','buyNote','weak']);
+function t(k,v){const a=I[k];let s=a?((HJ&&LI===2&&!HKEEP.has(k)&&a[0])||a[LI]||a[1]):k;if(v)for(const x in v)s=s.split('{'+x+'}').join(v[x]);return s}
 
 (function(){
 const SALT='raku-nihongo|';
 const KANJI_T=['reading','writing'], MEAN_T=['context','paraphrase','usage'], GRAM_T=['grammar','order','bunsho'], READ_T=['dokkai'], LISTEN_T=['listen'], ALL_T=KANJI_T.concat(MEAN_T,GRAM_T,READ_T,LISTEN_T);
 const SECT={kanji:KANJI_T,mean:MEAN_T,gram:GRAM_T,read:READ_T,listen:LISTEN_T};const SECJ={kanji:'漢字',mean:'語彙',gram:'文法',read:'読解',listen:'聴解'};const secOf=ty=>Object.keys(SECT).find(k=>SECT[k].includes(ty))||'kanji';
 const TL={reading:'漢字読み',writing:'表記',context:'文脈規定',paraphrase:'言い換え類義',usage:'用法',grammar:'文法形式',order:'文の組み立て',bunsho:'文章の文法',dokkai:'読解',listen:'聴解'};
-const TN=k=>LI===0?'':t('t_'+k);
+const TN=k=>LI===0||HJ?'':t('t_'+k);
 const C='①②③④';
 let MOJ={1:{1:'＿＿＿のことばの読み方として最もよいものを、１・２・３・４から一つえらびなさい。',2:'＿＿＿のことばを漢字で書くとき、最もよいものを、１・２・３・４から一つえらびなさい。',3:'（　　）に入れるのに最もよいものを、１・２・３・４から一つえらびなさい。',4:'＿＿＿に意味が最も近いものを、１・２・３・４から一つえらびなさい。',5:'つぎのことばの使い方として最もよいものを、１・２・３・４から一つえらびなさい。'},
  2:{1:'つぎの文の（　　）に入れるのに最もよいものを、１・２・３・４から一つえらびなさい。',2:'つぎの文の　★　に入る最もよいものを、１・２・３・４から一つえらびなさい。',3:'つぎの文章を読んで、文章全体の内容を考えて、（　）に入る最もよいものを、１・２・３・４から一つえらびなさい。',4:'つぎの（１）から（４）の文章を読んで、質問に答えなさい。答えは、１・２・３・４から最もよいものを一つえらびなさい。',5:'つぎの（１）と（２）の文章を読んで、質問に答えなさい。答えは、１・２・３・４から最もよいものを一つえらびなさい。',6:'つぎの文章を読んで、質問に答えなさい。答えは、１・２・３・４から最もよいものを一つえらびなさい。',7:'右のページは、ある案内である。これを読んで、下の質問に答えなさい。答えは、１・２・３・４から最もよいものを一つえらびなさい。'},
@@ -1035,21 +1039,21 @@ function badges(){const done=Object.keys(P.res).length,st=streak(),k=secStats(KA
 function ring(v,max,label){const p=Math.min(1,max?v/max:0),r=42,c=2*Math.PI*r;return `<svg viewBox="0 0 100 100" class="ring" role="img" aria-label="${label}"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd166"/><stop offset="1" stop-color="#ff3d6e"/></linearGradient></defs><circle cx="50" cy="50" r="${r}" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="9"/><circle cx="50" cy="50" r="${r}" fill="none" stroke="url(#rg)" stroke-width="9" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-p)}" transform="rotate(-90 50 50)"/><text x="50" y="49" text-anchor="middle" class="ring-n">${v}</text><text x="50" y="65" text-anchor="middle" class="ring-l">/ ${max}</text></svg>`}
 
 /* ---------- home launcher (all sections at top + cards) ---------- */
-const HD={units:['युनिट अनुसार गृहकार्य, हरेकमा ५० प्रश्न','Homework by unit, 50 questions each'],pass:['आफ्नो स्तर जाँच: कान्जी, शब्द, व्याकरण','Check your level: kanji, words, grammar'],quiz:['मोडल प्रश्न सेट अभ्यास गर्नुहोस्','Practise the model question sets'],mock:['वास्तविक JLPT जस्तै समयसहित पूरा परीक्षा','A full timed exam, just like the real JLPT'],srs:['फ्ल्यासकार्डले शब्द याद गर्नुहोस्','Remember words with flashcards'],review:['गलत भएका प्रश्न फेरि गर्नुहोस्','Redo the questions you got wrong'],words:['सबै शब्द र अर्थ खोज्नुहोस्','Search every word and meaning'],books:['किताबहरू अनलाइन पढ्नुहोस्','Read the study books online'],course:['N5–N1 र अरू कोर्स छान्नुहोस्','Pick N5–N1 or another course']};
-const hdx=k=>{const L=LANGS[LI][0];return (HD[k]||['',''])[L==='ne'?0:1]};
+const HD={units:['युनिट अनुसार गृहकार्य, हरेकमा ५० प्रश्न','Homework by unit, 50 questions each','ユニット別の宿題（各50問）'],pass:['आफ्नो स्तर जाँच: कान्जी, शब्द, व्याकरण','Check your level: kanji, words, grammar','漢字・語彙・文法で実力チェック'],quiz:['मोडल प्रश्न सेट अभ्यास गर्नुहोस्','Practise the model question sets','模擬問題セットで練習'],mock:['वास्तविक JLPT जस्तै समयसहित पूरा परीक्षा','A full timed exam, just like the real JLPT','本番のJLPTと同じ時間で全問テスト'],srs:['फ्ल्यासकार्डले शब्द याद गर्नुहोस्','Remember words with flashcards','フラッシュカードで単語を覚える'],review:['गलत भएका प्रश्न फेरि गर्नुहोस्','Redo the questions you got wrong','間違えた問題をもう一度'],words:['सबै शब्द र अर्थ खोज्नुहोस्','Search every word and meaning','すべての単語と意味を検索'],books:['किताबहरू अनलाइन पढ्नुहोस्','Read the study books online','教材をオンラインで読む'],course:['N5–N1 र अरू कोर्स छान्नुहोस्','Pick N5–N1 or another course','N5〜N1などのコースを選ぶ']};
+const hdx=k=>{const L=LANGS[LI][0];return (HD[k]||['','',''])[L==='ne'?0:L==='ja'?2:1]};
 function homeSecs(){const ex=exam(),uB=ex==='n3'||ex==='n5';
-  return [uB&&['units','課',ut('nav')],['pass','合','Pass? Try it'],['quiz','練',t('navQuiz')],['mock','試',t('navMock')],['srs','札',t('navSrs')],['review','誤',t('navRev')],['words','辞',t('navWords')],uB&&['books','本',bt('lib')],['course','選',LANGS[LI][0]==='ne'?'कोर्स छान्नुहोस्':'Choose course']].filter(Boolean)}
+  return [uB&&['units','課',ut('nav')],['pass','合','Pass? Try it'],['quiz','練',t('navQuiz')],['mock','試',t('navMock')],['srs','札',t('navSrs')],['review','誤',t('navRev')],['words','辞',t('navWords')],uB&&['books','本',bt('lib')],['course','選',['ne','ja'].includes(LANGS[LI][0])?'コースを選ぶ':'Choose course']].filter(Boolean)}
 function homeTop(){const L=LANGS[LI][0],ne=L==='ne',lv=(COURSES.find(c=>c[0]===exam())||[0,'JLPT'])[1];
   const secs=homeSecs().filter(x=>!['pass','mock'].includes(x[0]));
   const hl=k=>k==='course'?'#courses':'#'+k;
   return `<section class="hl-hero"><div class="hl-glow"></div><div class="hl-eyebrow">${esc(lv)} · BP Nihongo Hub</div>
-   <h1 class="hl-h">${ne?'पास हुने बाटो, एकै ठाउँमा':'Your path to passing, all in one place'}</h1>
+   <h1 class="hl-h">${ne||L==='ja'?'合格への道、ここにすべて':'Your path to passing, all in one place'}</h1>
    <div class="hl-feat">
     <a class="hl-big hl-pass" href="#pass"><i>合</i><div><b>Pass? Try it</b><span>${hdx('pass')}</span></div><em>→</em></a>
     <a class="hl-big hl-mock" href="#mock"><i>試</i><div><b>${t('navMock')}</b><span>${hdx('mock')}</span></div><em>→</em></a>
    </div></section>
   <nav class="hl-grid" aria-label="Sections">${secs.map(([k,g,n])=>`<a href="${hl(k)}" ${k==='course'?'data-tocourse="1"':''}><i>${g}</i><span>${esc(n)}</span></a>`).join('')}</nav>`}
-function homeCards(){return `<h2 class="hsech"><i>全</i>${LANGS[LI][0]==='ne'?'सबै सेक्सन':'All sections'}</h2><div class="hl-cards">${homeSecs().map(([k,g,n],i)=>`<a class="card hl-card" href="${k==='course'?'#courses':'#'+k}" ${k==='course'?'data-tocourse="1"':''}><i>${g}</i><div><small>${String(i+1).padStart(2,'0')}</small><b>${esc(n)}</b><span>${hdx(k)}</span></div><em>→</em></a>`).join('')}</div>`}
+function homeCards(){return `<h2 class="hsech"><i>全</i>${['ne','ja'].includes(LANGS[LI][0])?'すべてのセクション':'All sections'}</h2><div class="hl-cards">${homeSecs().map(([k,g,n],i)=>`<a class="card hl-card" href="${k==='course'?'#courses':'#'+k}" ${k==='course'?'data-tocourse="1"':''}><i>${g}</i><div><small>${String(i+1).padStart(2,'0')}</small><b>${esc(n)}</b><span>${hdx(k)}</span></div><em>→</em></a>`).join('')}</div>`}
 function bindHomeTop(){$$('[data-tocourse]').forEach(a=>a.onclick=e=>{e.preventDefault();const c=$('#courses');if(c)c.scrollIntoView({behavior:'smooth',block:'start'})})}
 function renderHome(){
   const k=secStats(KANJI_T),m=secStats(MEAN_T);const done=k.done+m.done,ok=k.ok+m.ok;
@@ -1058,11 +1062,11 @@ function renderHome(){
   const pct=s=>s.total?Math.round(s.done/s.total*100):0;const due=SR.due().length;
   const bars=ALL_T.map(ty=>{const s=typeStats(ty);const a=s.done?Math.round(s.ok/s.done*100):0;return `<div class="brow"><span>${TL[ty]}<small>${TN(ty)}</small></span><div class="bar"><i style="width:${a}%;background:${!s.done?'var(--line)':a<60?'var(--shu)':a<80?'var(--gold)':'var(--ok)'}"></i></div><b>${s.done?a+'%':'–'}</b></div>`}).join('');
   const weakest=ALL_T.map(ty=>({ty,s:typeStats(ty)})).filter(x=>x.s.done>=5).sort((a,b)=>a.s.ok/a.s.done-b.s.ok/b.s.done)[0];
-  shell('home',`<section class="courses" id="courses"><div class="eyebrow">${t('courses')}</div><div class="crow">${COURSES.map(([k,n,sub,on])=>`<button class="course ${on?'on':''} ${exam()===k?'sel':''}" data-exam="${k}" aria-pressed="${exam()===k}"><b>${n}</b><small>${sub}</small><span class="st">${on?t('open'):t('soon')}</span></button>`).join('')}</div>${(COURSES.find(c=>c[0]===exam())||[0,0,0,1])[3]?'':`<div class="card soonnote">${t('soonNote',{c:(COURSES.find(c=>c[0]===exam())||[])[1]})}</div>`}</section>${UNL?'':`<section class="card unlockcard"><div><b>🎁 ${t('freeDemo')}</b><p>${t('lockedN',{n:(D.sets||[]).length-(D.free||[]).length})}${SHOWPRICE?' · N5–N3 ¥2,000 · N2–N1 ¥3,000':''}</p></div><a class="btn grad" href="#unlock">🔓 ${t('unlockBtn')}</a></section>`}
+  HJ=true;const HH=`<section class="courses" id="courses"><div class="eyebrow">${t('courses')}</div><div class="crow">${COURSES.map(([k,n,sub,on])=>`<button class="course ${on?'on':''} ${exam()===k?'sel':''}" data-exam="${k}" aria-pressed="${exam()===k}"><b>${n}</b><small>${sub}</small><span class="st">${on?t('open'):t('soon')}</span></button>`).join('')}</div>${(COURSES.find(c=>c[0]===exam())||[0,0,0,1])[3]?'':`<div class="card soonnote">${t('soonNote',{c:(COURSES.find(c=>c[0]===exam())||[])[1]})}</div>`}</section>${UNL?'':`<section class="card unlockcard"><div><b>🎁 ${t('freeDemo')}</b><p>${t('lockedN',{n:(D.sets||[]).length-(D.free||[]).length})}${SHOWPRICE?' · N5–N3 ¥2,000 · N2–N1 ¥3,000':''}</p></div><a class="btn grad" href="#unlock">🔓 ${t('unlockBtn')}</a></section>`}${homeTop()}
   <section class="dash"><div class="d-top"><div class="d-l"><div class="h-hello">${t('hello')}${me()?', <b>'+esc(me())+'</b>':''} 👋</div><h1>${t('goalT',{n:S.goal})}</h1>
    <div class="row d-btns"><button class="btn light" data-go="kanji">${t('startP')} →</button><a class="btn glass" href="#mock">${t('navMock')}</a></div></div>
    <div class="d-r">${ring(tcount,S.goal,t('today'))}<label class="d-goal">${t('goalL')} <select id="goalSel" class="glass">${[10,20,30,50,100].map(g=>`<option ${g==S.goal?'selected':''}>${g}</option>`).join('')}</select></label></div></div>
-   <div class="d-stats"><div><b>${done}</b><span>${t('stDone')}</span></div><div><b>${done?Math.round(ok/done*100):0}%</b><span>${t('stAcc')}</span></div><div><b>${streak()}🔥</b><span>${t('stStreak')}</span></div><a href="#review"><b>${weak}</b><span>${t('stWeak')}</span></a></div></section>${homeTop()}
+   <div class="d-stats"><div><b>${done}</b><span>${t('stDone')}</span></div><div><b>${done?Math.round(ok/done*100):0}%</b><span>${t('stAcc')}</span></div><div><b>${streak()}🔥</b><span>${t('stStreak')}</span></div><a href="#review"><b>${weak}</b><span>${t('stWeak')}</span></a></div></section>
   <h2 class="hsech"><i>試</i>${ut('setsH')}<small>${D.total||D.q.length} 問</small></h2>
   <div class="setgrid">${[['kanji','漢','STEP 1',t('kanji'),k],['mean','語','STEP 2',t('mean'),m],...[['gram','文',GRAM_T],['read','読',READ_T],['listen','聴',LISTEN_T]].map(([kk,g,T],x)=>[kk,g,'STEP '+(x+3),t(kk),secStats(T)])].filter(r=>r[4].total).map(([kk,g,st,ti,s])=>`<button class="card setc" data-go="${kk}"><span class="sg">${g}</span><small>${st}</small><b>${ti}</b><span class="sn">${s.total} 問</span><span class="sbar"><i style="width:${pct(s)}%"></i></span><span class="sp">${s.done}/${s.total} · ${pct(s)}%</span></button>`).join('')}</div>
   ${['n3','n5'].includes(exam())?hwHome()+booksHome():''}
@@ -1074,7 +1078,7 @@ function renderHome(){
   </div>
   <section class="card chart"><div class="eyebrow">${t('chartT')}</div>${bars}
    <p style="margin:10px 0 0;font-size:14px">${weakest?`${t('weak')} <b style="color:var(--shu)">${TL[weakest.ty]}${TN(weakest.ty)?' ('+TN(weakest.ty)+')':''}</b> · <button class="linkbtn" data-type-go="${weakest.ty}">${t('practiceThis')}</button>`:t('weakHint')}</p></section>
-  <section class="card badges"><div class="eyebrow">${t('badgesT')}</div>${(k.done>=k.total&&k.ok/k.total>=.7)?`<button class="btn red" data-cert="kanji" style="margin:10px 8px 0 0">${t('certK')}</button>`:''}${(m.done>=m.total&&m.ok/m.total>=.7)?`<button class="btn red" data-cert="mean" style="margin:10px 0 0">${t('certM')}</button>`:''}<p class="note" style="margin:8px 0 0">${t('certRule')}</p><div class="bgrid">${badges().map(([i,s,on])=>`<div class="badge ${on?'on':''}" title="${esc(s)}"><span>${i}</span><small>${s}</small></div>`).join('')}</div></section>${homeCards()}`);
+  <section class="card badges"><div class="eyebrow">${t('badgesT')}</div>${(k.done>=k.total&&k.ok/k.total>=.7)?`<button class="btn red" data-cert="kanji" style="margin:10px 8px 0 0">${t('certK')}</button>`:''}${(m.done>=m.total&&m.ok/m.total>=.7)?`<button class="btn red" data-cert="mean" style="margin:10px 0 0">${t('certM')}</button>`:''}<p class="note" style="margin:8px 0 0">${t('certRule')}</p><div class="bgrid">${badges().map(([i,s,on])=>`<div class="badge ${on?'on':''}" title="${esc(s)}"><span>${i}</span><small>${s}</small></div>`).join('')}</div></section>${homeCards()}`;HJ=false;shell('home',HH);
   $$('[data-exam]').forEach(b=>b.onclick=()=>{LS.set('exam',b.dataset.exam);render()});
   $$('[data-go]').forEach(b=>b.onclick=()=>{Object.assign(Q.sel,{sec:b.dataset.go,set:'all',type:'all'});Q.auto=true;if(location.hash==='#quiz')render();else location.hash='#quiz'});
   $$('[data-type-go]').forEach(b=>b.onclick=()=>{const ty=b.dataset.typeGo;Object.assign(Q.sel,{sec:secOf(ty),set:'all',type:ty,order:'shuffle'});Q.auto=true;location.hash='#quiz'});
@@ -1340,7 +1344,7 @@ const UT={nav:['宿題','Units','युनिट'],title:['ユニット別 宿�
  done:['回答','Answered','उत्तर दिइयो'],
  setsH:['模擬問題セット','Model question sets','मोडल प्रश्न सेट'],hwH:['宿題（ユニット別）','Homework (by unit)','गृहकार्य (युनिट अनुसार)'],
  l:['聴解','Listening','सुनाइ (Listening)'],ld:['近日公開','Coming soon','छिट्टै आउँदैछ'],units:['ユニット','units','युनिट']};
-const ut=(k,o)=>{const v=(exam()==='n5'&&UT5[k])||UT[k];const c=LANGS[LI][0];let s=c==='ja'?v[0]:c==='ne'?v[2]:v[1];if(o)for(const x in o)s=s.replace('{'+x+'}',o[x]);return s};
+const ut=(k,o)=>{const v=(exam()==='n5'&&UT5[k])||UT[k];const c=LANGS[LI][0];let s=c==='ja'||(HJ&&c==='ne')?v[0]:c==='ne'?v[2]:v[1];if(o)for(const x in o)s=s.replace('{'+x+'}',o[x]);return s};
 const ulang=()=>LANGS[LI][0]==='ne'?'ne':'en';
 async function loadUnits(){if(UD&&UDE===exam())return;UDE=exam();try{UD=await fetch(exam()==='n5'?'units-n5.json':'units.json').then(r=>r.json())}catch(e){UD={k:[],v:[],g:[]};return}
   if(window.MK&&Object.values(UD).some(s=>s.some(x=>x.lk))){try{const L=await fetch(exam()==='n5'?'units-n5-locked.json':'units-locked.json').then(r=>r.json());
@@ -1419,7 +1423,7 @@ const BT={lib:['教材ライブラリー','Books','किताब'],
      '© Binod Paudel. View only. Downloading, copying, screenshots or sharing are not allowed. Doing so may lead to action under copyright law.',
      '© Binod Paudel. हेर्न मात्र। डाउनलोड, कपी, स्क्रिनसट वा अरूलाई सेयर गर्न पाइँदैन। त्यसो गरेमा प्रतिलिपि अधिकार (copyright) कानुनअनुसार कारबाही हुन सक्छ।'],
  loading:['読み込み中…','Loading…','लोड हुँदैछ…']};
-const bt=k=>{const v=BT[k];const c=LANGS[LI][0];return c==='ja'?v[0]:c==='ne'?v[2]:v[1]};
+const bt=k=>{const v=BT[k];const c=LANGS[LI][0];return c==='ja'||(HJ&&c==='ne')?v[0]:c==='ne'?v[2]:v[1]};
 async function loadBooks(){if(BK)return;try{BK=await fetch('books/books.json').then(r=>r.json())}catch(e){BK={}}}
 const BICON={k:'漢',v:'語',g:'文',b:'練'};
 const bOf=b=>(b.x||'n3')===dxOf();const BSECS=()=>['k','v','g','b'].filter(s=>!BK||Object.values(BK).some(b=>bOf(b)&&b.sec===s)).filter(s=>BK||dxOf()==='n3'||s!=='b');

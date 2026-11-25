@@ -47,7 +47,7 @@ const CSS=`
 .ps-units{flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin}.ps-units .ps-note{flex:none}.ps-units button{flex:none;display:flex;flex-direction:column;align-items:center;line-height:1.1;min-width:44px}.ps-units button small{font-size:10px;opacity:.7;font-weight:600}.ps-uh{margin:6px 0 8px;font-size:18px}.ps-uh small{color:var(--muted);font-weight:600}
 .ps-pager button.on{background:var(--ink);color:var(--paper)}
 .ps-bar{position:sticky;bottom:72px;z-index:5;display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--paper);border:1.5px solid var(--line);border-radius:16px;padding:10px;box-shadow:var(--shadow);margin:14px 0}
-.ps-bar .cnt{flex:1;font-weight:700;font-size:13.5px;min-width:90px}.ps-bar .btn{padding:9px 12px;font-size:14px}
+.ps-end{display:flex;justify-content:center;margin:18px 0 8px}.ps-end .btn{min-width:220px;padding:14px 22px;font-size:17px}.ps-bar .cnt{flex:1;font-weight:700;font-size:13.5px;min-width:90px}.ps-bar .btn{padding:9px 12px;font-size:14px}
 .ps-check{background:#000080!important;color:#fff!important;padding:12px 28px!important;border-radius:6px!important;font-size:17px!important}
 .ps-res{padding:16px;margin:12px 0}
 .ps-res h2{margin:0 0 6px}.ps-big{font:900 44px/1 var(--f-disp);color:var(--ai)}
@@ -126,8 +126,8 @@ window.renderPass=async function(){
   }else{
     body=`<p class="ps-note">पढ्न/बुझ्न सक्ने ${PS.kind==='k'?'कान्जी':'शब्द'}मा ✓ लगाउनुहोस्। ⓘ थिच्दा अर्थ ${PS.kind==='k'?'र लेख्ने तरिका':''} देखिन्छ।</p><div class="ps-grid ps-${PS.lv}">${L.slice(a,b).map((x,j)=>{const i=a+j;return `<div class="ps-cell ${S.has(i)?'on':''}" data-c="${i}"><div class="top"><span>${String(i+1).padStart(3,'0')}</span><input type="checkbox" data-i="${i}" ${S.has(i)?'checked':''} aria-label="${E(label(PS.kind,x))}"></div><div class="w ${PS.kind==='k'?'kj':''}">${E(label(PS.kind,x))}</div><span class="i" data-inf="${i}">i</span></div>`}).join('')}</div>`;
   }
-  $('#psBody').innerHTML=pager+body+(UN?nextU(UN,PS.page):pager)+`<div class="ps-bar"><span class="cnt" id="psCnt"></span><button class="btn ghost" id="psAll" title="यो पेज सबै ✓">सबै ✓</button><button class="btn ghost" id="psClr" title="यो पेज खाली">खाली</button><button class="btn ps-check" id="psCheck">Check!</button></div>`+credit();
-  const cnt=()=>{$('#psCnt').innerHTML=`✓ ${S.size} / ${L.length} (${KIND[PS.kind][1]})`};cnt();
+  $('#psBody').innerHTML=pager+body+(UN?nextU(UN,PS.page):pager)+`<div class="ps-end"><button class="btn ps-check" id="psCheck">Check! ✓</button></div>`+credit();
+  const cnt=()=>{};
   const toggle=(i,on)=>{on?S.add(i):S.delete(i);putSet(PS.lv,PS.kind,S);const inp=document.querySelector(`input[data-i="${i}"]`);if(inp){inp.checked=on;(inp.closest('.ps-cell')||inp.closest('.ps-gr')).classList.toggle('on',on)}cnt()};
   document.querySelectorAll('#psBody input[data-i]').forEach(x=>x.onchange=()=>toggle(+x.dataset.i,x.checked));
   document.querySelectorAll('#psBody .ps-cell').forEach(c=>c.onclick=e=>{
@@ -137,8 +137,6 @@ window.renderPass=async function(){
     toggle(i,!S.has(i));
   });
   document.querySelectorAll('[data-pg]').forEach(x=>x.onclick=()=>{PS.page=+x.dataset.pg;saveUI();renderPass();window.scrollTo(0,0)});
-  $('#psAll').onclick=()=>{for(let i=a;i<b;i++)toggle(i,true)};
-  $('#psClr').onclick=()=>{for(let i=a;i<b;i++)toggle(i,false)};
   $('#psCheck').onclick=()=>{PS.kind='r';saveUI();renderPass();window.scrollTo(0,0)};
 };
 function nextU(UN,p){return `<div class="ps-pager" style="justify-content:space-between">${p>0?`<button data-pg="${p-1}">← ${E(UN[p-1][0])}</button>`:"<span></span>"}${p<UN.length-1?`<button data-pg="${p+1}" class="on">${E(UN[p+1][0])} →</button>`:""}</div>`}
