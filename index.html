@@ -664,6 +664,7 @@ details.codebox{margin-top:10px}details.codebox summary{cursor:pointer;color:var
 .tday{margin:0 0 12px}.tday ul{margin:8px 0 0;padding-left:4px;list-style:none;display:grid;gap:6px;font-size:.92rem}
 .ttodo{margin:0 0 12px;border:1.5px solid var(--gold,#e3a200)}.ttodo summary{cursor:pointer}.ttodo ol{margin:10px 0 0;padding-left:20px;display:grid;gap:10px}.ttodo li small{display:block;opacity:.8;margin-top:2px}.ttodo li.dn b{text-decoration:line-through;opacity:.55}
 .lbcard{margin:14px 0}.lb-h{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline}.lb-h span{font-weight:700;color:var(--gold,#e3a200)}.lb-bar{height:10px;border-radius:99px;background:rgba(127,127,127,.2);margin:8px 0 10px;overflow:hidden}.lb-bar i{display:block;height:100%;background:linear-gradient(90deg,#e3a200,#e5193f);border-radius:99px}.lb-l{list-style:none;margin:6px 0 10px;padding:0;display:grid;gap:4px}.lb-l li{display:flex;gap:10px;align-items:center;padding:6px 10px;border-radius:10px;background:rgba(127,127,127,.08)}.lb-l li span{width:28px;text-align:center}.lb-l li b{flex:1}.lb-l li em{font-style:normal;font-weight:800}.lb-l li.me{outline:2px solid var(--gold,#e3a200)}
+.instcard{margin:14px 0;border:1.5px dashed var(--gold,#e3a200)}.instcard:empty{display:none}.in-row{display:flex;gap:12px;align-items:center;margin-bottom:10px}.in-ic{font-size:2rem}.in-row small{display:block;opacity:.8}
 </style>
 <div id="app"><div class="loginwrap"><div class="aur a1"></div><div class="aur a2"></div></div></div>
 <div id="toast" class="toast" hidden></div>
@@ -1168,6 +1169,17 @@ async function lbFill(){const el=$('#lbHome');if(!el)return;const n=wkCount(),pc
   const row=(x,i)=>`<li class="${x.id===BE.user.uid?'me':''}"><span>${i<3?['🥇','🥈','🥉'][i]:i+1}</span><b>${esc(x.name||'Student')}</b><em>${x.n}</em></li>`;
   el.innerHTML=top+`<ol class="lb-l">${L.slice(0,10).map(row).join('')||'<li class="muted">No one yet this week. Be the first!</li>'}${mi>=10?row(L[mi],mi):''}</ol><button class="chip" id="lbOut">Leave ranking</button>`;
   $('#lbOut').onclick=()=>{LS.set('lbon',false);if(BE.api.lbPut)BE.api.lbPut(BE.user.uid,{w:'',n:0,name:'',c:''}).catch(()=>{});lbFill()}}
+/* install as an app (Android/PC: browser prompt; iPhone: Share → Add to Home Screen) */
+let _bip=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();_bip=e;const el=$('#instHome');if(el)instFill()});
+window.addEventListener('appinstalled',()=>{LS.set('inst',1);const el=$('#instHome');if(el)el.remove()});
+const isStandalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+const isIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+function instFill(){const el=$('#instHome');if(!el)return;if(isStandalone()||LS.get('inst',0)||LS.get('instX',0)>Date.now()){el.remove();return}
+  if(_bip){el.innerHTML=`<div class="in-row"><span class="in-ic">📲</span><div><b>Install BP Nihongo Hub as an app</b><small>Opens from your home screen, works offline, no Play Store needed.</small></div></div><div class="erow"><button class="btn grad" id="instGo">Install app</button><button class="chip" id="instX">Not now</button></div>`}
+  else if(isIOS()){el.innerHTML=`<div class="in-row"><span class="in-ic">📲</span><div><b>Add BP Nihongo Hub to your iPhone home screen</b><small>In Safari tap <b>Share</b> <span aria-hidden="true">⬆︎</span> → <b>Add to Home Screen</b> → <b>Add</b>. It opens like an app.</small></div></div><div class="erow"><button class="chip" id="instX">OK</button></div>`}
+  else{el.remove();return}
+  const g=$('#instGo');if(g)g.onclick=async()=>{_bip.prompt();const r=await _bip.userChoice.catch(()=>({}));_bip=null;if(r&&r.outcome==='accepted')LS.set('inst',1);instFill()};
+  $('#instX').onclick=()=>{LS.set('instX',Date.now()+14*864e5);el.remove()}}
 function planCard(done){if(!/^n[1-5]$/.test(exam()))return '';
   const own=LS.get('examdate',''),d=own?new Date(own+'T09:00'):jlptNext();const days=Math.ceil((d-Date.now())/864e5);
   const total=D.total||D.q.length,left=Math.max(0,total-done),rsv=days>=30?7:Math.max(1,Math.floor(days/4)),study=Math.max(1,days-rsv),need=Math.ceil(left/study),daily=Math.min(150,Math.max(5,need));
@@ -1186,7 +1198,7 @@ function renderHome(){
   <section class="dash"><div class="d-top"><div class="d-l"><div class="h-hello">${t('hello')}${me()?', <b>'+esc(me())+'</b>':''} 👋</div><h1>${t('goalT',{n:S.goal})}</h1>
    <div class="row d-btns"><button class="btn light" data-go="kanji">${t('startP')} →</button><a class="btn glass" href="#mock">${t('navMock')}</a></div></div>
    <div class="d-r">${ring(tcount,S.goal,t('today'))}<label class="d-goal">${t('goalL')} <select id="goalSel" class="glass">${[...new Set([10,20,30,50,100,+S.goal])].sort((a,b)=>a-b).map(g=>`<option ${g==S.goal?'selected':''}>${g}</option>`).join('')}</select></label></div></div>
-   <div class="d-stats"><div><b>${done}</b><span>${t('stDone')}</span></div><div><b>${done?Math.round(ok/done*100):0}%</b><span>${t('stAcc')}</span></div><div><b>${streak()}🔥</b><span>${t('stStreak')}</span></div><a href="#review"><b>${weak}</b><span>${t('stWeak')}</span></a></div></section>${planCard(done)}${/^n[1-5]$/.test(exam())?'<section class="card lbcard" id="lbHome"></section>':''}
+   <div class="d-stats"><div><b>${done}</b><span>${t('stDone')}</span></div><div><b>${done?Math.round(ok/done*100):0}%</b><span>${t('stAcc')}</span></div><div><b>${streak()}🔥</b><span>${t('stStreak')}</span></div><a href="#review"><b>${weak}</b><span>${t('stWeak')}</span></a></div></section>${planCard(done)}${/^n[1-5]$/.test(exam())?'<section class="card lbcard" id="lbHome"></section>':''}<section class="card instcard" id="instHome"></section>
   <h2 class="hsech"><i>試</i>${ut('setsH')}<small>${D.total||D.q.length} 問</small></h2>
   <div class="setgrid">${[['kanji','漢','STEP 1',t('kanji'),k],['mean','語','STEP 2',t('mean'),m],...[['gram','文',GRAM_T],['read','読',READ_T],['listen','聴',LISTEN_T]].map(([kk,g,T],x)=>[kk,g,'STEP '+(x+3),t(kk),secStats(T)])].filter(r=>r[4].total).map(([kk,g,st,ti,s])=>`<button class="card setc" data-go="${kk}"><span class="sg">${g}</span><small>${st}</small><b>${ti}</b><span class="sn">${s.total} 問</span><span class="sbar"><i style="width:${pct(s)}%"></i></span><span class="sp">${s.done}/${s.total} · ${pct(s)}%</span></button>`).join('')}</div>
   ${['n3','n4','n5'].includes(exam())?hwHome()+booksHome():''}
@@ -1204,7 +1216,7 @@ function renderHome(){
   $$('[data-type-go]').forEach(b=>b.onclick=()=>{const ty=b.dataset.typeGo;Object.assign(Q.sel,{sec:secOf(ty),set:'all',type:ty,order:'shuffle'});Q.auto=true;location.hash='#quiz'});
   $$('[data-cert]').forEach(b=>b.onclick=()=>{const st=secStats(b.dataset.cert==='kanji'?KANJI_T:MEAN_T);openCert(b.dataset.cert==='kanji'?'JLPT '+exam().toUpperCase()+' 漢字 Kanji Section':'JLPT '+exam().toUpperCase()+' 語彙 Vocabulary Section','Accuracy '+Math.round(st.ok/st.total*100)+'%')});
   $('#goalSel').onchange=e=>{S.goal=+e.target.value;saveS();renderHome()};
-  lbFill();
+  lbFill();instFill();
   {const g=$('#pcGoal');if(g)g.onclick=()=>{S.goal=+g.dataset.g;saveS();renderHome()};const pd=$('#pcDate');if(pd)pd.onchange=()=>{LS.set('examdate',pd.value===ymd(jlptNext())?'':pd.value);renderHome()}}
   $$('[data-bsec]').forEach(b=>b.onclick=()=>{BS.sec=b.dataset.bsec});
   $$('[data-hsec]').forEach(b=>b.onclick=()=>{US.sec=b.dataset.hsec;US.inPage=false});
