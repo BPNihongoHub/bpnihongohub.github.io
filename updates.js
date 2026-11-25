@@ -19,7 +19,7 @@ const BOARD=[['JLPT','JLPT'],['JFT-Basic','JFT-Basic'],['BJT','BJT'],['介護福
 function board(d){const ev=(d.ev||[]).filter(e=>e.kind==='apply').map(e=>({...e,a:dleft(e.date),b:dleft(e.end||e.date)}));
   return BOARD.map(([k,n])=>{const ap=ev.filter(e=>e.cat===k);let st='r',tx='Closed',f=null,u=null;
     const op=ap.find(e=>e.a<=0&&e.b>=0),so=ap.filter(e=>e.a>0&&e.a<=30).sort((x,y)=>x.a-y.a)[0],any=(d.open||[]).find(e=>e.cat===k);
-    if(op){st='g';tx='Open · until '+fd(op.end||op.date);f=op.f;u=op.u}else if(any){st='g';tx='Book any time';u=any.u}else if(so){st='y';tx='Opens in '+so.a+' days';u=so.u}
+    if(op){st='g';tx='Open now · '+op.b+' days left';f=op.f;u=op.u}else if(any){st='g';tx='Open now';u=any.u}else if(so){st='y';tx='Opens in '+so.a+' days';u=so.u}
     return {n,st,tx,f,u}})}
 function boardHtml(d){return `<section class="card up-bd">${board(d).map(x=>`<a class="up-bi" href="${esc(x.f||x.u||'#updates')}" ${x.f||x.u?'target="_blank" rel="noopener"':''}><span class="up-sig ${x.st}"></span><b>${esc(x.n)}</b><small>${esc(x.tx)}</small></a>`).join('')}
   <p class="muted" style="font-size:11px;margin:8px 0 0">🟢 form open now · 🟡 opens soon · 🔴 closed</p></section>`}
@@ -84,11 +84,11 @@ window.renderUpdates=async function(){
   shell('updates','<section class="up-h"><small>⋮ UPDATES</small><h1>Exams · News · Safety</h1><p>Loading…</p></section>');
   const [d,N]=await Promise.all([data(),news()]),S=soon(d.ev||[]);
   const ev=S.map(e=>{const [ic,kn]=KN[e.kind]||KN.test,open=e.a<=0,closed=e.b<0,ap=e.kind==='apply';
-    const st=ap?(closed?'<span class="up-st cl">🔴 Closed</span>':open?`<span class="up-st op">🟢 Open now · until ${fd(e.end||e.date)}</span>`:`<span class="up-st so">🟡 Opens in ${e.a} days</span>`):'';
+    const st=ap?(closed?'<span class="up-st cl">🔴 Closed</span>':open?`<span class="up-st op">🟢 Open now · ${e.b} days left (until ${fd(e.end||e.date)})</span>`:`<span class="up-st so">🟡 Opens in ${e.a} days</span>`):'';
     return `<section class="card up-ev" ${closed?'style="opacity:.65"':''}><div class="up-dl ${open&&!closed&&!ap?'now':''}" ${ap?`style="background:${closed?'#fdeaea;color:#c0001a':open?'#e6f7ee;color:#0a7a3e':'#fff3d6;color:#7a5200'}"`:''}>${ap?`<span class="up-sig big ${closed?'r':open?'g':'y'}"></span>`:''}${closed?'<small>closed</small>':open?(e.end?`<small>open</small><b>${e.b}</b><small>days left</small>`:'<b>今日</b><small>Today</small>'):`<b>${e.a}</b><small>${ap?'days to open':'days left'}</small>`}</div>
     <div><span class="up-tag">${esc(e.cat)}</span><span class="up-tag" style="background:#fff0f2;color:#e5193f">${ic} ${kn}</span><h3>${esc(e.t)}</h3>${st}<p>${esc(e.s)}</p>
     <p class="muted" style="font-size:12px">📅 ${fd(e.date)}${e.end?' – '+fd(e.end):''}</p>${ap&&e.f&&!closed?`<a class="btn grad up-ap" href="${esc(e.f)}" target="_blank" rel="noopener">📝 ${open?'Apply now':'Application form'} ↗</a><br>`:''}<a class="up-lk" href="${esc(e.u)}" target="_blank" rel="noopener">Official page (${esc(e.src||'')}) ↗</a></div></section>`}).join('');
-  const op=(d.open||[]).map(e=>`<section class="card up-ev"><div class="up-dl" style="background:#e6f7ee;color:#0a7a3e"><span class="up-sig g big"></span><small>Open<br>any time</small></div><div><span class="up-tag">${esc(e.cat)}</span><h3>${esc(e.t)}</h3><p>${esc(e.s)}</p><a class="up-lk" href="${esc(e.u)}" target="_blank" rel="noopener">Official page ↗</a></div></section>`).join('');
+  const op=(d.open||[]).map(e=>`<section class="card up-ev"><div class="up-dl" style="background:#e6f7ee;color:#0a7a3e"><span class="up-sig g big"></span><small><b style="font-size:13px">Open now</b></small></div><div><span class="up-tag">${esc(e.cat)}</span><h3>${esc(e.t)}</h3><p>${esc(e.s)}</p><a class="up-lk" href="${esc(e.u)}" target="_blank" rel="noopener">Official page ↗</a></div></section>`).join('');
   const nw=(d.news||[]).map(e=>`<section class="card up-ev"><div class="up-dl" style="background:#e8edff;color:#2443e8"><small>${dleft(e.date)>0?'starts in':'since'}</small><b>${Math.abs(dleft(e.date))}</b><small>days</small></div><div><span class="up-tag" style="background:#fff0f2;color:#e5193f">${esc(e.lv)}</span><h3>${esc(e.t)}</h3><p>${esc(e.s)}</p><p class="muted" style="font-size:12px">📅 ${fd(e.date)}</p><a class="up-lk" href="${esc(e.u)}" target="_blank" rel="noopener">Full information (official) ↗</a></div></section>`).join('');
   shell('updates',`<section class="up-h"><small>⋮ UPDATES</small><h1>Exams · News · Safety</h1><p>Exam days, applications and results in the next 30 days, Japan news, and live earthquake / tsunami info. Always check the official page.</p></section>
   <h2 class="up-sec">🚦 Application forms</h2>${boardHtml(d)}
@@ -99,7 +99,7 @@ window.renderUpdates=async function(){
   <h2 class="up-sec">🗞 This week in Japan</h2><p class="muted" style="font-size:12px;margin:-4px 0 8px">Easy Japanese summaries of national news from Japanese TV and newspapers. Updated at 9 AM and 9 PM. Tap "Nepali · English" for the translation. Each news goes away after 7 days.</p>${newsHtml(N)}
   <h2 class="up-sec">📰 Rules & immigration</h2>${nw||'<section class="card"><p class="muted" style="margin:0">No news now.</p></section>'}
   <p style="margin:4px 0 0"><a class="up-lk" href="https://www.moj.go.jp/isa/publications/newslist/" target="_blank" rel="noopener">Immigration Services Agency news ↗</a></p>
-  <h2 class="up-sec">🗓 Tests you can book any time</h2>${op}
+  <h2 class="up-sec">🟢 Tests open now</h2>${op}
   <p class="muted" style="font-size:12px;margin:14px 0">Last checked: ${esc(d.checked||'')}. Dates can change, so please confirm on the official page.</p>`);
   quakes()};
 })();
