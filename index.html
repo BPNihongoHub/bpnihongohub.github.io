@@ -661,6 +661,7 @@ details.codebox{margin-top:10px}details.codebox summary{cursor:pointer;color:var
 .stbar{display:flex;align-items:center;gap:8px;max-width:1100px;margin:8px auto 0;padding:9px 14px;border-radius:12px;background:linear-gradient(90deg,#2443e8,#0a1440);color:#fff;font-size:.9rem;font-weight:600}.stbar.warn{background:linear-gradient(90deg,#e5193f,#a10f2c)}.stbar a{color:#fff;flex:1;text-decoration:none}.stbar button{background:none;border:0;color:#fff;font-size:1rem;cursor:pointer;opacity:.8}@media(max-width:1132px){.stbar{margin:8px 16px 0}}
 .plancard{display:flex;gap:16px;align-items:center;margin:14px 0;flex-wrap:wrap}.pc-l{text-align:center;min-width:92px}.pc-l span{font-size:.75rem;opacity:.75;display:block}.pc-big{font-size:2.4rem;font-weight:800;line-height:1;color:var(--shu,#e5193f)}.pc-big small{font-size:.8rem;margin-left:3px}.pc-r{flex:1;min-width:220px}.pc-r p{margin:6px 0 10px}.pc-date{font-size:.85rem;display:flex;gap:6px;align-items:center}.pc-date input{padding:6px;border-radius:8px;border:1px solid var(--line,#ccc);background:transparent;color:inherit}
 .repbtn{margin-top:10px;background:none;border:1px dashed var(--line,#999);color:inherit;opacity:.7;border-radius:8px;padding:4px 10px;font-size:.78rem;cursor:pointer}.repbtn:hover{opacity:1}.repbox{display:flex;flex-direction:column;gap:8px;margin-top:8px}.repbox textarea{width:100%;box-sizing:border-box;border-radius:10px;padding:8px;border:1px solid var(--line,#ccc);background:transparent;color:inherit;font:inherit}
+.tday{margin:0 0 12px}.tday ul{margin:8px 0 0;padding-left:4px;list-style:none;display:grid;gap:6px;font-size:.92rem}
 </style>
 <div id="app"><div class="loginwrap"><div class="aur a1"></div><div class="aur a2"></div></div></div>
 <div id="toast" class="toast" hidden></div>
@@ -1905,6 +1906,16 @@ async function renderTeacher(){
     return `<section class="card money"><div class="mtop"><div><small>💰 Total received · 合計</small><b>${yen(sum(ok))}</b><span>${ok.length} approved payment(s)</span></div><div><small>📅 This month (${mo})</small><b>${yen(sum(tm))}</b><span>${tm.length} payment(s)</span></div><div><small>⏳ Waiting to check</small><b>${PY.length}</b><span>🎁 On free trial: ${tr}</span></div></div>
     <div class="mgrid">${['n5','n4','n3','n2','n1'].map(c=>{const a=ok.filter(p=>(p.course||'n3')===c);return `<div class="mc"><b>${PAYC(c)}</b><i>${yen(sum(a))}</i><span>${a.length} student(s)</span></div>`}).join('')}</div></section>`})()}
   ${hk?'':`<section class="card accbox"><b>🔑 ${at('keyT')} · ${PAYC(tc)}</b><p class="muted" style="margin:0">${at('keyS')}</p><form id="kF" class="erow"><input id="kC" placeholder="XXXX-XXXXXXXX" autocomplete="off" style="flex:2"><button class="btn grad">${at('save')}</button></form></section>`}
+  ${(()=>{const d0=new Date();d0.setHours(0,0,0,0);const T0=d0.getTime(),W0=T0-6*864e5,ms=v=>tms(v)||+v||0;
+    const nT=U.filter(u=>ms(u.created)>=T0).length,nW=U.filter(u=>ms(u.created)>=W0).length,aT=U.filter(u=>ms(u.last)>=T0).length,tr=U.filter(u=>!isPaidP(u,tc)&&isTrialP(u)).length;
+    const soon=U.filter(u=>isPaidP(u,tc)&&untilOf(u,tc)-Date.now()<14*864e5),pT=PH.filter(x=>ms(x.created)>=T0),pW=PH.filter(x=>x.status==='approved'&&ms(x.decided||x.created)>=W0);
+    const rp=RP?RP.filter(r=>r.status!=='fixed').length:0,hw=HW?HW.filter(h=>h.status!=='checked').length:0;
+    return `<section class="card tday"><b>📊 Today · 今日 (${fdate(Date.now())})</b><ul>
+     <li>👤 New accounts: <b>${nT}</b> today · <b>${nW}</b> this week · 🎁 in free trial now: <b>${tr}</b></li>
+     <li>🔥 Students active today: <b>${aT}</b></li>
+     <li>💴 Payments sent today: <b>${pT.length}</b> · ⏳ waiting for you: <b>${PY.length}</b> · approved this week: <b>${pW.length}</b> (${PAY.cur}${pW.reduce((s,x)=>s+(+x.amount||0),0).toLocaleString('en')})</li>
+     <li>⌛ ${PAYC(tc)} ends within 14 days: <b>${soon.length}</b>${soon.length?' — '+soon.slice(0,8).map(u=>esc(u.name||u.email||'')+' ('+fdate(untilOf(u,tc))+')').join(', '):''}</li>
+     <li>⚑ Mistake reports to check: <b>${rp}</b> · 宿 homework to check: <b>${hw}</b></li></ul></section>`})()}
   <section class="tstats">${[[at('total'),U.length],[at('active'),act],[at('inactive'),U.length-act],[at('paidN'),paid],[at('pendN'),PY.length],[at('avg'),avg+(RV.length?' ★':'')]].map(([l,v])=>`<div class="card ts"><b>${v}</b><span>${l}</span></div>`).join('')}</section>
   <h2 class="hsech"><i>¥</i>${at('pays')} (${PY.length})</h2>
   ${PY.length?PY.map(p=>`<div class="card tpay"><div><b>${esc(p.name||p.email||'')}</b><small><b>${PAYC(p.course||'n3')}</b> · ${esc(p.email||'')} · ${esc(p.method||'')} · ${PAY.cur}${esc(p.amount||'')}</small>${p.txn?`<small>ID: ${esc(p.txn)}</small>`:''}${p.note?`<small>${esc(p.note)}</small>`:''}<small>${fdate(p.created)}</small></div>
