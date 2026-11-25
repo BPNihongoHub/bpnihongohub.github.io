@@ -963,7 +963,7 @@ async function ensureData(){const ex=dxOf();if(DX===ex)return;
   DC[DX]={D,KEYS,UNL,LX};let c=DC[ex];
   let fresh=false;if(!c){const [d,k]=await Promise.all([fetch(ex==='n3'?'data.json':'data-'+ex+'.json').then(r=>r.json()),fetch(ex==='n3'?'keys.json':'keys-'+ex+'.json',{cache:'no-store'}).then(r=>r.json()).catch(()=>null)]);c={D:d,KEYS:k,UNL:ex==='n3'&&(d.sets||[]).every(n=>(d.free||[]).includes(n)),LX:{}};DC[ex]=c;fresh=true}
   D=c.D;KEYS=c.KEYS;UNL=c.UNL;LX=c.LX;DX=ex;window.MK=MKC[ex]||null;UD=null;for(const k in EX)delete EX[k];
-  if(fresh&&!UNL){const cc=LS.get(codeKey(ex),'');if(cc)unlock(cc,true);else if(BE.user&&isPaidP(BE.prof,ex))beKey()}
+  if(fresh&&!UNL){const cc=LS.get(codeKey(ex),'');if(cc)unlock(cc,true);else if(BE.user&&(BE.admin||isPaidP(BE.prof,ex)))beKey()}
   const T=ex==='n5'?N5T:ex==='n4'?N4T:N3T;if(!N3T.MOJ){N3T.MOJ=MOJ;N3T.PTS=PTS;N3T.PART=PART}MOJ=T.MOJ||N3T.MOJ;PTS=T.PTS||N3T.PTS;PART=T.PART||N3T.PART;
   P.res=LS.get('res',{});SR.c=LS.get('srs',{})}
 async function boot(){
@@ -1556,7 +1556,7 @@ async function beInit(){
   if(!BE.ok){BE.ready=true;return}
   BE.api.onAuth(async u=>{BE.user=u;BE.prof=null;BE.admin=false;
     if(u){BE.err='';try{BE.prof=await BE.api.touch(u)}catch(e){BE.err='profile: '+((e&&(e.code||e.message))||e)}try{BE.admin=await BE.api.isAdmin()}catch(e){}
-      if(isPaidP(BE.prof,DX))beKey()}
+      if(BE.admin||isPaidP(BE.prof,DX))beKey()}
     BE.ready=true;render()});
 }
 async function beKey(){/* paid account: fetch the course unlock code (readable only by paid users) and open locked sets */
