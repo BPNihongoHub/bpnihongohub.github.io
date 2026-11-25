@@ -1147,7 +1147,7 @@ function renderLogin(){
     if(LOGIN.users.some(u=>u.h===h)){LS.set('auth',h);location.hash='#home';render()}else{$('#lerr').textContent=t('loginErr')}};
 }
 
-const PRICES=[['N5',2000],['N4',2000],['N3',2000]];
+const PRICES=[['N5',2000],['N4',2000],['N3',2000],['N2',3000],['N1',3000]];
 const SHOWPRICE=false;
 const priceBox=()=>!SHOWPRICE?'':`<div class="pricebox"><div class="eyebrow">${t('priceT')}</div><div class="prow">${PRICES.map(([k,y])=>`<div class="pr ${k.toLowerCase()===exam()?'sel':''}"><b>JLPT ${k}</b><span>¥${y.toLocaleString('en')}</span></div>`).join('')}</div><p class="muted">${t('priceNote')}</p></div>`;
 function renderUnlock(){
