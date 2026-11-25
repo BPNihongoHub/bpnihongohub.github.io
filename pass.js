@@ -78,6 +78,20 @@ const CSS=`
 .ps-pr{padding-left:22px;margin:0 0 12px}.ps-pr li{padding:10px 8px;border-bottom:1px solid var(--line);border-radius:8px}.ps-pr li.ok{background:var(--ok-soft)}.ps-pr li.ng{background:var(--shu-soft)}
 .ps-pr .q{font:500 17px/2.1 var(--f-jp)}.ps-pr .m{font-size:13px;color:var(--muted)}.ps-pr .a{font-size:14px;margin-top:3px}.ps-pr .a b{font-family:var(--f-jp);color:var(--ai)}
 .ps-in{font:600 16px var(--f-jp);width:8.5em;max-width:60vw;border:0;border-bottom:2px solid var(--ai);background:var(--ai-soft);color:var(--ink);padding:3px 6px;border-radius:6px 6px 0 0;margin:0 3px}
+.kc{margin-top:6px;border:3px solid #4471c4;border-radius:14px;overflow:hidden;background:#fff;color:#111}
+.kc-top{display:flex;justify-content:space-between;align-items:center;padding:10px 12px 0}.kc-st{font-size:12.5px;color:#556}
+.kc-lv{display:inline-block;background:#4471c4;color:#fff;font:800 14px/1 var(--f-ui,sans-serif);padding:6px 10px;border-radius:6px;font-style:normal}
+.kc-lv.kc-n4{background:#0c9a60}.kc-lv.kc-n3{background:#d98a00}.kc-lv.kc-n2{background:#c2185b}.kc-lv.kc-n1{background:#5e35b1}
+.kc-w .kc-lv{font-size:10.5px;padding:3px 5px;margin-left:6px;vertical-align:2px}
+.kc-main{display:flex;justify-content:center;align-items:center;gap:18px;padding:8px 10px 12px}.kc-big{font:700 104px/1 var(--f-jp)}.kc .ps-svg{width:120px;height:120px}
+.kc-mean{background:#4471c4;color:#fff;text-align:center;padding:10px 12px}.kc-mean .ne{font-size:21px;font-weight:800}.kc-mean .en{font-size:15.5px;opacity:.95;margin-top:2px}
+.kc-rds{display:grid;grid-template-columns:1fr 1fr}.kc-rd{padding:12px 8px;text-align:center}.kc-rd+.kc-rd{border-left:3px dashed #4471c4}
+.kc-rd .h{display:inline-block;background:#e4e6ea;border:1.5px solid #888;font-weight:800;font-style:italic;padding:4px 12px;margin-bottom:6px;font-size:14px}
+.kc-rd .r{font:500 17px/1.5 var(--f-jp)}.kc-rd .r span{display:block;font:400 13px var(--f-ui,sans-serif);color:#555}
+.kc-wh{background:#7a8f9c;color:#fff;text-align:center;font-weight:800;padding:8px}
+.kc-ws{display:grid;grid-template-columns:1fr 1fr;gap:0}.kc-w{padding:8px 10px;border-bottom:1px solid #e3e6ee}.kc-w:nth-child(odd){border-right:2px dashed #4471c4}
+.kc-w .j{font:500 15px/1.5 var(--f-jp)}.kc-w .j b{font-size:17px}.kc-w .m{font-size:13px;color:#333}.kc-w .m span{color:#667}
+@media(max-width:420px){.kc-ws{grid-template-columns:1fr}.kc-w:nth-child(odd){border-right:0}.kc-big{font-size:88px}}
 .ps-credit{font-size:11.5px;color:var(--muted);margin:18px 0 0;line-height:1.5}
 `;
 function css(){if(!document.getElementById('psCss')){const s=document.createElement('style');s.id='psCss';s.textContent=CSS;document.head.appendChild(s)}}
@@ -184,13 +198,25 @@ function animate(svg){
   svg.getBoundingClientRect();
   ps.forEach((p,i)=>{const L=+p.style.strokeDasharray.split(',')[0]||400;const dur=Math.max(.25,L/120);setTimeout(()=>{p.style.transition=`stroke-dashoffset ${dur}s linear`;p.style.strokeDashoffset=0},t*1000);t+=dur+.12});
 }
+let KW=null;async function kwords(){if(!KW)KW=await fetch('pass/kw.json').then(r=>r.json()).catch(()=>({}));return KW}
+const RM=(()=>{const m={};const base='あa い i う u え e お o か ka き ki く ku け ke こ ko さ sa し shi す su せ se そ so た ta ち chi つ tsu て te と to な na に ni ぬ nu ね ne の no は ha ひ hi ふ fu へ he ほ ho ま ma み mi む mu め me も mo や ya ゆ yu よ yo ら ra り ri る ru れ re ろ ro わ wa を o ん n が ga ぎ gi ぐ gu げ ge ご go ざ za じ ji ず zu ぜ ze ぞ zo だ da ぢ ji づ zu で de ど do ば ba び bi ぶ bu べ be ぼ bo ぱ pa ぴ pi ぷ pu ぺ pe ぽ po ぁ a ぃ i ぅ u ぇ e ぉ o'.replace('あa','あ a').split(' ');for(let i=0;i<base.length;i+=2)m[base[i]]=base[i+1];
+ return t=>{t=String(t||'').replace(/[ァ-ヶ]/g,c=>String.fromCharCode(c.charCodeAt(0)-96));let o='';for(let i=0;i<t.length;i++){const c=t[i],n=t[i+1];
+  if('ゃゅょ'.includes(n)&&m[c]){const v={'ゃ':'a','ゅ':'u','ょ':'o'}[n];let r=m[c];r=/^(shi|chi|ji)$/.test(r)?r.slice(0,-1)+v:r.slice(0,-1)+'y'+v;o+=r;i++;continue}
+  if(c==='っ'){const r=n&&m[n];o+=r?r[0]:'';continue}if(c==='ー'){o+=o.slice(-1);continue}o+=m[c]!=null?m[c]:c}return o}})();
 async function showKanji(ch,lv){
-  const b=await kanjiBlock(ch,lv);if(!b){modal(`<p>${E(ch)}: जानकारी छैन।</p>`);return}
-  const {x,P}=b;
-  const m=modal(`<div class="ps-kj">${svgOf(P)}<div><div style="font:700 64px/1 var(--f-jp)">${E(x[0])}</div><div class="ps-note">${b.lv.toUpperCase()} · ${P.length} रेखा (画数)</div></div></div>
-  <div class="ps-ne">${E(x[4])}</div>
-  <div class="ps-kv"><div><b>音読み (on)</b> ${E(x[1]||'—')}</div><div><b>訓読み (kun)</b> ${E(RD(x[2])||'—')}</div><div><b>English</b> ${E(x[3])}</div></div>
-  <p class="ps-note">लेख्ने तरिका: माथिको बाकसमा रेखा एक-एक गरी क्रमैसँग कोरिन्छ (माथिबाट तल, बायाँबाट दायाँ)। <button class="btn ghost" id="psRe" style="padding:6px 12px">▶ फेरि हेर्नुहोस्</button></p>`);
+  const [b,W]=await Promise.all([kanjiBlock(ch,lv),kwords()]);if(!b){modal(`<p>${E(ch)}: जानकारी छैन।</p>`);return}
+  const {x,P}=b;const L=b.lv.toUpperCase();
+  const KT=t=>t.replace(/[ぁ-ゖ]/g,c=>String.fromCharCode(c.charCodeAt(0)+96));const on=KT(String(x[1]||'')).split(/[、,\s]+/).filter(Boolean),kun=String(x[2]||'').split(/[、,\s]+/).filter(Boolean);
+  const rcol=(t,a)=>`<div class="kc-rd"><div class="h">${t}</div>${a.length?a.map(r=>`<div class="r"><b>${E(RD(r).replace(/-/g,"〜"))}</b><span>${E(RM(r.replace(/[.\-]/g,'')))}</span></div>`).join(''):'<div class="r">—</div>'}</div>`;
+  const ws=(W[ch]||[]);
+  const m=modal(`<div class="kc">
+   <div class="kc-top"><span class="kc-lv kc-${b.lv}">JLPT ${L}</span><span class="kc-st">${P.length} strokes · ${P.length} रेखा</span></div>
+   <div class="kc-main"><div class="kc-big">${E(x[0])}</div>${svgOf(P)}</div>
+   <div class="kc-mean"><div class="ne">${E(x[4])}</div><div class="en">${E(String(x[3]||'').toLowerCase())}</div></div>
+   <div class="kc-rds">${rcol('音読み Onyomi',on)}${rcol('訓読み Kunyomi',kun)}</div>
+   <p class="ps-note" style="text-align:center;margin:8px 0">लेख्ने तरिका (stroke order): रेखा क्रमैसँग कोरिन्छ। <button class="btn ghost" id="psRe" style="padding:5px 12px">▶ फेरि</button></p>
+   ${ws.length?`<div class="kc-wh">यो कान्जीबाट बन्ने शब्द · Common words</div><div class="kc-ws">${ws.map(w=>`<div class="kc-w"><div class="j"><b>${E(w[0])}</b>【${E(w[1])}】<i class="kc-lv kc-n${w[4]}">N${w[4]}</i></div><div class="m">${E(w[3])} · <span>${E(w[2])}</span></div></div>`).join('')}</div>`:''}
+  </div>`);
   const svg=m.querySelector('svg');animate(svg);m.querySelector('#psRe').onclick=()=>animate(svg);
 }
 async function info(kind,lv,i){
