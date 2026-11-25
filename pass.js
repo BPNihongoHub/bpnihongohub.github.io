@@ -79,6 +79,13 @@ const CSS=`
 .ps-ftbl .r{border:1.5px solid var(--line);border-radius:12px;overflow:hidden;margin:0 0 8px}.ps-ftbl .l{background:#3a3d55;color:#fff;padding:7px 10px;font-weight:700;font-size:14px}.ps-ftbl .c{padding:8px 10px;font:500 17px/2 var(--f-jp)}
 .ps-pr{padding-left:22px;margin:0 0 12px}.ps-pr li{padding:10px 8px;border-bottom:1px solid var(--line);border-radius:8px}.ps-pr li.ok{background:var(--ok-soft)}.ps-pr li.ng{background:var(--shu-soft)}
 .ps-pr .q{font:500 17px/2.1 var(--f-jp)}.ps-pr .m{font-size:13px;color:var(--muted)}.ps-pr .a{font-size:14px;margin-top:3px}.ps-pr .a b{font-family:var(--f-jp);color:var(--ai)}
+.ps-ops{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 4px}.ps-ops button{display:flex;gap:8px;align-items:center;text-align:left;font:600 15.5px var(--f-jp);padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}.ps-ops button i{font:800 12px var(--f-ui,sans-serif);font-style:normal;background:var(--ai-soft);color:var(--ai);border-radius:50%;width:22px;height:22px;display:grid;place-items:center;flex:none}.ps-ops button.sel{border-color:var(--ai);background:var(--ai-soft)}.ps-ops button.right{border-color:var(--ok);background:var(--ok-soft)}.ps-ops button.wrong{border-color:var(--shu);background:var(--shu-soft)}
+.ps-bl{color:var(--ai);font-weight:700}.ps-why{margin-top:6px;font-size:14px;line-height:1.6}.ps-why p{margin:4px 0}
+.ps-lg{display:inline-block;font:800 10.5px sans-serif;letter-spacing:.5px;background:var(--ai);color:#fff;border-radius:6px;padding:1px 6px;vertical-align:2px}.ps-lg.ne{background:var(--shu)}
+.ps-nebox{border:1px dashed var(--shu);border-radius:14px;padding:10px 12px;margin:0 0 14px;background:var(--shu-soft)}.ps-nebox .lb{font-size:12px;font-weight:800;color:var(--shu);margin-bottom:2px}
+.ps-hw{display:grid;gap:10px}.ps-hw label{display:grid;gap:4px;font-weight:700;font-size:13px}.ps-hw textarea{font:500 16px/1.6 var(--f-jp);border:2px solid var(--line);border-radius:12px;padding:8px 10px;background:var(--paper);color:var(--ink);resize:vertical;width:100%;box-sizing:border-box}.ps-hw textarea:focus{border-color:var(--ai);outline:0}
+.ps-hwi .hd{display:flex;justify-content:space-between;gap:8px;align-items:center}.ps-hwi .hd b{font-family:var(--f-jp)}.ps-hwi .st{font-size:12px;font-weight:800;padding:3px 8px;border-radius:99px;background:var(--gold-soft,#fff3c4);color:#7a5a00}.ps-hwi .st.ok{background:var(--ok-soft);color:var(--ok)}.ps-hwi ol{font:500 16px/1.8 var(--f-jp);margin:8px 0}.ps-hwi .cm{background:var(--ai-soft);border-radius:10px;padding:8px 10px;margin:6px 0}
+@media(max-width:480px){.ps-ops{grid-template-columns:1fr}}
 .ps-in{font:600 16px var(--f-jp);width:8.5em;max-width:60vw;border:0;border-bottom:2px solid var(--ai);background:var(--ai-soft);color:var(--ink);padding:3px 6px;border-radius:6px 6px 0 0;margin:0 3px}
 .kc{margin-top:6px;border:3px solid #4471c4;border-radius:14px;overflow:hidden;background:#fff;color:#111}
 .kc-top{display:flex;justify-content:space-between;align-items:center;padding:10px 12px 0}.kc-st{font-size:12.5px;color:#556}
@@ -101,7 +108,7 @@ const RD=s=>String(s||'').replace(/([^\s.]+)\.([^\s]+)/g,'$1($2)');
 const E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const LVINFO={n1:['900','2,000','10,000'],n2:['600','1,000','6,000'],n3:['450','700','3,500'],n4:['300','300','1,500'],n5:['150','100','800']};
 
-function head(){return `<section class="ps-hero"><h1>You want to pass? Try it 🎯</h1><p>How many kanji, words and grammar points do you know? Tick ✓ the ones you know and press <b>Check!</b> Tap a word to see its meaning and stroke order.</p></section>`}
+function head(){return `<section class="ps-hero"><h1>You want to pass? Try it 🎯</h1><p>How many kanji, words and grammar points do you know? Tick ✓ the ones you know and press <b>Check!</b> Tap a word to see its meaning and stroke order.</p><p><a href="#pass/hw" style="color:inherit;font-weight:800">📒 My homework →</a></p></section>`}
 function tabs(){
   return `<div class="ps-row">${LV.map(l=>`<button data-lv="${l}" class="${PS.lv===l?'on':''}">${l.toUpperCase()}</button>`).join('')}</div>
   <div class="ps-row">${Object.keys(KIND).map(k=>`<button data-kind="${k}" class="${PS.kind===k?'on':''}">${KIND[k][0]} · ${KIND[k][1]}</button>`).join('')}<button data-kind="r" class="${PS.kind==='r'?'on':''}">📊 結果 Result</button></div>`;
@@ -113,6 +120,7 @@ window.renderPass=async function(){
   css();
   const parts=(location.hash.slice(1)).split('/');
   if(parts[1]==='g'&&parts[2]&&parts[3]!=null)return grammarPage(parts[2],+parts[3]);
+  if(parts[1]==='hw')return hwPage();
   shell('pass',head()+tabs()+'<div id="psBody"><div class="bp-inl"><span class="bp-spin"></span>Loading… please wait</div></div>');
   bindTabs();
   if(PS.kind==='r')return results();
@@ -235,37 +243,86 @@ async function info(kind,lv,i){
 const GD={};
 async function gdata(lv){if(!(lv in GD))GD[lv]=await fetch('pass/gd-'+lv+'.json').then(r=>r.ok?r.json():{}).catch(()=>({}));return GD[lv]}
 function nrm(t){return String(t||'').replace(/[\s　。、,，．.！!？?「」]/g,'').replace(/[ァ-ヶ]/g,c=>String.fromCharCode(c.charCodeAt(0)-96)).replace(/[xX✕✖]/g,'×').replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-65248))}
+function rng(seed){let a=seed>>>0;return()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296}}
+function shuf(a,r){a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.floor(r()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
+const POOL={};
+function pool(lv,G){if(POOL[lv])return POOL[lv];const P=[];Object.keys(G).forEach(j=>(G[j].p||[]).forEach(q=>{const t=[].concat(q[1])[0];if(t)P.push({t:String(t),j:+j})}));return POOL[lv]=P}
+/* 4 options: the answer + 3 wrong answers taken from nearby grammar points of the same level */
+function opts(lv,G,i,k,q){
+  const ans=String([].concat(q[1])[0]),ok=new Set(q[2].concat(q[1]).map(nrm)),sep=/[、,]/.test(ans),seen=new Set([nrm(ans)]);
+  const c=pool(lv,G).filter(o=>{const n=nrm(o.t);if(!n||ok.has(n)||seen.has(n)||/[、,]/.test(o.t)!==sep)return false;seen.add(n);return true})
+    .map(o=>Object.assign({s:Math.abs(o.j-i)+3*Math.abs(o.t.length-ans.length)},o)).sort((a,b)=>a.s-b.s).slice(0,9);
+  const r=rng(i*31+k*7+lv.charCodeAt(1));
+  if(sep&&c.length<3){/* answers like 「から、まで」: build wrong pairs from common particles */
+    const n=ans.split(/[、,]/).length,PT=['は','が','を','に','で','へ','と','も','の','から','まで','や','より'];
+    for(let z=0;z<40&&c.length<6;z++){const t=Array.from({length:n},()=>PT[Math.floor(r()*PT.length)]).join('、'),m=nrm(t);if(!ok.has(m)&&!seen.has(m)){seen.add(m);c.push({t,j:-1})}}}
+  return shuf([{t:ans,j:i,ok:1}].concat(shuf(c,r).slice(0,3)),r);
+}
 async function grammarPage(lv,i){
   shell('pass','<div id="psBody"><div class="bp-inl"><span class="bp-spin"></span>Loading… please wait</div></div>');
   const [d,G]=await Promise.all([load(lv).catch(()=>null),gdata(lv)]);const x=d&&d.g[i];
   if(!x){$('#psBody').innerHTML='<p>Not found.</p>';return}
   const S=getSet(lv,'g'),g=G[i];
   const nav=`<div style="display:flex;gap:8px;justify-content:space-between;margin:12px 0">${i>0?`<a class="btn ghost" href="#pass/g/${lv}/${i-1}">← Previous</a>`:'<span></span>'}${i<d.g.length-1?`<a class="btn" href="#pass/g/${lv}/${i+1}">Next →</a>`:''}</div>`;
-  let body;
+  const tl=j=>G[j]&&G[j].u&&G[j].u[0]?G[j].u[0][0]:'';
+  let body,OP=[];
+  const hw=`<div class="card ps-res"><h2 class="ps-h">④ Homework <small>宿題</small></h2>
+    ${g&&g.h.length?g.h.map(h=>`<div class="ps-ex"><div class="jp">${h[0]}</div><div class="nep">${E(h[1])}</div></div>`).join(''):`<p class="ps-note">Make 3 sentences of your own with <b style="font-family:var(--f-jp)">${E(x[0])}</b>.</p>`}
+    <p class="ps-note">Write 3 sentences with this grammar and press <b>Send</b>. Your teacher will check them. · यो व्याकरण प्रयोग गरेर ३ वटा वाक्य लेख्नुहोस् र <b>Send</b> थिच्नुहोस्।</p>
+    <div class="ps-hw">${[1,2,3].map(n=>`<label>Sentence ${n}<textarea id="psH${n}" rows="2" maxlength="300" placeholder="例：…"></textarea></label>`).join('')}</div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px"><button class="btn ps-check" id="psHs">Send ✉</button><a class="btn ghost" href="#pass/hw">📒 My homework</a><span id="psHm" class="ps-note" style="margin:0"></span></div></div>`;
   if(g){
+    OP=g.p.map((q,k)=>opts(lv,G,i,k,q));
     body=`<div class="card ps-res"><h2 class="ps-h">① How to use <small>使い方</small></h2>
-    ${g.u.map((u,k)=>`<div class="ps-use"><div class="t"><span>${k+1}</span>${E(u[0])}</div><p>${E(u[1])}</p><div class="ps-ex"><div class="jp">${u[2]}</div><div class="nep">${E(u[3])}</div></div></div>`).join('')}</div>
+    <div class="ps-nebox"><div class="lb"><span class="ps-lg ne">NE</span> नेपालीमा</div><b>${E(x[1])}</b><div class="ps-ex"><div class="jp">${E(x[2])}</div><div class="nep">${E(x[3])}</div></div></div>
+    ${g.u.map((u,k)=>`<div class="ps-use"><div class="t"><span>${k+1}</span>${E(u[0])}</div><p><span class="ps-lg">EN</span> ${E(u[1])}</p>${u[4]?`<p><span class="ps-lg ne">NE</span> ${E(u[4])}</p>`:''}<div class="ps-ex"><div class="jp">${u[2]}</div><div class="nep">${E(u[3])}</div></div></div>`).join('')}</div>
     ${g.f.length?`<div class="card ps-res"><h2 class="ps-h">② How to make <small>作り方</small></h2><div class="ps-ftbl">${g.f.map(f=>`<div class="r"><div class="l">${E(f[0])}</div><div class="c">${f[1]}</div></div>`).join('')}</div></div>`:''}
-    ${g.p.length?`<div class="card ps-res"><h2 class="ps-h">③ Practice <small>練習</small></h2><p class="ps-note">Fill in the blank (＿＿). Words in （　） show the base form or a hint. Then press <b>Check answers</b>.</p>
-    <ol class="ps-pr">${g.p.map((q,k)=>`<li data-k="${k}"><div class="q">${q[0].replace('＿＿',`<input class="ps-in" data-k="${k}" autocomplete="off" autocapitalize="off" spellcheck="false">`).replace(/＿＿/g,'<u>　　</u>')}</div><div class="m">${E(q[3])}</div><div class="a"></div></li>`).join('')}</ol>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn ps-check" id="psPc">Check answers</button><button class="btn ghost" id="psPs">Show answers</button><b id="psPsc"></b></div></div>`:''}
-    ${g.h.length?`<div class="card ps-res"><h2 class="ps-h">④ Homework <small>宿題</small></h2>${g.h.map(h=>`<div class="ps-ex"><div class="jp">${h[0]}</div><div class="nep">${E(h[1])}</div></div>`).join('')}<p class="ps-note">Write it in your notebook and show it to your teacher.</p></div>`:''}`;
+    ${g.p.length?`<div class="card ps-res"><h2 class="ps-h">③ Practice <small>練習</small></h2><p class="ps-note">Choose the right answer for （　　）, then press <b>Check answers</b>. · सही उत्तर छान्नुहोस् र <b>Check answers</b> थिच्नुहोस्।</p>
+    <ol class="ps-pr">${g.p.map((q,k)=>`<li data-k="${k}"><div class="q">${q[0].replace(/＿{2,}/g,'<span class="ps-bl">（　　）</span>')}</div><div class="m">${E(q[3])}</div><div class="ps-ops">${OP[k].map((o,n)=>`<button type="button" data-k="${k}" data-o="${n}"><i>${n+1}</i>${E(o.t)}</button>`).join('')}</div><div class="a"></div></li>`).join('')}</ol>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn ps-check" id="psPc">Check answers</button><button class="btn ghost" id="psPs">Show answers</button><b id="psPsc"></b></div></div>`:''}`;
   }else{
     body=`<div class="card ps-res"><h3 style="margin:0 0 6px">Meaning</h3><div class="ps-ne">${E(x[1])}</div>
     <h3 style="margin:14px 0 6px">Example</h3><div class="ps-ex"><div class="jp">${E(x[2])}</div><div class="nep">${E(x[3])}</div></div><p class="ps-note">Full lesson for this point is coming soon.</p></div>`;
   }
   $('#psBody').innerHTML=`<p><a href="#pass">← ${lv.toUpperCase()} grammar list</a></p>
   <section class="ps-hero"><p>${lv.toUpperCase()} · Grammar ${i+1}/${d.g.length}</p><h1 style="font-family:var(--f-jp)">${E(x[0])}</h1>${g&&g.u[0]?`<p>${E(g.u[0][0])}</p>`:''}</section>
-  ${body}
+  ${body}${hw}
   <label class="card" style="display:flex;gap:10px;align-items:center;padding:14px;font-weight:700"><input type="checkbox" id="psGk" ${S.has(i)?'checked':''} style="width:22px;height:22px"> I understand this grammar ✓</label>
   ${nav}`;
   $('#psGk').onchange=e=>{const s=getSet(lv,'g');e.target.checked?s.add(i):s.delete(i);putSet(lv,'g',s)};
   if(g&&g.p.length){
-    const show=(mark)=>{let ok=0;g.p.forEach((q,k)=>{const li=$(`.ps-pr li[data-k="${k}"]`),inp=li.querySelector('input'),v=inp?inp.value:'';const good=q[2].map(nrm).includes(nrm(v))&&nrm(v)!=='';if(good)ok++;
+    const sel={};
+    document.querySelectorAll('.ps-ops button').forEach(b=>b.onclick=()=>{const k=+b.dataset.k;sel[k]=+b.dataset.o;b.parentNode.querySelectorAll('button').forEach(z=>z.classList.toggle('sel',z===b))});
+    const show=(mark)=>{let ok=0;g.p.forEach((q,k)=>{const li=$(`.ps-pr li[data-k="${k}"]`),O=OP[k],c=O.findIndex(o=>o.ok),s0=sel[k],good=s0===c;if(good)ok++;
       li.classList.toggle('ok',mark&&good);li.classList.toggle('ng',mark&&!good);
-      li.querySelector('.a').innerHTML=(mark?(good?'<span class="ps-ok">✓ Correct</span> ':'<span class="ps-ng">✗</span> '):'')+(mark&&good?'':`Answer: <b>${E([].concat(q[1]).join(' / '))}</b>`)});
+      li.querySelectorAll('.ps-ops button').forEach((z,n)=>{z.classList.toggle('right',n===c);z.classList.toggle('wrong',mark&&n===s0&&!good)});
+      const w=(mark&&s0!=null&&!good)?O[s0]:null,wx=w&&d.g[w.j];
+      li.querySelector('.a').innerHTML=(mark?(good?'<span class="ps-ok">✓ Correct · सही</span>':`<span class="ps-ng">✗ ${s0==null?'No answer · उत्तर छानिएन':'Wrong · गलत'}</span>`):'')+
+      `<div class="ps-why"><p><span class="ps-lg">EN</span> Answer: <b>${E(O[c].t)}</b> — this is <b>${E(x[0])}</b>${tl(i)?` (${E(tl(i))})`:''}. The sentence means: “${E(String(q[3]).replace(/[.。]$/,''))}”.${w?` Your choice <b>${E(w.t)}</b>${wx?` belongs to <b>${E(wx[0])}</b>${tl(w.j)?` (${E(tl(w.j))})`:''}`:''} and does not fit this sentence.`:''}</p>
+      <p><span class="ps-lg ne">NE</span> सही उत्तर: <b>${E(O[c].t)}</b> — यहाँ <b>${E(x[0])}</b> (${E(x[1])}) प्रयोग हुन्छ।${w?` तपाईंले छान्नुभएको <b>${E(w.t)}</b>${wx?` <b>${E(wx[0])}</b> (${E(wx[1])}) को रूप हो,`:''} त्यसैले यो वाक्यमा मिल्दैन।`:''}</p></div>`});
       if(mark)$('#psPsc').innerHTML=`Score: ${ok} / ${g.p.length} ${ok===g.p.length?'🎉':''}`};
     $('#psPc').onclick=()=>show(true);$('#psPs').onclick=()=>show(false);
   }
+  $('#psHs').onclick=async()=>{const m=$('#psHm'),B=window.PSH.be&&window.PSH.be();
+    const sn=[1,2,3].map(n=>$('#psH'+n).value.trim());
+    if(!sn.some(Boolean)){m.textContent='Please write at least one sentence. · कम्तिमा एउटा वाक्य लेख्नुहोस्।';return}
+    if(!B||!B.ok){m.textContent='Sending is not available here.';return}
+    if(!B.user){m.innerHTML='Please <a href="#acc">log in</a> first, then send. · पहिले <a href="#acc">Log in</a> गर्नुहोस्।';return}
+    const btn=$('#psHs');btn.disabled=true;m.textContent='Sending…';
+    try{await B.api.hwSend(B.user.uid,{lv,gi:i,gp:x[0],s:sn,name:(B.prof&&B.prof.name)||B.user.displayName||'',email:B.user.email||''});
+      [1,2,3].forEach(n=>$('#psH'+n).value='');m.innerHTML='✓ Sent! See it in <a href="#pass/hw">📒 My homework</a>. · पठाइयो!'}
+    catch(e){m.textContent='Could not send. Please try again. · पठाउन सकिएन।';btn.disabled=false;return}
+    btn.disabled=false};
+}
+async function hwPage(){
+  shell('pass','<div id="psBody"><div class="bp-inl"><span class="bp-spin"></span>Loading… please wait</div></div>');
+  const B=window.PSH.be&&window.PSH.be(),top=`<p><a href="#pass">← Pass? Try it</a></p><section class="ps-hero"><h1>📒 My homework <small style="font-family:var(--f-jp)">宿題</small></h1><p>Homework you sent from the grammar pages, and your teacher's check.</p></section>`;
+  if(!B||!B.ok){$('#psBody').innerHTML=top+'<p class="ps-note">Not available here.</p>';return}
+  if(!B.ready){setTimeout(hwPage,500);return}
+  if(!B.user){$('#psBody').innerHTML=top+'<div class="card ps-res"><p>Please <a href="#acc">log in</a> to see your homework. · <a href="#acc">Log in</a> गर्नुहोस्।</p></div>';return}
+  let L=[];try{L=await B.api.myHw(B.user.uid)}catch(e){$('#psBody').innerHTML=top+'<p class="ps-note">Could not load. Please try again later.</p>';return}
+  const fd=ms=>ms?new Date(ms).toISOString().slice(0,10):'';
+  $('#psBody').innerHTML=top+(L.length?L.map(h=>`<div class="card ps-res ps-hwi"><div class="hd"><a href="#pass/g/${E(h.lv)}/${+h.gi}"><b>${E(String(h.lv||'').toUpperCase())} · ${E(h.gp)}</b></a><span class="st ${h.status==='checked'?'ok':''}">${h.status==='checked'?'✓ Checked':'⏳ Waiting'}</span></div>
+    <ol>${(h.s||[]).filter(Boolean).map(t=>`<li>${E(t)}</li>`).join('')}</ol>${h.comment?`<div class="cm">👩‍🏫 ${E(h.comment)}</div>`:''}<small class="ps-note">${fd(h.created)}</small></div>`).join(''):'<div class="card ps-res"><p>No homework sent yet. Open a grammar point, write 3 sentences and press Send.</p></div>');
 }
 })();

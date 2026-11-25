@@ -1597,6 +1597,10 @@ function fbApi(){
     setPaid:(uid,v,c)=>F.doc('users/'+uid).update((c||'n3')==='n3'?(v?{paid:true,paidAt:firebase.firestore.FieldValue.serverTimestamp(),paidUntil:firebase.firestore.Timestamp.fromMillis(Date.now()+SIXM())}:{paid:false,paidUntil:null}):{['pu.'+c]:v?firebase.firestore.Timestamp.fromMillis(Date.now()+SIXM()):null}),
     showReview:(id,v)=>F.doc('reviews/'+id).update({show:v}),
     reviewsPublic:async()=>{try{const q=await F.collection('reviews').where('show','==',true).get();return q.docs.map(norm)}catch(e){return[]}},
+    hwSend:(uid,o)=>F.collection('hw').add(Object.assign({},o,{uid,status:'new',created:TS()})),
+    async myHw(uid){const q=await F.collection('hw').where('uid','==',uid).get();return q.docs.map(norm).sort((a,b)=>b.created-a.created)},
+    async allHw(){const q=await F.collection('hw').get();return q.docs.map(norm).sort((a,b)=>b.created-a.created)},
+    hwMark:(id,o)=>F.doc('hw/'+id).update(Object.assign({},o,{checked:TS()})),
     toMs
   };
 }
@@ -1621,6 +1625,10 @@ function mockApi(){/* localhost test double with the same shape as fbApi */
     async setPaid(uid,v,c){const d=db();const u=d.users[uid];c=c||'n3';if(c==='n3'){u.paid=v;u.paidUntil=v?Date.now()+SIXM():null}else{u.pu=u.pu||{};u.pu[c]=v?Date.now()+SIXM():null}put(d)},
     async showReview(id,v){const d=db();d.reviews[id].show=v;put(d)},
     async reviewsPublic(){return Object.values(db().reviews).filter(r=>r.show)},
+    async hwSend(uid,o){const d=db();d.hw=d.hw||{};d.hw['h'+Date.now()]=Object.assign({},o,{uid,status:'new',created:Date.now()});put(d)},
+    async myHw(uid){return Object.entries(db().hw||{}).map(([id,h])=>Object.assign({id},h)).filter(h=>h.uid===uid).sort((a,b)=>b.created-a.created)},
+    async allHw(){return Object.entries(db().hw||{}).map(([id,h])=>Object.assign({id},h)).sort((a,b)=>b.created-a.created)},
+    async hwMark(id,o){const d=db();Object.assign(d.hw[id],o,{checked:Date.now()});put(d)},
     toMs:v=>v||0};
 }
 
@@ -1705,6 +1713,7 @@ async function renderTeacher(){
     .sort((a,b)=>TD.sort==='name'?String(a.name).localeCompare(b.name):TD.sort==='done'?((b.prog||{}).done||0)-((a.prog||{}).done||0):TD.sort==='joined'?(b.created||0)-(a.created||0):(b.last||0)-(a.last||0));
   const pr=u=>{const g=u.prog||{};return{d:g.done||0,a:g.done?Math.round((g.ok||0)*100/g.done):0,h:Object.values(g.hw||{}).filter(v=>v>=35).length}};
   let hk=true;try{hk=await BE.api.hasKey(tc)}catch(e){}
+  let HW=null;try{HW=await BE.api.allHw()}catch(e){HW=null}
   shell('teacher',`${ph('師',at('tT'),new Date().toISOString().slice(0,10))}
   <div class="erow" style="margin:0 0 12px">${['n3','n5'].map(c=>`<button class="chip ${c===tc?'on':''}" data-tc="${c}">${PAYC(c)}</button>`).join('')}</div>
   ${hk?'':`<section class="card accbox"><b>🔑 ${at('keyT')} · ${PAYC(tc)}</b><p class="muted" style="margin:0">${at('keyS')}</p><form id="kF" class="erow"><input id="kC" placeholder="XXXX-XXXXXXXX" autocomplete="off" style="flex:2"><button class="btn grad">${at('save')}</button></form></section>`}
@@ -1718,7 +1727,10 @@ async function renderTeacher(){
   ${L.map(u=>{const x=pr(u),on=(u.last||0)>=wk;return `<tr><td><b>${esc(u.name||'—')}</b><small>${esc(u.email||'')}${u.phone?' · '+esc(u.phone):''}</small></td><td><span class="dot ${on?'on':''}"></span>${ago(u.last)}</td><td>${x.d}</td><td>${x.a}%</td><td>${x.h}</td><td>${fdate(u.created)}</td><td>${isPaidP(u,tc)?`<span class="paidtag">¥ ✓ ${fdate(untilOf(u,tc))}</span>`:(untilOf(u,tc)?'<span class="muted">⌛ '+fdate(untilOf(u,tc))+'</span> ':'')}<button class="chip" data-pd="${u.id}" data-v="${isPaidP(u,tc)?0:1}">${PAYC(tc)} ${isPaidP(u,tc)?at('takePaid'):at('givePaid')}</button></td></tr>`}).join('')||`<tr><td colspan="7" class="muted">${at('none')}</td></tr>`}
   </tbody></table></div>
   <h2 class="hsech"><i>★</i>${at('revs')} (${RV.length})</h2>
-  ${RV.map(r=>`<div class="card trev"><div><span class="st">${stars(r.stars||0)}</span> <b>${esc(r.name||'')}</b><p>${esc(r.text||'')}</p><small>${fdate(r.created)}</small></div><button class="chip ${r.show?'on':''}" data-rv="${r.id}" data-v="${r.show?0:1}">${r.show?at('hide'):at('show')}</button></div>`).join('')||`<p class="muted">${at('none')}</p>`}`);
+  ${RV.map(r=>`<div class="card trev"><div><span class="st">${stars(r.stars||0)}</span> <b>${esc(r.name||'')}</b><p>${esc(r.text||'')}</p><small>${fdate(r.created)}</small></div><button class="chip ${r.show?'on':''}" data-rv="${r.id}" data-v="${r.show?0:1}">${r.show?at('hide'):at('show')}</button></div>`).join('')||`<p class="muted">${at('none')}</p>`}
+  <h2 class="hsech"><i>宿</i>Homework (${HW?HW.filter(h=>h.status!=='checked').length+' new / '+HW.length:'—'})</h2>
+  ${HW==null?`<p class="muted">To receive homework, paste the new Firebase rules (firebase-rules.txt).</p>`:HW.slice(0,80).map(h=>`<div class="card trev"><div style="flex:1"><b>${esc(h.name||h.email||'')}</b> <small>${esc(h.email||'')}</small><p style="font-family:var(--f-jp)"><a href="#pass/g/${esc(h.lv)}/${+h.gi}"><b>${esc(String(h.lv||'').toUpperCase())} · ${esc(h.gp||'')}</b></a></p><ol style="font-family:var(--f-jp);margin:4px 0">${(h.s||[]).filter(Boolean).map(t=>`<li>${esc(t)}</li>`).join('')}</ol><input data-hwc="${h.id}" placeholder="Comment for student" value="${esc(h.comment||'')}" style="width:100%"><small>${fdate(h.created)}</small></div><button class="chip ${h.status==='checked'?'on':''}" data-hw="${h.id}">${h.status==='checked'?'✓ Checked':'Mark checked'}</button></div>`).join('')||`<p class="muted">${at('none')}</p>`}`);
+  $$('[data-hw]').forEach(b=>b.onclick=async()=>{const c=($(`[data-hwc="${b.dataset.hw}"]`)||{}).value||'';b.disabled=true;try{await BE.api.hwMark(b.dataset.hw,{status:'checked',comment:c});toast('✓')}catch(e){toast(at('err'))}renderTeacher()});
   $('#tq').oninput=e=>{TD.q=e.target.value;clearTimeout(TD.t);TD.t=setTimeout(()=>{renderTeacher().then(()=>{const i=$('#tq');i.focus();i.setSelectionRange(i.value.length,i.value.length)})},350)};
   const kf=$('#kF');if(kf)kf.onsubmit=async e=>{e.preventDefault();const c=$('#kC').value.toUpperCase().replace(/[^0-9A-Z]/g,'');if(c.length!==12){toast(at('err'));return}try{await BE.api.setKey(tc,c);toast('✓');renderTeacher()}catch(x){toast(at('err'))}};
   $('#tsort').onchange=e=>{TD.sort=e.target.value;renderTeacher()};
@@ -1778,7 +1790,7 @@ function renderAdmin(){
     try{await ART.publish({'keys.json':{content:JSON.stringify(nk),contentType:'application/json'}});KEYS=nk;toast('Code बन्द भयो।');renderAdmin()}
     catch(err){$('#aerr').textContent=(err&&err.code==='capability_disabled')?'लिंक public भएकाले यहाँबाट सेभ हुँदैन। Claude लाई code को पहिलो ४ अक्षर भन्नुहोस्।':'सेभ भएन ('+(err&&err.code||'error')+')।'}};
 }
-window.PSH={shell:(a,b)=>shell(a,b)};
+window.PSH={shell:(a,b)=>shell(a,b),be:()=>BE,toast:m=>toast(m)};
 boot();
 })();
 </script>
