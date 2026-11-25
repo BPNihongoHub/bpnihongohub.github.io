@@ -1546,7 +1546,7 @@ const UT={nav:['宿題','Units','युनिट'],title:['ユニット別 宿�
  l:['聴解','Listening','सुनाइ (Listening)'],ld:['近日公開','Coming soon','छिट्टै आउँदैछ'],units:['ユニット','units','युनिट']};
 const ut=(k,o)=>{const v=(['n4','n5'].includes(exam())&&UT5[k])||UT[k];const c=LANGS[LI][0];let s=c==='ja'||(HJ&&c==='ne')?v[0]:v[1];if(o)for(const x in o)s=s.replace('{'+x+'}',o[x]);return s};
 const ulang=()=>LANGS[LI][0]==='ne'?'ne':'en';
-async function loadUnits(){if(UD&&UDE===exam())return;UDE=exam();try{UD=await fetch(exam()==='n3'?'units.json':'units-'+exam()+'.json').then(r=>r.json())}catch(e){UD={k:[],v:[],g:[]};return}
+async function loadUnits(){if(UD&&UDE===exam())return;UDE=exam();if(!['n3','n4','n5'].includes(exam())){UD={k:[],v:[],g:[]};return}try{UD=await fetch(exam()==='n3'?'units.json':'units-'+exam()+'.json').then(r=>r.json())}catch(e){UD={k:[],v:[],g:[]};return}
   if(window.MK&&Object.values(UD).some(s=>s.some(x=>x.lk))){try{const L=await fetch(exam()==='n3'?'units-locked.json':'units-'+exam()+'-locked.json').then(r=>r.json());
     const raw=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64d(L.iv)},window.MK,b64d(L.ct));const B=JSON.parse(new TextDecoder().decode(raw));
     for(const s in B)B[s].forEach(full=>{const i=UD[s].findIndex(x=>x.n===full.n);if(i>=0)UD[s][i]=full})}catch(e){}}}
