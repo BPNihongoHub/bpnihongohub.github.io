@@ -145,7 +145,7 @@ function bindTabs(){
   document.querySelectorAll('[data-lv]').forEach(x=>x.onclick=()=>{if(PS.lv===x.dataset.lv)return;PS.lv=x.dataset.lv;PS.page=0;saveUI();const big=!PD[PS.lv];if(big&&window.BPLoad)BPLoad(true,'Loading '+PS.lv.toUpperCase()+'…');Promise.resolve(renderPass()).finally(()=>{window.BPLoad&&BPLoad(false)})});
   document.querySelectorAll('[data-kind]').forEach(x=>x.onclick=()=>{PS.kind=x.dataset.kind;PS.page=0;saveUI();if(!PD[PS.lv]&&window.BPLoad)BPLoad(true);Promise.resolve(renderPass()).finally(()=>{window.BPLoad&&BPLoad(false)})});
 }
-function credit(){return `<p class="ps-credit">स्रोत: कान्जी सूची <a href="https://github.com/davidluzgouveia/kanji-data">kanji-data</a> (MIT), शब्द सूची <a href="https://github.com/jamsinclair/open-anki-jlpt-decks">open-anki-jlpt-decks</a> (MIT), लेख्ने क्रम <a href="https://kanjivg.tagaini.net">KanjiVG</a> © Ulrich Apel (CC BY-SA 3.0)। नेपाली अर्थ र व्याकरण: BP Nihongo Hub।</p>`}
+function credit(){return `<p class="ps-credit">Sources: kanji list <a href="https://github.com/davidluzgouveia/kanji-data">kanji-data</a> (MIT), word list <a href="https://github.com/jamsinclair/open-anki-jlpt-decks">open-anki-jlpt-decks</a> (MIT), stroke order <a href="https://kanjivg.tagaini.net">KanjiVG</a> © Ulrich Apel (CC BY-SA 3.0). Nepali meanings and grammar: BP Nihongo Hub.</p>`}
 
 async function results(){
   const rows=[];let est=null;
@@ -162,11 +162,11 @@ async function results(){
   $('#psBody').innerHTML=`<div class="card ps-res"><h2>${cur.lv.toUpperCase()} Result</h2><div class="ps-big">${cur.p}%</div>${line('k')}${line('v')}${line('g')}
   <p class="ps-note">✓ = I know it, ✗ = not yet (study more).</p></div>
   <div class="card ps-res"><h2>Your estimated level</h2><div class="ps-big" style="color:var(--shu)">${est?est.toUpperCase():'Below N5'}</div>
-  <p class="ps-note">कुनै स्तर र त्यसभन्दा सजिला सबै स्तरमा ६०% वा बढी आएमा त्यो स्तर मानिन्छ। अर्को स्तरको सूचीमा पनि ✓ लगाएर हेर्नुहोस्।</p>
+  <p class="ps-note">You reach a level when you know 60% or more of that level and of every easier level. Tick ✓ the lists of the other levels too.</p>
   <table class="ps-tbl"><tr><th>JLPT</th><th>Kanji</th><th>Words</th><th>Grammar</th><th>%</th></tr>${rows.slice().reverse().map(r=>`<tr class="${r.lv===est?'me':''}"><td>${r.lv.toUpperCase()}</td><td>${r.k[0]}/${r.k[1]}</td><td>${r.v[0]}/${r.v[1]}</td><td>${r.g[0]}/${r.g[1]}</td><td>${r.p}%</td></tr>`).join('')}</table>
   <h3 style="margin:16px 0 4px">JLPT levels and study needed</h3>
   <table class="ps-tbl"><tr><th>JLPT</th><th>Study time</th><th>Kanji</th><th>Words</th></tr>${LV.slice().reverse().map(l=>`<tr><td>${l.toUpperCase()}</td><td>${LVINFO[l][0]} h</td><td>~${LVINFO[l][1]}</td><td>~${LVINFO[l][2]}</td></tr>`).join('')}</table>
-  <p class="ps-note">यो वेबसाइटको सूचीमा: N5 कान्जी 103/शब्द 718, N4 144/668, N3 366/2140, N2 367/1906, N1 1232/2699 (हरेक स्तरमा त्यही स्तरका मात्र; अघिल्लो स्तरका दोहोरिँदैनन्। माथिल्लो तहको कान्जी भएको शब्द हिरागानामा देखाइन्छ)।</p></div>
+  <p class="ps-note">Lists on this site: N5 kanji 103 / words 718, N4 144/668, N3 366/2140, N2 367/1906, N1 1232/2699 (each level has only its own items, nothing repeats; words with higher-level kanji are shown in hiragana).</p></div>
   <button class="btn ghost" id="psWrong">Show only ✗ ${KIND.k[1]}/${KIND.v[1]} I don't know</button><div id="psWL"></div>`+credit();
   $('#psWrong').onclick=async()=>{
     const d=await load(cur.lv);let h='';
@@ -226,9 +226,9 @@ async function info(kind,lv,i){
   if(kind==='v'){
     const w=x[0].split(';')[0].trim();const ks=[...new Set([...w].filter(c=>/[一-鿿]/.test(c)))];
     const m=modal(`<div style="font:700 40px/1.2 var(--f-jp)">${E(w)}</div><div class="ps-note" style="font-size:17px">${E(x[1])}</div>
-    <div class="ps-ne">${E(x[3])}</div><div class="ps-kv"><div><b>English</b> ${E(x[2])}</div><div><b>स्तर</b> ${lv.toUpperCase()}</div></div>
-    ${x[4]?`<p class="ps-note" style="margin-top:10px">${lv.toUpperCase()} मा यो शब्द प्रायः हिरागानामै लेखिन्छ। माथिल्लो तहमा कान्जीमा: <b style="font-family:var(--f-jp);font-size:17px">${E(x[4])}</b></p>`:''}
-    ${ks.length?`<p class="ps-note" style="margin-top:12px">यो शब्दका कान्जी (थिच्दा अर्थ र लेख्ने तरिका):</p><div class="ps-kbtns">${ks.map(c=>`<button data-k="${E(c)}">${E(c)}</button>`).join('')}</div>`:''}`);
+    <div class="ps-ne">${E(x[3])}</div><div class="ps-kv"><div><b>English</b> ${E(x[2])}</div><div><b>Level</b> ${lv.toUpperCase()}</div></div>
+    ${x[4]?`<p class="ps-note" style="margin-top:10px">At ${lv.toUpperCase()} this word is usually written in hiragana. In kanji (higher level): <b style="font-family:var(--f-jp);font-size:17px">${E(x[4])}</b></p>`:''}
+    ${ks.length?`<p class="ps-note" style="margin-top:12px">Kanji in this word (tap for meaning and stroke order):</p><div class="ps-kbtns">${ks.map(c=>`<button data-k="${E(c)}">${E(c)}</button>`).join('')}</div>`:''}`);
     m.querySelectorAll('[data-k]').forEach(btn=>btn.onclick=()=>{m.remove();showKanji(btn.dataset.k)});
   }
 }
