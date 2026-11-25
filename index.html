@@ -1027,6 +1027,18 @@ const authed=()=>true;
 const b64d=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 const isLocked=n=>!UNL&&!(D.free||[]).includes(+n);
 let UERR='',CODEUNTIL=0;
+const CDOM='@code.bpnihongohub.app',isCodeAcc=u=>!!(u&&/@code\.bpnihongohub\.app$/.test(u.email||''));
+/* code + name + password, no Gmail: the code itself becomes the account (same code + same password on up to 3 devices) */
+async function codeLogin(code,name,pw){code=(code||'').toUpperCase().replace(/[^0-9A-Z]/g,'');const K=KEYS;
+  if(code.length!==12||!K||!K.w||!K.w[code.slice(0,4)])return t('codeErr');
+  if((pw||'').length<6)return 'Password must be 6 letters or more.';
+  const em='c'+code.toLowerCase()+CDOM;
+  try{await BE.api.signin(em,pw)}catch(x){const c=(x&&x.code)||'';
+    if(/user-not-found|invalid-credential|invalid-login/.test(c)){try{await BE.api.signup(em,pw,(name||'').trim().slice(0,60))}catch(y){return /email-already-in-use/.test((y&&y.code)||'')?'Wrong password for this code. Use the same password you made the first time (ask Binod sensei if you forgot).':authMsg(y)}}
+    else if(/wrong-password/.test(c))return 'Wrong password for this code. Use the same password you made the first time.';else return authMsg(x)}
+  for(let i=0;i<50&&!(BE.user&&BE.prof&&BE.user.email===em);i++)await new Promise(r=>setTimeout(r,150));
+  if(name&&name.trim()&&BE.prof&&BE.prof.name!==name.trim().slice(0,60)){try{await BE.api.saveProf(BE.user.uid,{name:name.trim().slice(0,60),phone:BE.prof.phone||''});BE.prof.name=name.trim().slice(0,60)}catch(e){}}
+  const ok=await unlock(code,false);return ok?true:uerrMsg()}
 const UMSG={signin:'Please sign in first (Google or email). A code works only on one account.',other:'This code is already used by another account. Ask Binod sensei.',dev3:'This code is already open on 3 devices. Ask Binod sensei to reset it.',expired:'This code\'s 6 months have ended. Please pay or ask Binod sensei for a new code.'};
 const uerrMsg=()=>UMSG[UERR]?UMSG[UERR]+(UERR==='signin'?' <a href="#acc">Sign in →</a>':''):t('codeErr');
 function beWait(){return new Promise(r=>{if(BE.ready)return r();let n=0;const iv=setInterval(()=>{if(BE.ready||++n>100){clearInterval(iv);r()}},150)})}
@@ -1084,7 +1096,7 @@ const ph=(g,ti,sub)=>`<section class="phead"><i>${g}</i><div><h1>${ti}</h1>${sub
 function stBar(active){/* site-wide account notice: verify email / trial days left / renew before paid access ends */
   if(!BE.user||['pay','acc','teacher','admin'].includes(active))return '';const p=BE.prof||{},c=dxOf(),now=Date.now(),day=864e5;
   let m='',h='#pay',cls='';
-  if(BE.user.emailVerified===false){m='📧 Verify your email to start your 3-day free trial';h='#acc'}
+  if(BE.user.emailVerified===false&&!isCodeAcc(BE.user)){m='📧 Verify your email to start your 3-day free trial';h='#acc'}
   else if(isPaidP(p,c)){const d=Math.ceil((untilOf(p,c)-now)/day);if(d<=7){m=`⏰ Your ${PAYC(c)} access ends in ${d} day(s) · ${fdate(untilOf(p,c))}. Renew now`;cls='warn'}}
   else if(isTrialP(p)){const d=trialLeft(p);m=`🎁 Free trial: ${d} day(s) left. Pay for ${PAYC(c)} to keep everything open`;cls=d<=1?'warn':''}
   else if(untilOf(p,c)&&now-untilOf(p,c)<30*day){m=`🔒 Your ${PAYC(c)} access has ended. Renew to open everything again`;cls='warn'}
@@ -1131,7 +1143,13 @@ function renderUnlock(){
   if(BE.ok&&!UNL){shell('home',`${ph('🔓',at('payT'),PAYC())}<section class="card accbox paybox"><div class="big">${PAY.cur}${PAY.price.toLocaleString('en')}</div><b>${at('per6')}</b>
     <ol><li>${BE.user?'✓ ':''}${at('login')} (Google / Email)</li><li>${at('st2')}</li><li>${at('st3')}</li><li>${at('st4')}</li></ol>
     ${BE.user?(isPaidP(BE.prof)?`<p>${at('paid')}</p>`:`<a class="btn grad" href="#pay">💳 ${at('payT')}</a>`):`<a class="btn grad" href="#acc">${at('login')} →</a>`}
-    <details class="codebox"><summary>Code?</summary><form id="uf"><input id="ucode" placeholder="XXXX-XXXXXXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="16" required><div class="err" id="uerr" role="alert"></div><button class="btn ghost" id="ubtn">🔓 ${t('unlockBtn')}</button></form></details></section>`);
+    ${BE.user?`<details class="codebox"><summary>Code?</summary><form id="uf"><input id="ucode" placeholder="XXXX-XXXX-XXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="16" required><div class="err" id="uerr" role="alert"></div><button class="btn ghost" id="ubtn">🔓 ${t('unlockBtn')}</button></form></details>`:
+    `<details class="codebox" open><summary>🎟 Have a code? (no Gmail needed)</summary><form id="uf2" class="eform"><input id="ucode" placeholder="Code XXXX-XXXX-XXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="16" required>
+    <input id="uname" placeholder="Your name" autocomplete="name"><input id="upw" type="password" placeholder="Password (6+ letters)" minlength="6" autocomplete="current-password" required>
+    <div class="err" id="uerr" role="alert"></div><button class="btn grad" id="ubtn">🔓 Open with code</button>
+    <p class="muted" style="font-size:12px;margin:0;text-align:left">First time: write your name and make a password. On another phone: the same code and the same password. One code works on max 3 devices for 6 months.</p></form></details>`}</section>`);
+    if($('#uf2')){inAppWire();$('#uf2').onsubmit=async e=>{e.preventDefault();const b=$('#ubtn');b.disabled=true;b.textContent='…';$('#uerr').textContent='';
+      const r=await codeLogin($('#ucode').value,$('#uname').value,$('#upw').value);if(r===true){toast(t('unlocked')+(CODEUNTIL?' · Open until '+fdate(CODEUNTIL):''));location.hash='#home'}else{b.disabled=false;b.textContent='🔓 Open with code';$('#uerr').innerHTML=r}};return}
     $('#uf').onsubmit=async e=>{e.preventDefault();const bt_=$('#ubtn');bt_.disabled=true;const ok=await unlock($('#ucode').value,false);if(!ok){bt_.disabled=false;$('#uerr').innerHTML=uerrMsg()}else toast(t('unlocked')+(CODEUNTIL?' · Open until '+fdate(CODEUNTIL):''))};return}
   if(UNL){shell('home',`<section class="card unlockpage"><h2>✓ ${t('unlocked')}</h2><p><a class="btn" href="#quiz">${t('startP')} →</a></p></section>`);return}
   shell('home',`<section class="card unlockpage">${hanko('hk')}<h2>🔒 ${t('unlockT')}</h2><p class="muted">${t('freeDemo')} ${t('lockedN',{n:(D.sets||[]).length-(D.free||[]).length})}</p>
@@ -1739,7 +1757,7 @@ function fbApi(){
     async codeGet(id){const s=await F.doc('codes/'+id).get();return s.exists?s.data():null},codeSet:(id,o)=>F.doc('codes/'+id).set(o),
     async codes(){const q=await F.collection('codes').get();return q.docs.map(norm)},codeDel:id=>F.doc('codes/'+id).delete(),
     signin:(e,p)=>A.signInWithEmailAndPassword(e,p),
-    signup:async(e,p,n)=>{const c=await A.createUserWithEmailAndPassword(e,p);if(n)await c.user.updateProfile({displayName:n});try{await c.user.sendEmailVerification()}catch(x){}return c},
+    signup:async(e,p,n)=>{const c=await A.createUserWithEmailAndPassword(e,p);if(n)await c.user.updateProfile({displayName:n});if(!/@code\.bpnihongohub\.app$/.test(e))try{await c.user.sendEmailVerification()}catch(x){}return c},
     verify:()=>A.currentUser.sendEmailVerification(),
     reloadUser:async()=>{await A.currentUser.reload();return A.currentUser},
     async blk(){try{const s=await F.doc('pub/keys').get();return s.exists?(s.data().ids||[]):[]}catch(e){return null}},setBlk:ids=>F.doc('pub/keys').set({ids}),
@@ -1864,7 +1882,7 @@ async function renderAccount(){
   if(!BE.ok){shell('acc',`${ph('人',at('acc'),'')}<div class="card emptyx"><div class="ex-ic">🔐</div><p>${at('soon')}</p></div>`);return}
   if(!BE.ready){shell('acc',`<div class="card empty">…</div>`);return}
   if(!BE.user){
-    shell('acc',`${ph('人',at('acc'),'')}${inAppBox()}${subCard()}<section class="card accbox signbox"><h3>👤 Sign in · ログイン</h3>
+    shell('acc',`${ph('人',at('acc'),'')}${inAppBox()}${subCard()}<a class="btn ghost" href="#unlock" style="display:block;max-width:440px;margin:0 auto 14px;text-align:center">🎟 Have a code? Open with code (no Gmail needed) →</a><section class="card accbox signbox"><h3>👤 Sign in · ログイン</h3>
       <button class="btn gbtn" id="gIn"><b>G</b> ${at('google')}</button><div class="or"><span>or email</span></div>
       <form id="eForm" class="eform"><input id="eName" placeholder="${at('name')} (new account only)" autocomplete="name">
       <input id="eMail" type="email" placeholder="${at('email')}" autocomplete="email" required>
@@ -1884,8 +1902,8 @@ async function renderAccount(){
   const p=BE.prof||{},sum=p.prog||{};let mine=[];try{mine=await BE.api.myPay(BE.user.uid)}catch(e){}
   const pend=mine.some(x=>x.status==='pending'&&(x.course||'n3')===dxOf());
   const vals=Object.values(P.res),done=vals.length,ok=vals.filter(v=>v===1).length,ures=LS.get('ures',{}),hwp=Object.values(ures).filter(v=>(v.b||0)>=35).length;
-  const nv=BE.user.emailVerified===false;
-  shell('acc',`${ph('人',at('acc'),esc(p.email||BE.user.email||''))}
+  const nv=BE.user.emailVerified===false&&!isCodeAcc(BE.user);
+  shell('acc',`${ph('人',at('acc'),isCodeAcc(BE.user)?'🎟 Code account'+(p.name?' · '+esc(p.name):''):esc(p.email||BE.user.email||''))}
   ${nv?`<section class="card accbox" style="border:1.5px solid #e3a200"><b>📧 Please verify your email · メール確認</b><p class="muted">We sent a link to <b>${esc(BE.user.email||'')}</b>. Open it, then tap "I verified". Your 3-day free trial starts after this.</p><div class="erow"><button class="btn grad" id="vDone">✓ I verified</button><button class="btn ghost" id="vSend">Resend email</button></div><div class="err" id="vErr"></div></section>`:''}
   <section class="card accbox"><div class="plan ${isPaidP(p)?'ok':isTrialP(p)?'trial':'lock'}"><b>${PAYC()}</b> · ${isPaidP(p)?at('paid')+`<small>${at('until')}: ${fdate(untilOf(p))}</small>`:pend?at('pending'):isTrialP(p)?`🎁 Free trial: everything open<small>${trialLeft(p)} day(s) left · until ${fdate(trialEnd(p))}. Pay before it ends to keep everything open.</small>`:untilOf(p)?at('expired'):`🔒 Locked${trialEnd(p)?'<small>Your 3-day free trial has ended. Pay to open everything.</small>':''}`}</div>
    ${!isPaidP(p)&&PAY.on&&!pend?`<a class="btn grad" href="#pay">💳 ${at('payT')} · ${PAY.cur}${PAY.price.toLocaleString('en')} · ${at('per6')}</a>`:''}
