@@ -4,7 +4,7 @@
 (function(){
 const $=s=>document.querySelector(s);const shell=(a,b)=>window.PSH.shell(a,b);
 const LV=['n5','n4','n3','n2','n1'];
-const KIND={k:['漢字','कान्जी'],v:['語彙','शब्द (अर्थ)'],g:['文法','व्याकरण']};
+const KIND={k:['漢字','Kanji'],v:['語彙','Vocabulary'],g:['文法','Grammar']};
 const PER=100;
 const PD={},SD={};
 const PS={lv:'n5',kind:'k',page:0};
@@ -100,10 +100,10 @@ const RD=s=>String(s||'').replace(/([^\s.]+)\.([^\s]+)/g,'$1($2)');
 const E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const LVINFO={n1:['900','2,000','10,000'],n2:['600','1,000','6,000'],n3:['450','700','3,500'],n4:['300','300','1,500'],n5:['150','100','800']};
 
-function head(){return `<section class="ps-hero"><h1>You want to pass? Try it 🎯</h1><p>तपाईंलाई कति कान्जी, शब्द र व्याकरण आउँछ? आउने जतिमा ✓ लगाउनुहोस् र <b>Check!</b> थिच्नुहोस्। शब्द थिच्दा अर्थ र लेख्ने तरिका देखिन्छ।</p></section>`}
+function head(){return `<section class="ps-hero"><h1>You want to pass? Try it 🎯</h1><p>How many kanji, words and grammar points do you know? Tick ✓ the ones you know and press <b>Check!</b> Tap a word to see its meaning and stroke order.</p></section>`}
 function tabs(){
   return `<div class="ps-row">${LV.map(l=>`<button data-lv="${l}" class="${PS.lv===l?'on':''}">${l.toUpperCase()}</button>`).join('')}</div>
-  <div class="ps-row">${Object.keys(KIND).map(k=>`<button data-kind="${k}" class="${PS.kind===k?'on':''}">${KIND[k][0]} · ${KIND[k][1]}</button>`).join('')}<button data-kind="r" class="${PS.kind==='r'?'on':''}">📊 नतिजा</button></div>`;
+  <div class="ps-row">${Object.keys(KIND).map(k=>`<button data-kind="${k}" class="${PS.kind===k?'on':''}">${KIND[k][0]} · ${KIND[k][1]}</button>`).join('')}<button data-kind="r" class="${PS.kind==='r'?'on':''}">📊 結果 Result</button></div>`;
 }
 function itemsOf(d,kind){return d[kind]||[]}
 function label(kind,x){return kind==='k'?x[0]:kind==='v'?x[0].split(';')[0].trim():x[0]}
@@ -112,19 +112,19 @@ window.renderPass=async function(){
   css();
   const parts=(location.hash.slice(1)).split('/');
   if(parts[1]==='g'&&parts[2]&&parts[3]!=null)return grammarPage(parts[2],+parts[3]);
-  shell('pass',head()+tabs()+'<div id="psBody"><div class="ps-note">लोड हुँदैछ…</div></div>');
+  shell('pass',head()+tabs()+'<div id="psBody"><div class="ps-note">Loading…</div></div>');
   bindTabs();
   if(PS.kind==='r')return results();
-  let d;try{d=await load(PS.lv)}catch(e){$('#psBody').innerHTML='<p class="ps-note">डाटा लोड भएन। इन्टरनेट जाँच्नुहोस्।</p>';return}
+  let d;try{d=await load(PS.lv)}catch(e){$('#psBody').innerHTML='<p class="ps-note">Could not load the data. Please check your internet.</p>';return}
   const L=itemsOf(d,PS.kind),S=getSet(PS.lv,PS.kind),UN=d[PS.kind+'u'],pages=UN?UN.length:Math.ceil(L.length/PER);
   if(PS.page>=pages)PS.page=0;
   const a=UN?UN[PS.page][1]:PS.page*PER,b=UN?UN[PS.page][2]:Math.min(L.length,a+PER);
-  const pager=UN?`<div class="ps-pager ps-units"><span class="ps-note" style="margin:0 6px 0 0">युनिट:</span>${UN.map((u,i)=>`<button data-pg="${i}" class="${i===PS.page?'on':''}">${E(u[0].replace('Unit ',''))}<small>${u[2]-u[1]}</small></button>`).join('')}</div><h3 class="ps-uh">${E(UN[PS.page][0])} <small>(${b-a})</small></h3>`:pages>1?`<div class="ps-pager"><span class="ps-note" style="margin:0 6px 0 0">पेज:</span>${Array.from({length:pages},(_,i)=>`<button data-pg="${i}" class="${i===PS.page?'on':''}">${i*PER+1}–${Math.min(L.length,(i+1)*PER)}</button>`).join('')}</div>`:'';
+  const pager=UN?`<div class="ps-pager ps-units"><span class="ps-note" style="margin:0 6px 0 0">Unit:</span>${UN.map((u,i)=>`<button data-pg="${i}" class="${i===PS.page?'on':''}">${E(u[0].replace('Unit ',''))}<small>${u[2]-u[1]}</small></button>`).join('')}</div><h3 class="ps-uh">${E(UN[PS.page][0])} <small>(${b-a})</small></h3>`:pages>1?`<div class="ps-pager"><span class="ps-note" style="margin:0 6px 0 0">Page:</span>${Array.from({length:pages},(_,i)=>`<button data-pg="${i}" class="${i===PS.page?'on':''}">${i*PER+1}–${Math.min(L.length,(i+1)*PER)}</button>`).join('')}</div>`:'';
   let body;
   if(PS.kind==='g'){
-    body=`<p class="ps-note">बुझ्ने व्याकरणमा ✓ लगाउनुहोस्। नाम थिच्दा भित्र अर्थ र उदाहरण खुल्छ।</p><div class="ps-gl">${L.slice(a,b).map((x,j)=>{const i=a+j;return `<div class="ps-gr ${S.has(i)?'on':''}"><label><input type="checkbox" data-i="${i}" ${S.has(i)?'checked':''} aria-label="${E(x[0])}"></label><a href="#pass/g/${PS.lv}/${i}"><b>${i+1}. ${E(x[0])}</b><span>${E(x[1])}</span></a></div>`}).join('')}</div>`;
+    body=`<p class="ps-note">Tick ✓ the grammar you know. Tap a name to open its meaning and examples.</p><div class="ps-gl">${L.slice(a,b).map((x,j)=>{const i=a+j;return `<div class="ps-gr ${S.has(i)?'on':''}"><label><input type="checkbox" data-i="${i}" ${S.has(i)?'checked':''} aria-label="${E(x[0])}"></label><a href="#pass/g/${PS.lv}/${i}"><b>${i+1}. ${E(x[0])}</b><span>${E(x[1])}</span></a></div>`}).join('')}</div>`;
   }else{
-    body=`<p class="ps-note">पढ्न/बुझ्न सक्ने ${PS.kind==='k'?'कान्जी':'शब्द'}मा ✓ लगाउनुहोस्। ⓘ थिच्दा अर्थ ${PS.kind==='k'?'र लेख्ने तरिका':''} देखिन्छ।</p><div class="ps-grid ps-${PS.lv}">${L.slice(a,b).map((x,j)=>{const i=a+j;return `<div class="ps-cell ${S.has(i)?'on':''}" data-c="${i}"><div class="top"><span>${String(i+1).padStart(3,'0')}</span><input type="checkbox" data-i="${i}" ${S.has(i)?'checked':''} aria-label="${E(label(PS.kind,x))}"></div><div class="w ${PS.kind==='k'?'kj':''}">${E(label(PS.kind,x))}</div><span class="i" data-inf="${i}">i</span></div>`}).join('')}</div>`;
+    body=`<p class="ps-note">Tick ✓ the ${PS.kind==='k'?'kanji':'words'} you can read and understand. Tap ⓘ to see the meaning${PS.kind==='k'?' and stroke order':''}.</p><div class="ps-grid ps-${PS.lv}">${L.slice(a,b).map((x,j)=>{const i=a+j;return `<div class="ps-cell ${S.has(i)?'on':''}" data-c="${i}"><div class="top"><span>${String(i+1).padStart(3,'0')}</span><input type="checkbox" data-i="${i}" ${S.has(i)?'checked':''} aria-label="${E(label(PS.kind,x))}"></div><div class="w ${PS.kind==='k'?'kj':''}">${E(label(PS.kind,x))}</div><span class="i" data-inf="${i}">i</span></div>`}).join('')}</div>`;
   }
   $('#psBody').innerHTML=pager+body+(UN?nextU(UN,PS.page):pager)+`<div class="ps-end"><button class="btn ps-check" id="psCheck">Check! ✓</button></div>`+credit();
   const cnt=()=>{};
@@ -158,26 +158,26 @@ async function results(){
   const cur=rows.find(r=>r.lv===PS.lv)||rows[0];
   const pct=([a,b])=>b?Math.round(100*a/b):0;
   const line=(k)=>{const [a,b]=cur[k];return `<div style="margin:10px 0"><div style="display:flex;justify-content:space-between;font-weight:700"><span>${KIND[k][0]} ${KIND[k][1]}</span><span><span class="ps-ok">✓ ${a}</span> · <span class="ps-ng">✗ ${b-a}</span> / ${b}</span></div><div class="ps-meter"><i style="width:${pct(cur[k])}%"></i></div></div>`};
-  $('#psBody').innerHTML=`<div class="card ps-res"><h2>${cur.lv.toUpperCase()} नतिजा</h2><div class="ps-big">${cur.p}%</div>${line('k')}${line('v')}${line('g')}
-  <p class="ps-note">✓ = आउने (मिल्यो), ✗ = नआउने (अझै पढ्नुपर्ने)।</p></div>
-  <div class="card ps-res"><h2>तपाईंको अनुमानित स्तर</h2><div class="ps-big" style="color:var(--shu)">${est?est.toUpperCase():'N5 भन्दा तल'}</div>
+  $('#psBody').innerHTML=`<div class="card ps-res"><h2>${cur.lv.toUpperCase()} Result</h2><div class="ps-big">${cur.p}%</div>${line('k')}${line('v')}${line('g')}
+  <p class="ps-note">✓ = I know it, ✗ = not yet (study more).</p></div>
+  <div class="card ps-res"><h2>Your estimated level</h2><div class="ps-big" style="color:var(--shu)">${est?est.toUpperCase():'Below N5'}</div>
   <p class="ps-note">कुनै स्तर र त्यसभन्दा सजिला सबै स्तरमा ६०% वा बढी आएमा त्यो स्तर मानिन्छ। अर्को स्तरको सूचीमा पनि ✓ लगाएर हेर्नुहोस्।</p>
-  <table class="ps-tbl"><tr><th>JLPT</th><th>कान्जी</th><th>शब्द</th><th>व्याकरण</th><th>%</th></tr>${rows.slice().reverse().map(r=>`<tr class="${r.lv===est?'me':''}"><td>${r.lv.toUpperCase()}</td><td>${r.k[0]}/${r.k[1]}</td><td>${r.v[0]}/${r.v[1]}</td><td>${r.g[0]}/${r.g[1]}</td><td>${r.p}%</td></tr>`).join('')}</table>
-  <h3 style="margin:16px 0 4px">JLPT स्तर र आवश्यक पढाइ</h3>
-  <table class="ps-tbl"><tr><th>JLPT</th><th>पढाइ समय</th><th>कान्जी</th><th>शब्द</th></tr>${LV.slice().reverse().map(l=>`<tr><td>${l.toUpperCase()}</td><td>${LVINFO[l][0]} घण्टा</td><td>करिब ${LVINFO[l][1]}</td><td>करिब ${LVINFO[l][2]}</td></tr>`).join('')}</table>
+  <table class="ps-tbl"><tr><th>JLPT</th><th>Kanji</th><th>Words</th><th>Grammar</th><th>%</th></tr>${rows.slice().reverse().map(r=>`<tr class="${r.lv===est?'me':''}"><td>${r.lv.toUpperCase()}</td><td>${r.k[0]}/${r.k[1]}</td><td>${r.v[0]}/${r.v[1]}</td><td>${r.g[0]}/${r.g[1]}</td><td>${r.p}%</td></tr>`).join('')}</table>
+  <h3 style="margin:16px 0 4px">JLPT levels and study needed</h3>
+  <table class="ps-tbl"><tr><th>JLPT</th><th>Study time</th><th>Kanji</th><th>Words</th></tr>${LV.slice().reverse().map(l=>`<tr><td>${l.toUpperCase()}</td><td>${LVINFO[l][0]} h</td><td>~${LVINFO[l][1]}</td><td>~${LVINFO[l][2]}</td></tr>`).join('')}</table>
   <p class="ps-note">यो वेबसाइटको सूचीमा: N5 कान्जी 103/शब्द 718, N4 144/668, N3 366/2140, N2 367/1906, N1 1232/2699 (हरेक स्तरमा त्यही स्तरका मात्र; अघिल्लो स्तरका दोहोरिँदैनन्। माथिल्लो तहको कान्जी भएको शब्द हिरागानामा देखाइन्छ)।</p></div>
-  <button class="btn ghost" id="psWrong">✗ नआउने ${KIND.k[1]}/${KIND.v[1]} मात्र हेर्नुहोस्</button><div id="psWL"></div>`+credit();
+  <button class="btn ghost" id="psWrong">Show only ✗ ${KIND.k[1]}/${KIND.v[1]} I don't know</button><div id="psWL"></div>`+credit();
   $('#psWrong').onclick=async()=>{
     const d=await load(cur.lv);let h='';
     for(const k of ['k','v']){const S=getSet(cur.lv,k);const L=d[k].map((x,i)=>[x,i]).filter(([x,i])=>!S.has(i));
-      h+=`<h3>${KIND[k][1]} ✗ ${L.length}</h3><div class="ps-grid ps-${cur.lv}">${L.slice(0,300).map(([x,i])=>`<div class="ps-cell" data-k="${k}" data-c="${i}"><div class="top"><span>${String(i+1).padStart(3,'0')}</span></div><div class="w ${k==='k'?'kj':''}">${E(label(k,x))}</div><span class="i">i</span></div>`).join('')}</div>${L.length>300?'<p class="ps-note">पहिलो ३०० मात्र देखाइएको।</p>':''}`}
+      h+=`<h3>${KIND[k][1]} ✗ ${L.length}</h3><div class="ps-grid ps-${cur.lv}">${L.slice(0,300).map(([x,i])=>`<div class="ps-cell" data-k="${k}" data-c="${i}"><div class="top"><span>${String(i+1).padStart(3,'0')}</span></div><div class="w ${k==='k'?'kj':''}">${E(label(k,x))}</div><span class="i">i</span></div>`).join('')}</div>${L.length>300?'<p class="ps-note">Showing the first 300 only.</p>':''}`}
     $('#psWL').innerHTML=h;
     document.querySelectorAll('#psWL .ps-cell').forEach(c=>c.onclick=()=>info(c.dataset.k,cur.lv,+c.dataset.c));
   };
 }
 
 function modal(html){
-  const m=document.createElement('div');m.className='ps-modal';m.innerHTML=`<div class="ps-sheet" role="dialog" aria-modal="true"><button class="x" aria-label="बन्द">✕</button>${html}</div>`;
+  const m=document.createElement('div');m.className='ps-modal';m.innerHTML=`<div class="ps-sheet" role="dialog" aria-modal="true"><button class="x" aria-label="Close">✕</button>${html}</div>`;
   document.body.appendChild(m);const close=()=>m.remove();m.onclick=e=>{if(e.target===m)close()};m.querySelector('.x').onclick=close;
   return m;
 }
@@ -204,18 +204,18 @@ const RM=(()=>{const m={};const base='あa い i う u え e お o か ka き ki
   if('ゃゅょ'.includes(n)&&m[c]){const v={'ゃ':'a','ゅ':'u','ょ':'o'}[n];let r=m[c];r=/^(shi|chi|ji)$/.test(r)?r.slice(0,-1)+v:r.slice(0,-1)+'y'+v;o+=r;i++;continue}
   if(c==='っ'){const r=n&&m[n];o+=r?r[0]:'';continue}if(c==='ー'){o+=o.slice(-1);continue}o+=m[c]!=null?m[c]:c}return o}})();
 async function showKanji(ch,lv){
-  const [b,W]=await Promise.all([kanjiBlock(ch,lv),kwords()]);if(!b){modal(`<p>${E(ch)}: जानकारी छैन।</p>`);return}
+  const [b,W]=await Promise.all([kanjiBlock(ch,lv),kwords()]);if(!b){modal(`<p>${E(ch)}: no data.</p>`);return}
   const {x,P}=b;const L=b.lv.toUpperCase();
   const KT=t=>t.replace(/[ぁ-ゖ]/g,c=>String.fromCharCode(c.charCodeAt(0)+96));const on=KT(String(x[1]||'')).split(/[、,・\s]+/).filter(Boolean),kun=String(x[2]||'').split(/[、,・\s]+/).filter(Boolean);
   const rcol=(t,a)=>`<div class="kc-rd"><div class="h">${t}</div>${a.length?a.map(r=>`<div class="r"><b>${E(RD(r).replace(/-/g,"〜"))}</b><span>${E(RM(r.replace(/[.\-]/g,'')))}</span></div>`).join(''):'<div class="r">—</div>'}</div>`;
   const ws=(W[ch]||[]);
   const m=modal(`<div class="kc">
-   <div class="kc-top"><span class="kc-lv kc-${b.lv}">JLPT ${L}</span><span class="kc-st">${P.length} strokes · ${P.length} रेखा</span></div>
+   <div class="kc-top"><span class="kc-lv kc-${b.lv}">JLPT ${L}</span><span class="kc-st">${P.length} strokes · ${P.length}画</span></div>
    <div class="kc-main"><div class="kc-big">${E(x[0])}</div>${svgOf(P)}</div>
    <div class="kc-mean"><div class="ne">${E(x[4])}</div><div class="en">${E(String(x[3]||'').toLowerCase())}</div></div>
    <div class="kc-rds">${rcol('音読み Onyomi',on)}${rcol('訓読み Kunyomi',kun)}</div>
-   <p class="ps-note" style="text-align:center;margin:8px 0">लेख्ने तरिका (stroke order): रेखा क्रमैसँग कोरिन्छ। <button class="btn ghost" id="psRe" style="padding:5px 12px">▶ फेरि</button></p>
-   ${ws.length?`<div class="kc-wh">यो कान्जीबाट बन्ने शब्द · Common words</div><div class="kc-ws">${ws.map(w=>`<div class="kc-w"><div class="j"><b>${E(w[0])}</b>【${E(w[1])}】<i class="kc-lv kc-n${w[4]}">N${w[4]}</i></div><div class="m">${E(w[3])} · <span>${E(w[2])}</span></div></div>`).join('')}</div>`:''}
+   <p class="ps-note" style="text-align:center;margin:8px 0">Stroke order (書き順): the strokes are drawn in order. <button class="btn ghost" id="psRe" style="padding:5px 12px">▶ Again</button></p>
+   ${ws.length?`<div class="kc-wh">Common words · この漢字の言葉</div><div class="kc-ws">${ws.map(w=>`<div class="kc-w"><div class="j"><b>${E(w[0])}</b>【${E(w[1])}】<i class="kc-lv kc-n${w[4]}">N${w[4]}</i></div><div class="m">${E(w[3])} · <span>${E(w[2])}</span></div></div>`).join('')}</div>`:''}
   </div>`);
   const svg=m.querySelector('svg');animate(svg);m.querySelector('#psRe').onclick=()=>animate(svg);
 }
