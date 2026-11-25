@@ -666,6 +666,7 @@ details.codebox{margin-top:10px}details.codebox summary{cursor:pointer;color:var
 .lbcard{margin:14px 0}.lb-h{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline}.lb-h span{font-weight:700;color:var(--gold,#e3a200)}.lb-bar{height:10px;border-radius:99px;background:rgba(127,127,127,.2);margin:8px 0 10px;overflow:hidden}.lb-bar i{display:block;height:100%;background:linear-gradient(90deg,#e3a200,#e5193f);border-radius:99px}.lb-l{list-style:none;margin:6px 0 10px;padding:0;display:grid;gap:4px}.lb-l li{display:flex;gap:10px;align-items:center;padding:6px 10px;border-radius:10px;background:rgba(127,127,127,.08)}.lb-l li span{width:28px;text-align:center}.lb-l li b{flex:1}.lb-l li em{font-style:normal;font-weight:800}.lb-l li.me{outline:2px solid var(--gold,#e3a200)}
 .instcard{margin:14px 0;border:1.5px dashed var(--gold,#e3a200)}.instcard:empty{display:none}.in-row{display:flex;gap:12px;align-items:center;margin-bottom:10px}.in-ic{font-size:2rem}.in-row small{display:block;opacity:.8}
 .storyc .st-lv{font-weight:800;color:var(--gold,#e3a200);margin-bottom:6px}#storyHome .btn{margin-top:10px}
+.clsl{margin:8px 0;padding-left:4px;list-style:none;display:grid;gap:6px}.clscard{display:flex;gap:14px;align-items:center;margin:14px 0;text-decoration:none;color:inherit;border:1.5px solid var(--ai,#2443e8)}.clscard i{font-style:normal;font-size:1.6rem;font-weight:900;width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,#2443e8,#e5193f);color:#fff}.clscard div{flex:1}.clscard span{display:block;opacity:.8;font-size:.88rem}.clscard em{font-style:normal;font-size:1.3rem}
 </style>
 <div id="app"><div class="loginwrap"><div class="aur a1"></div><div class="aur a2"></div></div></div>
 <div id="toast" class="toast" hidden></div>
@@ -1050,7 +1051,7 @@ function render(){
   if(['n3','n4','n5'].includes(exam())&&DX!==dxOf()){BPLoad(true,'Loading '+exam().toUpperCase()+'…');ensureData().then(()=>{BPLoad(false);render()}).catch(()=>BPLoad(false));return}
   if(false&&['drive','bjt'].includes(exam())&&['home','quiz','mock','review','words','srs','unlock'].includes(r))return driveRoute(r);
   const views={home:renderHome,quiz:renderQuiz,mock:renderMock,review:()=>Q.start({mode:'review'}),words:renderWords,srs:renderSRS,admin:renderAdmin,unlock:renderUnlock};
-  if(r==='acc')return renderAccount();if(r==='pay')return renderPay();if(r==='rate')return renderReview();if(r==='story')return renderStory();if(r==='teacher')return renderTeacher();
+  if(r==='acc')return renderAccount();if(r==='pay')return renderPay();if(r==='rate')return renderReview();if(r==='story')return renderStory();if(r==='class')return renderClass();if(r==='teacher')return renderTeacher();
   if(r==='pass'||r.startsWith('pass/'))return window.renderPass?renderPass():null;
   if(r==='units')return renderUnits();
   if(r==='books')return renderBooks();
@@ -1203,7 +1204,7 @@ function renderHome(){
   <h2 class="hsech"><i>試</i>${ut('setsH')}<small>${D.total||D.q.length} 問</small></h2>
   <div class="setgrid">${[['kanji','漢','STEP 1',t('kanji'),k],['mean','語','STEP 2',t('mean'),m],...[['gram','文',GRAM_T],['read','読',READ_T],['listen','聴',LISTEN_T]].map(([kk,g,T],x)=>[kk,g,'STEP '+(x+3),t(kk),secStats(T)])].filter(r=>r[4].total).map(([kk,g,st,ti,s])=>`<button class="card setc" data-go="${kk}"><span class="sg">${g}</span><small>${st}</small><b>${ti}</b><span class="sn">${s.total} 問</span><span class="sbar"><i style="width:${pct(s)}%"></i></span><span class="sp">${s.done}/${s.total} · ${pct(s)}%</span></button>`).join('')}</div>
   ${['n3','n4','n5'].includes(exam())?hwHome()+booksHome():''}
-  <section id="storyHome" class="revhome"></section><section id="revHome" class="revhome"></section>
+  <a class="card clscard" href="#class"><i>教</i><div><b>Online class with Binod Sensei</b><span>Live lessons in Nepali · JLPT, JFT, 介護 · send a request</span></div><em>→</em></a><section id="storyHome" class="revhome"></section><section id="revHome" class="revhome"></section>
   <div class="grid2">
    <section class="card wotd"><div class="eyebrow">${t('wotd')} · 今日の単語</div><div class="w">${esc(w[0])}</div><div class="r">${esc(w[1])}</div><div class="mn"><span class="tag">NE</span>${esc(w[2])}</div><div class="mn"><span class="tag">EN</span>${esc(w[3])}</div>
    <div class="row" style="margin-top:12px"><button class="speak inv" data-say="${esc(w[1])}">▶ ${t('say')}</button><button class="speak inv" data-kanji="${esc(w[0])}">漢 ${t('kcard')}</button></div></section>
@@ -1750,6 +1751,9 @@ function fbApi(){
     async myStory(uid){try{const s=await F.doc('stories/'+uid).get();return s.exists?s.data():null}catch(e){return null}},
     async stories(all){const q=all?await F.collection('stories').get():await F.collection('stories').where('show','==',true).get();return q.docs.map(norm).sort((a,b)=>b.created-a.created)},
     showStory:(id,v)=>F.doc('stories/'+id).update({show:v}),
+    classReq:(uid,o)=>F.collection('classreq').add(Object.assign({uid,status:'new',created:TS()},o)),
+    async classReqs(){const q=await F.collection('classreq').get();return q.docs.map(norm).sort((a,b)=>b.created-a.created)},
+    classMark:(id,o)=>F.doc('classreq/'+id).update(o),
     reviewsPublic:async()=>{try{const q=await F.collection('reviews').where('show','==',true).get();return q.docs.map(norm)}catch(e){return[]}},
     hwSend:(uid,o)=>F.collection('hw').add(Object.assign({},o,{uid,status:'new',created:TS()})),
     async myHw(uid){const q=await F.collection('hw').where('uid','==',uid).get();return q.docs.map(norm).sort((a,b)=>b.created-a.created)},
@@ -1791,6 +1795,9 @@ function mockApi(){/* localhost test double with the same shape as fbApi */
     async myStory(uid){return (db().stories||{})[uid]||null},
     async stories(all){return Object.entries(db().stories||{}).map(([id,r])=>Object.assign({id},r)).filter(r=>all||r.show)},
     async showStory(id,v){const d=db();d.stories[id].show=v;put(d)},
+    async classReq(uid,o){const d=db();d.cr=d.cr||{};d.cr['c'+Date.now()]=Object.assign({uid,status:'new',created:Date.now()},o);put(d)},
+    async classReqs(){return Object.entries(db().cr||{}).map(([id,r])=>Object.assign({id},r))},
+    async classMark(id,o){const d=db();Object.assign(d.cr[id],o);put(d)},
     async reviewsPublic(){return Object.values(db().reviews).filter(r=>r.show)},
     async hwSend(uid,o){const d=db();d.hw=d.hw||{};d.hw['h'+Date.now()]=Object.assign({},o,{uid,status:'new',created:Date.now()});put(d)},
     async myHw(uid){return Object.entries(db().hw||{}).map(([id,h])=>Object.assign({id},h)).filter(h=>h.uid===uid).sort((a,b)=>b.created-a.created)},
@@ -1877,6 +1884,26 @@ function renderReview(){
   $$('[data-s]').forEach(b=>b.onclick=()=>{s=+b.dataset.s;paint()});
   $('#rvB').onclick=async()=>{try{await BE.api.review(BE.user.uid,{name:(BE.prof&&BE.prof.name)||'',stars:s,text:$('#rvT').value.trim()});toast(at('revOk'));location.hash='#acc'}catch(x){toast(at('err'))}};
 }
+/* ---- live / online class with Binod: students send a request, teacher answers ---- */
+function renderClass(){
+  if(!BE.ready&&BE.ok){shell('class',`<div class="card empty">…</div>`);return}
+  const sig=BE.ok&&BE.user;
+  shell('class',`${ph('教','Online class with Binod Paudel · オンライン授業','')}
+  <section class="card accbox"><h3>👨‍🏫 Learn live with Binod Sensei</h3>
+   <ul class="clsl"><li>📹 Online (Zoom / Google Meet) or in person</li><li>🎯 JLPT N5–N1, JFT-Basic, 介護 (nursing care), interview practice</li><li>🇳🇵 Explanations in Nepali, small groups</li><li>📚 Uses the BP Nihongo Hub books, model tests and homework</li></ul>
+   <p class="muted">Send your request. Binod will contact you with the times and price.</p></section>
+  <section class="card accbox">${sig?`<form id="crF" class="eform">
+   <label>Course<select id="crL">${['N5','N4','N3','N2','N1','JFT-Basic','介護 (Nursing care)','Interview / 面接','Other'].map(l=>`<option>${l}</option>`).join('')}</select></label>
+   <label>Online or in person<select id="crM"><option>Online</option><option>In person</option><option>Either</option></select></label>
+   <label>Good days / times<input id="crT" maxlength="80" placeholder="e.g. Sat/Sun evening (Japan time)"></label>
+   <label>How to contact you (phone / Messenger / Viber / LINE)<input id="crC" maxlength="100"></label>
+   <label>Message (optional)<textarea id="crX" rows="3" maxlength="500"></textarea></label>
+   <button class="btn grad">Send request</button><div class="err" id="crE"></div></form>`:`<p>Please sign in first, then send your request.</p><a class="btn grad" href="#acc">Sign in →</a>`}</section>
+  <section class="card accbox"><h3>🏫 For schools and consultancies</h3><p class="muted">Want BP Nihongo Hub for your students (codes for a whole class, teacher dashboard, class reports)? Choose "Other" above and write your school name.</p></section>`);
+  const f=$('#crF');if(f)f.onsubmit=async e=>{e.preventDefault();const c=$('#crC').value.trim();if(c.length<3){$('#crE').textContent='Please write how to contact you.';return}
+    try{await BE.api.classReq(BE.user.uid,{name:String((BE.prof&&BE.prof.name)||'').slice(0,60),email:String(BE.user.email||'').slice(0,200),lv:$('#crL').value,mode:$('#crM').value,times:$('#crT').value.trim().slice(0,80),contact:c.slice(0,100),text:$('#crX').value.trim().slice(0,500)});
+      try{fetch('https://ntfy.sh/'+NTFY,{method:'POST',body:'New class request: '+$('#crL').value+' ('+$('#crM').value+'). Open Teacher page.',headers:{Title:'BP Nihongo Hub - class',Tags:'teacher',Click:'https://bpnihongohub.github.io/#teacher'}}).catch(()=>{})}catch(x){}
+      $('#crF').outerHTML='<p>✓ Thank you! Binod will contact you soon.</p>'}catch(x){$('#crE').textContent=at('err')}}}
 /* ---- 合格 pass stories: students write, teacher approves, shown on Home ---- */
 const STLV=['N5','N4','N3','N2','N1','JFT-Basic','介護 (Nursing care)','特定技能 (SSW)','BJT'];
 async function renderStory(){
@@ -1980,6 +2007,7 @@ async function renderTeacher(){
   let HW=null;try{HW=await BE.api.allHw()}catch(e){HW=null}
   let RP=null;try{RP=await BE.api.allRep()}catch(e){RP=null}
   let ST=null;try{ST=await BE.api.stories(true)}catch(e){ST=null}
+  let CR=null;try{CR=(await BE.api.classReqs()).sort((a,b)=>(b.created||0)-(a.created||0))}catch(e){CR=null}
   let TDN=LS.get('todo',{});try{TDN=Object.assign({},TDN,await BE.api.todoGet())}catch(e){}
   shell('teacher',`${ph('師',at('tT'),new Date().toISOString().slice(0,10))}
   <div class="erow" style="margin:0 0 12px">${['n5','n4','n3'].map(c=>`<button class="chip ${c===tc?'on':''}" data-tc="${c}">${PAYC(c)}</button>`).join('')}</div>
@@ -2017,6 +2045,8 @@ async function renderTeacher(){
   <h2 class="hsech"><i>★</i>${at('revs')} (${RV.length})</h2>
   ${RV.map(r=>`<div class="card trev"><div><span class="st">${stars(r.stars||0)}</span> <b>${esc(r.name||'')}</b><p>${esc(r.text||'')}</p><small>${fdate(r.created)}</small></div><button class="chip ${r.show?'on':''}" data-rv="${r.id}" data-v="${r.show?0:1}">${r.show?at('hide'):at('show')}</button></div>`).join('')||`<p class="muted">${at('none')}</p>`}
   <section class="card" style="margin:12px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><div style="flex:1;min-width:200px"><b>💾 Backup</b><p class="muted" style="margin:4px 0 0">Download all students, payments, reviews, homework and reports as one file. Do it once a month and keep it in Google Drive.</p></div><button class="btn ghost" id="tBak">⬇ Download backup (JSON)</button><a class="btn grad" href="tools/post.html" target="_blank" rel="noopener">📸 Daily post maker</a></section>
+  <h2 class="hsech"><i>教</i>Class requests (${CR?CR.filter(c=>c.status!=='done').length+' new / '+CR.length:'—'})</h2>
+  ${CR==null?`<p class="muted">To receive class requests, paste the new Firebase rules (firebase-rules.txt).</p>`:CR.slice(0,60).map(c=>`<div class="card trev"><div style="flex:1"><b>${esc(c.lv||'')} · ${esc(c.mode||'')}</b> · ${esc(c.name||'')} <small>${esc(c.email||'')}</small><p>📞 ${esc(c.contact||'')}<br>🕒 ${esc(c.times||'')}${c.text?'<br>'+esc(c.text):''}</p><small>${fdate(c.created)}</small></div><button class="chip ${c.status==='done'?'on':''}" data-crd="${c.id}">${c.status==='done'?'✓ Contacted':'Mark contacted'}</button></div>`).join('')||`<p class="muted">${at('none')}</p>`}
   <h2 class="hsech"><i>祝</i>Pass stories (${ST?ST.filter(s=>!s.show).length+' new / '+ST.length:'—'})</h2>
   ${ST==null?`<p class="muted">To receive pass stories, paste the new Firebase rules (firebase-rules.txt).</p>`:ST.map(s=>`<div class="card trev"><div style="flex:1"><b>🎉 ${esc(s.lv||'')} ${esc(s.when||'')} ${esc(s.score||'')}</b> · ${esc(s.name||'')}<p>${esc(s.text||'')}</p><small>${fdate(s.created)}</small></div><button class="chip ${s.show?'on':''}" data-stv="${s.id}" data-v="${s.show?0:1}">${s.show?at('hide'):at('show')}</button></div>`).join('')||`<p class="muted">${at('none')}</p>`}
   <h2 class="hsech"><i>⚑</i>Mistake reports (${RP?RP.filter(r=>r.status!=='fixed').length+' new / '+RP.length:'—'})</h2>
@@ -2027,6 +2057,7 @@ async function renderTeacher(){
   $('#tBak').onclick=async()=>{const b=$('#tBak');b.disabled=true;try{const o={site:'bpnihongohub.github.io',at:new Date().toISOString(),users:U,pay:PH.length?PH:PY,reviews:RV,hw:HW||[],reports:RP||[]};
     const blob=new Blob([JSON.stringify(o,(k,v)=>v&&v.toMillis?v.toMillis():v,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='bp-nihongo-hub-backup-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.parentNode.removeChild(a)},500);toast('✓')}catch(e){toast(at('err'))}b.disabled=false};
   $$('[data-cls]').forEach(b=>b.onclick=()=>{TD.cls=b.dataset.cls;renderTeacher()});
+  $$('[data-crd]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await BE.api.classMark(b.dataset.crd,{status:'done'})}catch(e){toast(at('err'))}renderTeacher()});
   $$('[data-stv]').forEach(b=>b.onclick=async()=>{try{await BE.api.showStory(b.dataset.stv,b.dataset.v==='1')}catch(e){toast(at('err'))}renderTeacher()});
   $$('[data-rpf]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await BE.api.repMark(b.dataset.rpf,{status:'fixed'});toast('✓')}catch(e){toast(at('err'))}renderTeacher()});
   $$('[data-hw]').forEach(b=>b.onclick=async()=>{const c=($(`[data-hwc="${b.dataset.hw}"]`)||{}).value||'';b.disabled=true;try{await BE.api.hwMark(b.dataset.hw,{status:'checked',comment:c});toast('✓')}catch(e){toast(at('err'))}renderTeacher()});
