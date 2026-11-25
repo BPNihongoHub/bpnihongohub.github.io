@@ -1,0 +1,44 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex"><title>Voice Recorder</title><link rel="icon" href="../icon-192.png">
+<style>
+:root{--bg:#f4f6fc;--card:#fff;--ink:#0a1440;--line:#dfe3f0;--ai:#2443e8;--red:#e5193f;--mut:#5b6383}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0b1030;--card:#141a42;--ink:#eef1ff;--line:#283066;--mut:#a9b0d6}}
+:root[data-theme=dark]{--bg:#0b1030;--card:#141a42;--ink:#eef1ff;--line:#283066;--mut:#a9b0d6}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,'Noto Sans JP',sans-serif}
+.w{max-width:760px;margin:0 auto;padding:16px}h1{font-size:1.3rem;margin:4px 0}.m{color:var(--mut);font-size:.9rem}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}select,button,input{font:inherit;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}.q.done{border-color:#1aa56b}
+.id{font-weight:800;color:var(--ai)}.ln{margin:4px 0}.sp{display:inline-block;min-width:34px;font-weight:800}.F{color:var(--red)}.M{color:var(--ai)}.N{color:var(--mut)}
+.jp{font-size:1.12rem}button.rec{background:var(--red);color:#fff;border-color:var(--red);font-weight:800}button.rec.on{animation:p 1s infinite}@keyframes p{50%{opacity:.5}}
+audio{height:36px;vertical-align:middle}
+</style></head><body><div class="w">
+<h1>🎙 Listening voice recorder · 聴解の録音</h1>
+<p class="m">For Binod: open <b>private/voice/listening-scripts.json</b> (from the project files), pick a level and set, then record each question in your own voice. Read the intro, the conversation (女 = woman, 男 = man), then the question and, for 問題4/5, the choices. Use earphones with a mic in a quiet room. Each recording downloads with its own name; send the files in the chat.</p>
+<div class="row"><input type="file" id="f" accept=".json,application/json"><select id="lv"></select><select id="set"></select></div>
+<div id="list"><p class="m">Choose the scripts file first.</p></div>
+</div>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let DATA=null,rec=null,chunks=[],stream=null;const done=new Set(JSON.parse(localStorage.getItem('rec_done')||'[]'));
+$('#f').onchange=async e=>{const fl=e.target.files[0];if(!fl)return;DATA=JSON.parse(await fl.text());$('#lv').innerHTML=Object.keys(DATA).map(k=>`<option>${k}</option>`).join('');fillSets()};
+function fillSets(){const L=DATA[$('#lv').value];const sets=[...new Set(L.map(q=>q.id.split('-')[1]))];$('#set').innerHTML=sets.map(s=>`<option>${s}</option>`).join('');draw()}
+$('#lv').onchange=fillSets;$('#set').onchange=draw;
+const SPK={F:'女',M:'男',N:'ナ'};
+function draw(){const L=DATA[$('#lv').value].filter(q=>q.id.split('-')[1]===$('#set').value);
+  $('#list').innerHTML=L.map(q=>`<div class="q ${done.has(q.id)?'done':''}" data-id="${q.id}"><div class="id">${q.id} · 問題${q.mo||''} ${done.has(q.id)?'✓':''}</div>
+   ${q.in?`<div class="ln jp"><span class="sp N">ナ</span>${esc(q.in)}</div>`:''}
+   ${q.sc.map(([s,tx])=>`<div class="ln jp"><span class="sp ${s}">${SPK[s]||s}</span>${esc(tx)}</div>`).join('')}
+   ${q.q?`<div class="ln jp"><span class="sp N">ナ</span>${esc(q.q)}</div>`:''}
+   ${[4,5].includes(+q.mo)&&q.o.length?`<div class="ln jp"><span class="sp N">ナ</span>${q.o.map((o,i)=>(i+1)+'. '+esc(o)).join('　')}</div>`:''}
+   <div class="row"><button class="rec">● Record</button><span class="out"></span></div></div>`).join('');
+  document.querySelectorAll('.q').forEach(box=>{const b=box.querySelector('.rec');b.onclick=()=>toggle(box,b)})}
+async function toggle(box,b){
+  if(rec&&rec.state==='recording'){rec.stop();return}
+  try{stream=stream||await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}})}catch(e){alertBox(box,'Microphone not allowed. Please allow the mic and try again.');return}
+  const mt=['audio/webm;codecs=opus','audio/mp4','audio/webm'].find(t=>window.MediaRecorder&&MediaRecorder.isTypeSupported(t))||'';
+  rec=new MediaRecorder(stream,mt?{mimeType:mt}:{});chunks=[];rec.ondataavailable=e=>chunks.push(e.data);
+  rec.onstop=()=>{b.classList.remove('on');b.textContent='● Record again';const bl=new Blob(chunks,{type:rec.mimeType||'audio/webm'});const u=URL.createObjectURL(bl);const ext=/mp4/.test(bl.type)?'m4a':'webm';const id=box.dataset.id;
+    box.querySelector('.out').innerHTML=`<audio controls src="${u}"></audio> <a href="${u}" download="${id}.${ext}">⬇ Save ${id}.${ext}</a>`;done.add(id);localStorage.setItem('rec_done',JSON.stringify([...done]));box.classList.add('done')};
+  rec.start();b.classList.add('on');b.textContent='■ Stop'}
+function alertBox(box,m){box.querySelector('.out').textContent=m}
+</script></body></html>
