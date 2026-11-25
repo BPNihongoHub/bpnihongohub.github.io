@@ -1081,7 +1081,7 @@ function shell(active,inner){
   $('#app').innerHTML=`<header class="top"><div class="in"><a class="brand" href="#home">${hanko('hk')}<div><b>BP Nihongo <em>Hub</em></b><small>日本語 · <strong>JLPT</strong></small></div></a>
   <div class="tools">${langSel('langTop')}<button class="iconbtn" id="themeBtn" aria-label="${t('theme')}">◐</button><a class="iconbtn accbtn ${BE.user?'in':''}" href="#acc" aria-label="${at('acc')}">${BE.user?esc(((BE.prof&&BE.prof.name)||BE.user.email||'?').trim().charAt(0).toUpperCase()||'人'):'人'}</a>${UNL?'':`<a class="iconbtn lockbtn" href="#unlock" aria-label="${t('unlockT')}">🔒</a>`}</div>
   ${nav('tabs')}</div></header>${stBar(active)}<main class="wrap">${inner}</main>
-  <footer class="wrap foot-note">© BP Nihongo Hub · Binod Paudel · <a href="legal.html" style="color:inherit">Terms · Privacy · 特定商取引法</a></footer>${bnav}`;
+  <footer class="wrap foot-note">© BP Nihongo Hub · Binod Paudel · <a href="lists/" style="color:inherit">Free JLPT N5–N1 lists</a> · <a href="legal.html" style="color:inherit">Terms · Privacy · 特定商取引法</a></footer>${bnav}`;
   bindLang('langTop');
   const sb=$('#stbar button');if(sb)sb.onclick=()=>{LS.set(sb.dataset.k,1);sb.parentNode.remove()};
   const mb=$('#moreBtn'),ms=$('#moreSheet');if(mb){mb.onclick=e=>{e.stopPropagation();ms.hidden=!ms.hidden;mb.setAttribute('aria-expanded',!ms.hidden)};ms.onclick=e=>{if(e.target===ms)ms.hidden=true};ms.querySelectorAll('a').forEach(x=>x.onclick=()=>{ms.hidden=true})}

@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url><loc>https://bpnihongohub.github.io/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+<url><loc>https://bpnihongohub.github.io/lists/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+<url><loc>https://bpnihongohub.github.io/lists/n5-kanji-nepali.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+<url><loc>https://bpnihongohub.github.io/lists/n5-vocabulary-nepali.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+<url><loc>https://bpnihongohub.github.io/lists/n5-grammar-nepali.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+<url><loc>https://bpnihongohub.github.io/lists/n4-kanji-nepali.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+<url><loc>https://bpnihongohub.github.io/lists/n4-vocabulary-nepali.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+<url><loc>https://bpnihongohub.github.io/lists/n4-grammar-nepali.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+<url><loc>https://bpnihongohub.github.io/lists/n3-kanji-nepali.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+<url><loc>https://bpnihongohub.github.io/lists/n3-vocabulary-nepali.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+<url><loc>https://bpnihongohub.github.io/lists/n3-grammar-nepali.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+<url><loc>https://bpnihongohub.github.io/lists/n2-kanji-nepali.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+<url><loc>https://bpnihongohub.github.io/lists/n2-vocabulary-nepali.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+<url><loc>https://bpnihongohub.github.io/lists/n2-grammar-nepali.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+<url><loc>https://bpnihongohub.github.io/lists/n1-kanji-nepali.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+<url><loc>https://bpnihongohub.github.io/lists/n1-vocabulary-nepali.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+<url><loc>https://bpnihongohub.github.io/lists/n1-grammar-nepali.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
 <url><loc>https://bpnihongohub.github.io/legal.html</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
 </urlset>
