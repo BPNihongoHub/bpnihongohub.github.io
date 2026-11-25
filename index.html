@@ -1496,6 +1496,7 @@ async function decStrip(src){const buf=new Uint8Array(await fetch(src).then(r=>r
    FBCONF stays null until Binod creates his Firebase project; then paste the config here.
    PAY.on stays false until Binod confirms price + free rules (locks are OFF meanwhile). */
 const FBCONF={apiKey:"AIzaSyDe-FSQzW7RaAMCAS81ghbBLYMI5kB-zzk",authDomain:"binod-paudel.firebaseapp.com",projectId:"binod-paudel",storageBucket:"binod-paudel.firebasestorage.app",messagingSenderId:"589004931560",appId:"1:589004931560:web:a7a205b8ef231749dbe45d"};/* public web config (not a secret) */
+const NTFY='bpnh-pay-c9b102a9ce94';/* teacher phone push via ntfy.sh (free): only course/amount/method are sent, never student name/email */
 const PAY={on:true,price:2000,cur:'¥',course:'JLPT N3',months:6,qr:'pay/qr.png',pp:'https://qr.paypay.ne.jp/p2p01_qBJtme3wtzK9CSCZ',ppid:'binodpaudel',link:''};/* link = Stripe Payment Link (card + konbini) once Binod creates it */
 const SIXM=()=>183*864e5;
 const tms=v=>v&&v.toMillis?v.toMillis():(+v||0);
@@ -1594,6 +1595,7 @@ function fbApi(){
     async reviews(all){const q=all?await F.collection('reviews').get():await F.collection('reviews').where('show','==',true).get();return q.docs.map(norm).sort((a,b)=>b.created-a.created)},
     async users(){const q=await F.collection('users').get();return q.docs.map(norm)},
     async pays(){const q=await F.collection('pay').where('status','==','pending').get();return q.docs.map(norm)},
+    async payHist(){const q=await F.collection('pay').where('status','in',['approved','rejected']).get();return q.docs.map(norm).sort((a,b)=>(b.decided||b.created)-(a.decided||a.created))},
     async decide(p,ok){const b=F.batch();b.update(F.doc('pay/'+p.id),{status:ok?'approved':'rejected',decided:TS()});
       if(ok){const c=p.course||'n3',s=await F.doc('users/'+p.uid).get(),cur=s.exists?untilOf(s.data(),c):0,until=firebase.firestore.Timestamp.fromMillis(Math.max(Date.now(),cur)+SIXM());
         b.update(F.doc('users/'+p.uid),c==='n3'?{paid:true,paidAt:TS(),paidUntil:until}:{['pu.'+c]:until})}await b.commit()},
@@ -1624,6 +1626,7 @@ function mockApi(){/* localhost test double with the same shape as fbApi */
     async reviews(all){return Object.entries(db().reviews).map(([id,r])=>Object.assign({id},r)).filter(r=>all||r.show)},
     async users(){return Object.entries(db().users).map(([id,u])=>Object.assign({id},u))},
     async pays(){return Object.entries(db().pay).map(([id,p])=>Object.assign({id},p)).filter(p=>p.status==='pending')},
+    async payHist(){return Object.entries(db().pay).map(([id,p])=>Object.assign({id},p)).filter(p=>p.status!=='pending').sort((a,b)=>(b.decided||b.created)-(a.decided||a.created))},
     async decide(p,ok){const d=db();d.pay[p.id].status=ok?'approved':'rejected';if(ok){const u=d.users[p.uid],c=p.course||'n3',t=Math.max(Date.now(),untilOf(u,c))+SIXM();if(c==='n3'){u.paid=true;u.paidUntil=t}else{u.pu=u.pu||{};u.pu[c]=t}}put(d)},
     async setPaid(uid,v,c){const d=db();const u=d.users[uid];c=c||'n3';if(c==='n3'){u.paid=v;u.paidUntil=v?Date.now()+SIXM():null}else{u.pu=u.pu||{};u.pu[c]=v?Date.now()+SIXM():null}put(d)},
     async showReview(id,v){const d=db();d.reviews[id].show=v;put(d)},
@@ -1667,11 +1670,14 @@ async function renderAccount(){
    ${!isPaidP(p)&&PAY.on&&!pend?`<a class="btn grad" href="#pay">💳 ${at('payT')} · ${PAY.cur}${PAY.price.toLocaleString('en')} · ${at('per6')}</a>`:''}
    <form id="pForm" class="eform"><label>${at('name')}<input id="pName" value="${esc(p.name||'')}"></label><label>${at('phone')}<input id="pPhone" type="tel" value="${esc(p.phone||'')}"></label>
    <button class="btn ghost">${at('save')}</button></form></section>
+  ${mine.length?`<section class="card accbox"><h3>🧾 My payments · 支払い履歴</h3><table class="ptbl" style="width:100%;font-size:13px;border-collapse:collapse">${mine.map(x=>`<tr style="border-top:1px solid #e3e8f2"><td>${fdate(x.created)}</td><td>${PAYC(x.course||'n3')}</td><td>${PAY.cur}${(+x.amount||PAY.price).toLocaleString('en')}</td><td>${x.status==='approved'?'✅ Approved':x.status==='rejected'?'✕ Rejected':'⏳ Checking'}</td></tr>`).join('')}</table><p class="muted" style="font-size:12px;margin:6px 0 0">✅ = all sets, units and books of that course open for 6 months on this account. No code needed.</p></section>`:''}
   <section class="card accbox"><h3>${at('prog')}</h3><div class="astats"><div><b>${done}</b><span>${at('done')}</span></div><div><b>${done?Math.round(ok*100/done):0}%</b><span>${at('acc2')}</span></div><div><b>${hwp}</b><span>${at('hw')} ✓</span></div></div></section>
   ${BE.err?`<p class="muted" style="text-align:center;font-size:12px;color:var(--shu)">⚠ ${esc(BE.err)}</p>`:''}
   <div class="erow" style="justify-content:center;margin:14px 0"><a class="btn ghost" href="#rate">★ ${at('rev')}</a>${BE.admin?`<a class="btn ghost" href="#teacher">師 ${at('tT')}</a>`:''}<button class="btn ghost" id="outB">${at('logout')}</button></div>`);
   $('#pForm').onsubmit=async e=>{e.preventDefault();const o={name:$('#pName').value.trim().slice(0,60),phone:$('#pPhone').value.trim().slice(0,30)};try{await BE.api.saveProf(BE.user.uid,o);Object.assign(BE.prof,o);toast('✓')}catch(x){toast(at('err'))}};
   $('#outB').onclick=()=>BE.api.out();
+  if(BE.admin)BE.api.pays().then(p=>{if(p.length){toast('🔔 '+p.length+' payment(s) to check');const a=document.querySelector('a[href="#teacher"]');if(a)a.textContent+=' 🔔'+p.length}}).catch(()=>{});
+  try{const seen=LS.get('payseen',{}),nw=mine.filter(x=>x.status==='approved'&&!seen[x.id]);if(nw.length){nw.forEach(x=>seen[x.id]=1);LS.set('payseen',seen);toast('✅ Payment approved! '+PAYC(nw[0].course||'n3')+' is open for 6 months.');beKey()}}catch(e){}
   beSync(true);
 }
 
@@ -1686,7 +1692,7 @@ function renderPay(){
   <label>${at('note')}<input id="pyN" maxlength="200"></label><div class="err" id="pyE" role="alert"></div><button class="btn grad" id="pyB">${at('send')}</button></form></section>`);
   let img='';$('#pyS').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{img=await shrinkImg(f);const pv=$('#pyPrev');pv.src=img;pv.hidden=false}catch(x){img=''}};
   $('#payF').onsubmit=async e=>{e.preventDefault();const txn=$('#pyT').value.trim();if(!img&&!txn){$('#pyE').textContent=at('needShot');return}
-    const b=$('#pyB');b.disabled=true;try{await BE.api.pay(BE.user.uid,{name:(BE.prof&&BE.prof.name)||'',email:BE.user.email||'',method:$('#pyM').value,txn,note:$('#pyN').value.trim(),img,amount:PAY.price,course:dxOf()});toast(at('sent'));location.hash='#acc'}
+    const b=$('#pyB');b.disabled=true;try{await BE.api.pay(BE.user.uid,{name:(BE.prof&&BE.prof.name)||'',email:BE.user.email||'',method:$('#pyM').value,txn,note:$('#pyN').value.trim(),img,amount:PAY.price,course:dxOf()});toast(at('sent'));try{fetch('https://ntfy.sh/'+NTFY,{method:'POST',body:'New payment report: '+PAYC()+' '+PAY.cur+PAY.price.toLocaleString('en')+' ('+$('#pyM').value+'). Open Teacher page to approve.',headers:{Title:'BP Nihongo Hub - payment',Tags:'moneybag',Click:'https://bpnihongohub.github.io/#teacher'}}).catch(()=>{})}catch(e){}location.hash='#acc'}
     catch(x){b.disabled=false;$('#pyE').textContent=at('err')}};
 }
 
@@ -1710,7 +1716,7 @@ const TD={q:'',sort:'last',c:null};
 async function renderTeacher(){
   if(!BE.ok||!BE.admin){location.hash='#acc';return}
   shell('teacher',`${ph('師',at('tT'),'')}<div class="card empty">…</div>`);
-  let U=[],PY=[],RV=[];try{[U,PY,RV]=await Promise.all([BE.api.users(),BE.api.pays(),BE.api.reviews(true)])}catch(e){shell('teacher',`${ph('師',at('tT'),'')}<div class="card empty">${at('err')}</div>`);return}
+  let U=[],PY=[],RV=[],PH=[];try{[U,PY,RV]=await Promise.all([BE.api.users(),BE.api.pays(),BE.api.reviews(true)]);PH=await BE.api.payHist().catch(()=>[])}catch(e){shell('teacher',`${ph('師',at('tT'),'')}<div class="card empty">${at('err')}</div>`);return}
   const wk=Date.now()-7*864e5,act=U.filter(u=>(u.last||0)>=wk).length,tc=TD.c||dxOf(),paid=U.filter(u=>isPaidP(u,tc)).length,avg=RV.length?(RV.reduce((a,r)=>a+(r.stars||0),0)/RV.length).toFixed(1):'—';
   const q=TD.q.toLowerCase(),L=U.filter(u=>!q||(u.name+' '+u.email+' '+u.phone).toLowerCase().includes(q))
     .sort((a,b)=>TD.sort==='name'?String(a.name).localeCompare(b.name):TD.sort==='done'?((b.prog||{}).done||0)-((a.prog||{}).done||0):TD.sort==='joined'?(b.created||0)-(a.created||0):(b.last||0)-(a.last||0));
@@ -1724,6 +1730,8 @@ async function renderTeacher(){
   <h2 class="hsech"><i>¥</i>${at('pays')} (${PY.length})</h2>
   ${PY.length?PY.map(p=>`<div class="card tpay"><div><b>${esc(p.name||p.email||'')}</b><small><b>${PAYC(p.course||'n3')}</b> · ${esc(p.email||'')} · ${esc(p.method||'')} · ${PAY.cur}${esc(p.amount||'')}</small>${p.txn?`<small>ID: ${esc(p.txn)}</small>`:''}${p.note?`<small>${esc(p.note)}</small>`:''}<small>${fdate(p.created)}</small></div>
     ${p.img&&/^data:image\/jpeg;base64,/.test(p.img)?`<a href="#" data-img="${p.id}"><img src="${p.img}" alt="screenshot"></a>`:''}<div class="tbtn"><button class="btn grad" data-ok="${p.id}">✓ ${at('approve')}</button><button class="btn ghost" data-no="${p.id}">✕ ${at('reject')}</button></div></div>`).join(''):`<p class="muted">${at('none')}</p>`}
+  <h2 class="hsech"><i>🧾</i>Bills · 支払い履歴 (${PH.length}) · Total ✅ ${PAY.cur}${PH.filter(p=>p.status==='approved').reduce((a,p)=>a+(+p.amount||0),0).toLocaleString('en')}</h2>
+  ${PH.length?`<div class="card" style="overflow-x:auto"><table style="width:100%;font-size:13px;border-collapse:collapse"><tr><th align="left">Date</th><th align="left">Student</th><th align="left">Course</th><th align="left">Method</th><th align="left">Amount</th><th align="left">Status</th></tr>${PH.slice(0,200).map(p=>`<tr style="border-top:1px solid #e3e8f2"><td>${fdate(p.decided||p.created)}</td><td>${esc(p.name||'')}<br><small class="muted">${esc(p.email||'')}</small></td><td>${PAYC(p.course||'n3')}</td><td>${esc(p.method||'')}${p.txn?`<br><small class="muted">${esc(p.txn)}</small>`:''}</td><td>${PAY.cur}${(+p.amount||0).toLocaleString('en')}</td><td>${p.status==='approved'?'✅':'✕'}</td></tr>`).join('')}</table></div>`:`<p class="muted">—</p>`}
   <h2 class="hsech"><i>人</i>${at('students')} (${U.length})</h2>
   <div class="ttools"><input id="tq" placeholder="${at('search')}" value="${esc(TD.q)}"><select id="tsort">${[['last',at('last')],['joined',at('joined')],['done',at('done')],['name',at('name')]].map(([k,l])=>`<option value="${k}" ${TD.sort===k?'selected':''}>${l}</option>`).join('')}</select></div>
   <div class="tscroll"><table class="ttab"><thead><tr><th>${at('name')}</th><th>${at('last')}</th><th>${at('done')}</th><th>${at('acc2')}</th><th>${at('hw')} ✓</th><th>${at('joined')}</th><th></th></tr></thead><tbody>
