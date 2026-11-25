@@ -1322,7 +1322,16 @@ function renderPage(){
 }
 function scriptBox(q){const nm={M:'男',F:'女',N:'ナレーター'};const L=[];if(q.in)L.push(['N',q.in]);q.sc.forEach(l=>L.push(l));if((q.lm||q.mo)<=3&&q.q)L.push(['N',q.q]);
   return `<details class="script" open><summary>${t('script')}</summary>${L.map(([sp,tx])=>`<div><b>${nm[sp]||sp}：</b>${esc(tx)}</div>`).join('')}${(q.lm||q.mo)>=3?`<div class="muted" style="margin-top:6px">${q.o.map((o,j)=>C[j]+' '+esc(o)).join('　')}</div>`:''}</details>`}
-function mockBox(qs){const r=jlptScore(Q.mockRes);const mo={};Q.mockRes.filter(([q])=>q.pt===Q.part||!q.pt).forEach(([q,ok])=>{const k=q.mo||0;mo[k]=mo[k]||[0,0];mo[k][1]++;if(ok)mo[k][0]++});
+function mockBox(qs){const h=mockBox0(qs);if(/id="p[23]go"/.test(h))return h;
+  let sc='',pass=false;if(['n4','n5'].includes(exam())){const r=jlpt5Score(Q.mockRes);sc=r.hasL?r.tot+'/180':r.lk+'/120';pass=r.pass}
+  else{const r=jlptScore(Q.mockRes);sc=r.hasL?r.tot+'/180':r.hasR?r.tot+'/120':r.lk+'/60';pass=r.pass}
+  return h+`<br><button class="btn ghost" id="shareRes" data-sc="${sc}" data-ok="${pass?1:0}" style="margin-top:10px">📤 Share my result</button>`}
+document.addEventListener('click',async e=>{const b=e.target.closest('#shareRes');if(!b)return;
+  const lv='JLPT '+exam().toUpperCase(),url='https://bpnihongohub.github.io/';
+  const text=`${lv} mock test: ${b.dataset.sc}${b.dataset.ok==='1'?' · 合格 PASS 🎉':''}\nI practise on BP Nihongo Hub. Try it free:`;
+  try{if(navigator.share){await navigator.share({title:'BP Nihongo Hub',text,url});return}}catch(err){if(err&&err.name==='AbortError')return}
+  try{await navigator.clipboard.writeText(text+' '+url);toast('✓ Copied. Paste it in Facebook, Messenger, Viber…')}catch(err){toast(url)}});
+function mockBox0(qs){const r=jlptScore(Q.mockRes);const mo={};Q.mockRes.filter(([q])=>q.pt===Q.part||!q.pt).forEach(([q,ok])=>{const k=q.mo||0;mo[k]=mo[k]||[0,0];mo[k][1]++;if(ok)mo[k][0]++});
   const tbl=`<table class="motbl">${Object.keys(mo).map(k=>`<tr><td>問題${k}</td><td>${mo[k][0]} / ${mo[k][1]}</td></tr>`).join('')}</table>`;
   if(Q.part===1&&Q.hasP2)return `${tbl}<div style="margin-top:8px">${PART[1][0]} ${t('done1')}</div><button class="btn red" id="p2go" style="margin-top:10px">${t('part2')} · ${PART[2][0]} (${t('min',{n:PART[2][1]})}) →</button>`;
   if(Q.part===2&&Q.hasP3)return `${tbl}<div style="margin-top:8px">${PART[2][0]} ${t('done1')}</div><button class="btn red" id="p3go" style="margin-top:10px">${t('part3')} · ${PART[3][0]} (${t('min',{n:PART[3][1]})}) →</button>`;
