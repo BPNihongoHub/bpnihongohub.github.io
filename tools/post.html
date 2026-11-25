@@ -1,0 +1,62 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Daily Post Maker</title>
+<link rel="icon" href="../icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700;900&family=Noto+Sans+Devanagari:wght@500;700&family=Plus+Jakarta+Sans:wght@600;800&display=swap">
+<style>
+:root{--bg:#f4f6fc;--card:#fff;--ink:#0a1440;--line:#dfe3f0;--ai:#2443e8}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0b1030;--card:#141a42;--ink:#eef1ff;--line:#283066}}
+:root[data-theme=dark]{--bg:#0b1030;--card:#141a42;--ink:#eef1ff;--line:#283066}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 'Plus Jakarta Sans',system-ui,sans-serif}
+.w{max-width:720px;margin:0 auto;padding:16px}h1{font-size:1.3rem;margin:4px 0 12px}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 10px}select,button{font:inherit;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+button.go{background:var(--ai);color:#fff;border-color:var(--ai);font-weight:800}canvas{width:100%;height:auto;border-radius:14px;display:block;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+p.m{opacity:.75;font-size:.88rem}
+</style></head><body><div class="w">
+<h1>📸 Daily post maker · 今日の投稿</h1>
+<p class="m">Makes a ready-to-post picture (1080×1350) for Facebook, Instagram and TikTok from the site's own lists. A new item every day; use ◀ ▶ for others.</p>
+<div class="row"><select id="lv"><option>n5</option><option>n4</option><option selected>n3</option><option>n2</option><option>n1</option></select>
+<select id="ty"><option value="k">Kanji · 漢字</option><option value="v">Word · 語彙</option><option value="g">Grammar · 文法</option></select>
+<button id="pv">◀</button><button id="nx">▶</button><button class="go" id="dl">⬇ Download picture</button></div>
+<canvas id="c" width="1080" height="1350"></canvas>
+<p class="m" id="cap"></p>
+</div>
+<script>
+const $=s=>document.querySelector(s),C=$('#c'),x=C.getContext('2d'),W=1080,H=1350;
+const D={},KW={};let off=0;
+const day=()=>Math.floor((Date.now()-new Date().getTimezoneOffset()*6e4)/864e5);
+async function data(lv){if(!D[lv])D[lv]=await (await fetch('../pass/pass-'+lv+'.json')).json();return D[lv]}
+async function kw(){if(!KW.d){try{KW.d=await (await fetch('../pass/kw.json')).json()}catch(e){KW.d={}}}return KW.d}
+function wrap(t,mx,y,lh,font,maxLines){x.font=font;const ws=[...t];let line='',lines=[];
+  const sp=/\s/.test(t)?t.split(/(\s+)/):ws;for(const w of sp){const tst=line+w;if(x.measureText(tst).width>mx&&line){lines.push(line.trim());line=w}else line=tst}if(line.trim())lines.push(line.trim());
+  lines=lines.slice(0,maxLines||9);lines.forEach((l,i)=>x.fillText(l,W/2,y+i*lh));return y+lines.length*lh}
+function bg(){const g=x.createLinearGradient(0,0,W,H);g.addColorStop(0,'#0a1440');g.addColorStop(.55,'#2443e8');g.addColorStop(1,'#e5193f');x.fillStyle=g;x.fillRect(0,0,W,H);
+  x.globalAlpha=.07;x.fillStyle='#fff';x.font='900 520px "Noto Sans JP"';x.textAlign='center';x.fillText('日',W-170,520);x.globalAlpha=1;
+  x.fillStyle='rgba(255,255,255,.96)';rr(70,250,W-140,880,46);x.fill()}
+function rr(a,b,w,h,r){x.beginPath();x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath()}
+function head(lv,label){x.textAlign='center';x.fillStyle='#e3a200';x.font='800 40px "Plus Jakarta Sans"';x.fillText('TODAY’S '+label+' · 今日の'+({KANJI:'漢字',WORD:'ことば',GRAMMAR:'文法'})[label],W/2,120);
+  x.fillStyle='#fff';x.font='800 64px "Plus Jakarta Sans"';x.fillText('JLPT '+lv.toUpperCase(),W/2,200)}
+function foot(){x.textAlign='center';x.fillStyle='#fff';x.font='800 46px "Plus Jakarta Sans"';x.fillText('BP Nihongo Hub',W/2,1225);
+  x.font='600 32px "Plus Jakarta Sans"';x.globalAlpha=.9;x.fillText('bpnihongohub.github.io · Binod Paudel',W/2,1280);x.globalAlpha=1}
+async function draw(){const lv=$('#lv').value,ty=$('#ty').value,d=await data(lv),L=d[ty];const i=((day()+off)%L.length+L.length)%L.length,r=L[i];
+  await Promise.all(['900 100px "Noto Sans JP"','700 50px "Noto Sans Devanagari"','800 40px "Plus Jakarta Sans"'].map(f=>document.fonts.load(f).catch(()=>{})));
+  bg();x.textAlign='center';let cap='';
+  if(ty==='k'){head(lv,'KANJI');x.fillStyle='#0a1440';x.font='900 330px "Noto Sans JP"';x.fillText(r[0],W/2,610);
+    x.fillStyle='#e5193f';x.font='700 44px "Noto Sans JP"';wrap('音 '+(r[1]||'—'),860,700,58,'700 44px "Noto Sans JP"',2);
+    x.fillStyle='#2443e8';let y=wrap('訓 '+(r[2]||'—'),860,770,58,'700 44px "Noto Sans JP"',2);
+    x.fillStyle='#0a1440';y=wrap(r[4]||'',860,y+40,64,'700 56px "Noto Sans Devanagari"',2);x.fillStyle='#5b6383';y=wrap(r[3]||'',860,y,48,'600 38px "Plus Jakarta Sans"',2);
+    const k=await kw(),ws=(k[r[0]]||[]).slice(0,3);if(ws.length){x.fillStyle='#0a1440';wrap(ws.map(w=>Array.isArray(w)?w[0]+'（'+w[1]+'）':w).join('　'),900,Math.min(y+50,1080),52,'700 40px "Noto Sans JP"',2)}
+    cap=`今日の漢字【${r[0]}】JLPT ${lv.toUpperCase()}\n${r[4]} (${r[3]})\n音: ${r[1]} 訓: ${r[2]}`}
+  else if(ty==='v'){head(lv,'WORD');x.fillStyle='#e5193f';x.font='700 60px "Noto Sans JP"';if(r[1]!==r[0])x.fillText(r[1]||'',W/2,420);
+    x.fillStyle='#0a1440';const fs=r[0].length>5?150:210;x.font='900 '+fs+'px "Noto Sans JP"';x.fillText(r[0],W/2,640);
+    let y=wrap(r[3]||'',860,780,72,'700 62px "Noto Sans Devanagari"',3);x.fillStyle='#5b6383';wrap(r[2]||'',860,y+10,50,'600 40px "Plus Jakarta Sans"',3);
+    cap=`今日のことば【${r[0]}】(${r[1]}) JLPT ${lv.toUpperCase()}\n${r[3]} · ${r[2]}`}
+  else{head(lv,'GRAMMAR');x.fillStyle='#0a1440';let y=wrap(r[0],880,450,110,'900 96px "Noto Sans JP"',2);
+    x.fillStyle='#e5193f';y=wrap(r[1]||'',860,y+30,66,'700 54px "Noto Sans Devanagari"',3);
+    x.fillStyle='#0a1440';y=wrap(r[2]||'',880,y+50,62,'700 48px "Noto Sans JP"',3);x.fillStyle='#5b6383';wrap(r[3]||'',860,y+10,54,'600 40px "Noto Sans Devanagari"',3);
+    cap=`今日の文法【${r[0]}】JLPT ${lv.toUpperCase()}\n${r[1]}\n例: ${r[2]}\n${r[3]}`}
+  foot();$('#cap').textContent=cap+'\n\n👉 Free practice: https://bpnihongohub.github.io/  #JLPT #日本語 #NepaliInJapan #BPNihongoHub';$('#cap').style.whiteSpace='pre-wrap';C.dataset.n=lv+'-'+ty+'-'+(i+1)}
+$('#lv').onchange=$('#ty').onchange=()=>{off=0;draw()};$('#pv').onclick=()=>{off--;draw()};$('#nx').onclick=()=>{off++;draw()};
+$('#dl').onclick=()=>{C.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='bp-post-'+C.dataset.n+'.png';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.parentNode.removeChild(a)},500)},'image/png')};
+draw();
+</script></body></html>
