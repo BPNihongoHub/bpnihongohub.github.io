@@ -2063,11 +2063,16 @@ async function stCodesBox(){const el=$('#tSCodes');if(!el||!BE.api.cfgGet)return
   el.innerHTML=`<section class="card"><details ${SCT.open?'open':''} id="scD"><summary><b>🎟 Student codes · ${NM[SCT.c]} (${free} not used)</b></summary>
   <p class="muted" style="font-size:12px;margin:6px 0">Give one unused code to a student. After they sign in and type it, everything of that course opens on their account for 6 months (ALL = N3, N4 and N5 together). One code = one account, max 3 devices.</p>
   <div class="erow" style="flex-wrap:wrap;gap:6px">${Object.keys(NM).map(k=>`<button class="chip ${k===SCT.c?'on':''}" data-scc="${k}">${NM[k]}</button>`).join('')}</div>
+  <button class="btn ghost" id="scX" style="margin:8px 0 0">⬇ Download Excel (who used each code)</button>
   <input id="scQ" placeholder="Search code / student / email" value="${esc(SCT.q)}" style="margin:8px 0;width:100%">
   <div style="max-height:420px;overflow:auto"><table class="ptbl" style="width:100%;font-size:13px;border-collapse:collapse"><tr><th>#</th><th>Code</th><th>Status</th><th></th></tr>
   ${rows.map(x=>{const tk=SCT.c!=='all'&&x.n===2,own=SCT.c!=='all'&&x.n===1,exp=x.u&&x.u.at&&Date.now()>x.u.at+SIXM();
     return `<tr style="border-top:1px solid #e3e8f2${x.u||tk?';opacity:.6':''}"><td>${x.n}</td><td style="font-family:monospace;white-space:nowrap">${fm(x.c)}</td><td>${tk?'🔑 Teacher key, do not give':own?'Your own code':x.u?`${exp?'⛔ ended':'✅ used'} · ${esc(x.u.email||'')}<br><small>until ${x.u.at?fdate(x.u.at+SIXM()):'—'}</small>`:esc(x.st||x.note||'Not used')}</td><td>${tk?'':`<button class="chip" data-scp="${x.c}">📋 Copy</button>`}</td></tr>`}).join('')}</table></div></details></section>`;
   $('#scD').ontoggle=e=>SCT.open=e.target.open;
+  $('#scX').onclick=()=>{const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"',out=[['Course','#','Code','Status','Used by (email)','First used','Open until','Devices','Note'].map(q).join(',')];
+    for(const k of Object.keys(NM))(C[k]||[]).forEach((r,i)=>{const u=U[k+'_'+r[0].slice(0,4)],tk=k!=='all'&&i===1,own=k!=='all'&&i===0,exp=u&&u.at&&Date.now()>u.at+SIXM();
+      out.push([NM[k],i+1,fm(r[0]),tk?'Teacher key (do not give)':own?'Your own code':u?(exp?'Ended':'Used'):'Not used',u?u.email||u.uid:'',u&&u.at?fdate(u.at):'',u&&u.at?fdate(u.at+SIXM()):'',u?(u.dev||[]).length+'/3':'',r[1]||r[2]||''].map(q).join(','))});
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+out.join('\r\n')],{type:'text/csv'}));a.download='bp-student-codes-'+new Date().toISOString().slice(0,10)+'.csv';document.body.appendChild(a);a.click();a.remove()};
   $$('[data-scc]').forEach(b=>b.onclick=()=>{SCT.c=b.dataset.scc;SCT.open=true;stCodesBox()});
   $('#scQ').onchange=e=>{SCT.q=e.target.value.trim();SCT.open=true;stCodesBox()};
   $$('[data-scp]').forEach(b=>b.onclick=()=>{const t=fm(b.dataset.scp);(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Copied: '+t)).catch(()=>prompt('Copy',t))})}
