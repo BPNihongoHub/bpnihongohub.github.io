@@ -1606,7 +1606,7 @@ async function beInit(){
   BE.api.onAuth(async u=>{BE.user=u;BE.prof=null;BE.admin=false;
     if(u){BE.err='';try{BE.prof=await BE.api.touch(u)}catch(e){BE.err='profile: '+((e&&(e.code||e.message))||e)}try{BE.admin=await BE.api.isAdmin()}catch(e){}
       if(BE.admin)beBlk();
-      if(BE.admin||isTrialP(BE.prof)||isPaidP(BE.prof,DX))beKey()}
+      if(BE.admin||isTrialP(BE.prof)||isPaidP(BE.prof,DX))beKey();stPull()}
     BE.ready=true;render()});
 }
 async function beBlk(){/* teacher: publish the ids of the account keys so they cannot be typed in or saved on a phone */
@@ -1614,12 +1614,28 @@ async function beBlk(){/* teacher: publish the ids of the account keys so they c
     const old=(await BE.api.blk())||[];const all=[...new Set(old.concat(ids))];if(all.length!==old.length)await BE.api.setBlk(all)}catch(e){}}
 async function beKey(){/* paid account: fetch the course unlock code (readable only by paid users) and open locked sets */
   const cx=DX;if(MKC[cx])return;try{const c=await BE.api.key(cx);if(c&&DX===cx)await unlock(c,true,true)}catch(e){}}/* not saved locally: access ends when the 6 months end */
-let _syncT=0;
+let _syncT=0,_stT=0,_stReady=false;
+/* full study progress backup in the account (users/{uid}/st/main), so a new phone gets the same results */
+const stSkip=k=>/^rk_(auth|bemock|blk|payseen|lang_ok|theme|splash)$|code|key|^rk_stbar_/i.test(k);
+function stDump(){const o={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('rk_')&&!stSkip(k))o[k]=localStorage.getItem(k)}return JSON.stringify(o)}
+function stMerge(js){let o;try{o=JSON.parse(js)}catch(e){return false}let ch=false;
+  for(const [k,cv] of Object.entries(o)){if(stSkip(k)||!k.startsWith('rk_'))continue;const lv=localStorage.getItem(k);let nv=cv;
+    if(lv!=null){try{const a=JSON.parse(cv),b=JSON.parse(lv);
+      if(Array.isArray(a)&&Array.isArray(b))nv=JSON.stringify([...new Set(a.concat(b))]);
+      else if(a&&b&&typeof a==='object'&&typeof b==='object')nv=JSON.stringify(Object.assign({},a,b));
+      else nv=lv}catch(e){nv=lv}}
+    if(nv!==lv){try{localStorage.setItem(k,nv);ch=true}catch(e){}}}
+  return ch}
+async function stPull(){if(!BE.api.stGet||!BE.user)return;try{const c=await BE.api.stGet(BE.user.uid);_stReady=true;
+    if(c&&c.v&&stMerge(c.v)&&!sessionStorage.getItem('stpulled')){sessionStorage.setItem('stpulled','1');stPush(true);setTimeout(()=>location.reload(),300);return}
+    stPush(true)}catch(e){_stReady=true}}
+function stPush(force){if(!_stReady||!BE.api.stPut||!BE.user)return;const now=Date.now();if(!force&&now-_stT<120000)return;_stT=now;
+  const v=stDump();if(v.length<900000)BE.api.stPut(BE.user.uid,v).catch(()=>{})}
 function beSync(force){/* push a small progress summary, at most once a minute */
   if(!BE.ok||!BE.user)return;const now=Date.now();if(!force&&now-_syncT<60000)return;_syncT=now;
   const res=P.res,vals=Object.values(res),ures=LS.get('ures',{});
   const sum={done:vals.length,ok:vals.filter(v=>v===1).length,days:(P.days||[]).length,hw:Object.fromEntries(Object.entries(ures).map(([k,v])=>[k,v.b||0]))};
-  BE.api.progress(BE.user.uid,sum).catch(()=>{});
+  BE.api.progress(BE.user.uid,sum).catch(()=>{});stPush(force);
 }
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')beSync(true)});
 window.addEventListener('hashchange',()=>beSync(false));
@@ -1642,6 +1658,8 @@ function fbApi(){
       const p=norm(s);if(p.lastDay!==day()){await r.update({last:TS(),lastDay:day()});p.last=Date.now()}return p},
     saveProf:(uid,o)=>F.doc('users/'+uid).update({name:o.name,phone:o.phone}),
     progress:(uid,sum)=>F.doc('users/'+uid).update({prog:sum,last:TS(),lastDay:day()}),
+    async stGet(uid){const s=await F.doc('users/'+uid+'/st/main').get();return s.exists?s.data():null},
+    stPut:(uid,v)=>F.doc('users/'+uid+'/st/main').set({v,t:Date.now()}),
     async isAdmin(){try{await F.doc('config/admin').get();return true}catch(e){BE.aerr=(e&&(e.code||e.message))||String(e);try{const r=await A.currentUser.getIdTokenResult();BE.aerr+=' · '+r.signInProvider+' · v='+r.claims.email_verified}catch(x){}return false}},/* rules let only the teacher read config/* */
     async hasKey(cx){const s=await F.doc('secret/'+(cx||'n3')).get();return s.exists},setKey:(cx,c)=>F.doc('secret/'+(cx||'n3')).set({code:c}),
     async key(cx){const s=await F.doc('secret/'+(cx||'n3')).get();return s.exists?s.data().code:null},
@@ -1675,6 +1693,7 @@ function mockApi(){/* localhost test double with the same shape as fbApi */
     async touch(u){const d=db();d.users[u.uid].last=Date.now();put(d);return Object.assign({},d.users[u.uid])},
     async saveProf(uid,o){const d=db();Object.assign(d.users[uid],o);put(d)},
     async progress(uid,s){const d=db();d.users[uid].prog=s;d.users[uid].last=Date.now();put(d)},
+    async stGet(uid){return (db().st||{})[uid]||null},async stPut(uid,v){const d=db();d.st=d.st||{};d.st[uid]={v,t:Date.now()};put(d)},
     async isAdmin(){return(db().users[db().me]||{}).email==='teacher@example.com'},
     async key(cx){return LS.get('mockcode'+(cx||'n3'),null)},async hasKey(cx){return !!LS.get('mockcode'+(cx||'n3'),null)},async setKey(cx,c){LS.set('mockcode'+(cx||'n3'),c)},
     async pay(uid,o){const d=db();const id='p'+Date.now();d.pay[id]=Object.assign({uid,status:'pending',created:Date.now()},o);put(d)},
