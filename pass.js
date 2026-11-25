@@ -10,7 +10,7 @@ const PD={},SD={};
 const PS={lv:'n5',kind:'k',page:0};
 try{Object.assign(PS,JSON.parse(localStorage.getItem('rk_passui')||'{}'))}catch(e){}
 const saveUI=()=>{try{localStorage.setItem('rk_passui',JSON.stringify(PS))}catch(e){}};
-const keyOf=(lv,kind)=>'rk_pass2_'+lv+'_'+kind;
+const keyOf=(lv,kind)=>'rk_pass3_'+lv+'_'+kind;
 function getSet(lv,kind){try{return new Set(JSON.parse(localStorage.getItem(keyOf(lv,kind))||'[]'))}catch(e){return new Set()}}
 function putSet(lv,kind,s){try{localStorage.setItem(keyOf(lv,kind),JSON.stringify([...s]))}catch(e){}}
 async function load(lv){if(!PD[lv])PD[lv]=await fetch('pass/pass-'+lv+'.json').then(r=>r.json());return PD[lv]}
@@ -44,6 +44,7 @@ const CSS=`
 .ps-gr.on{background:var(--ok-soft)}
 .ps-pager{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:12px 0}
 .ps-pager button{min-width:42px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);border-radius:10px;padding:7px 8px;font-weight:700;cursor:pointer}
+.ps-units{flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin}.ps-units .ps-note{flex:none}.ps-units button{flex:none;display:flex;flex-direction:column;align-items:center;line-height:1.1;min-width:44px}.ps-units button small{font-size:10px;opacity:.7;font-weight:600}.ps-uh{margin:6px 0 8px;font-size:18px}.ps-uh small{color:var(--muted);font-weight:600}
 .ps-pager button.on{background:var(--ink);color:var(--paper)}
 .ps-bar{position:sticky;bottom:72px;z-index:5;display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--paper);border:1.5px solid var(--line);border-radius:16px;padding:10px;box-shadow:var(--shadow);margin:14px 0}
 .ps-bar .cnt{flex:1;font-weight:700;font-size:13.5px;min-width:90px}.ps-bar .btn{padding:9px 12px;font-size:14px}
@@ -115,17 +116,17 @@ window.renderPass=async function(){
   bindTabs();
   if(PS.kind==='r')return results();
   let d;try{d=await load(PS.lv)}catch(e){$('#psBody').innerHTML='<p class="ps-note">डाटा लोड भएन। इन्टरनेट जाँच्नुहोस्।</p>';return}
-  const L=itemsOf(d,PS.kind),S=getSet(PS.lv,PS.kind),pages=Math.ceil(L.length/PER);
+  const L=itemsOf(d,PS.kind),S=getSet(PS.lv,PS.kind),UN=d[PS.kind+'u'],pages=UN?UN.length:Math.ceil(L.length/PER);
   if(PS.page>=pages)PS.page=0;
-  const a=PS.page*PER,b=Math.min(L.length,a+PER);
-  const pager=pages>1?`<div class="ps-pager"><span class="ps-note" style="margin:0 6px 0 0">पेज:</span>${Array.from({length:pages},(_,i)=>`<button data-pg="${i}" class="${i===PS.page?'on':''}">${i*PER+1}–${Math.min(L.length,(i+1)*PER)}</button>`).join('')}</div>`:'';
+  const a=UN?UN[PS.page][1]:PS.page*PER,b=UN?UN[PS.page][2]:Math.min(L.length,a+PER);
+  const pager=UN?`<div class="ps-pager ps-units"><span class="ps-note" style="margin:0 6px 0 0">युनिट:</span>${UN.map((u,i)=>`<button data-pg="${i}" class="${i===PS.page?'on':''}">${E(u[0].replace('Unit ',''))}<small>${u[2]-u[1]}</small></button>`).join('')}</div><h3 class="ps-uh">${E(UN[PS.page][0])} <small>(${b-a})</small></h3>`:pages>1?`<div class="ps-pager"><span class="ps-note" style="margin:0 6px 0 0">पेज:</span>${Array.from({length:pages},(_,i)=>`<button data-pg="${i}" class="${i===PS.page?'on':''}">${i*PER+1}–${Math.min(L.length,(i+1)*PER)}</button>`).join('')}</div>`:'';
   let body;
   if(PS.kind==='g'){
     body=`<p class="ps-note">बुझ्ने व्याकरणमा ✓ लगाउनुहोस्। नाम थिच्दा भित्र अर्थ र उदाहरण खुल्छ।</p><div class="ps-gl">${L.slice(a,b).map((x,j)=>{const i=a+j;return `<div class="ps-gr ${S.has(i)?'on':''}"><label><input type="checkbox" data-i="${i}" ${S.has(i)?'checked':''} aria-label="${E(x[0])}"></label><a href="#pass/g/${PS.lv}/${i}"><b>${i+1}. ${E(x[0])}</b><span>${E(x[1])}</span></a></div>`}).join('')}</div>`;
   }else{
     body=`<p class="ps-note">पढ्न/बुझ्न सक्ने ${PS.kind==='k'?'कान्जी':'शब्द'}मा ✓ लगाउनुहोस्। ⓘ थिच्दा अर्थ ${PS.kind==='k'?'र लेख्ने तरिका':''} देखिन्छ।</p><div class="ps-grid ps-${PS.lv}">${L.slice(a,b).map((x,j)=>{const i=a+j;return `<div class="ps-cell ${S.has(i)?'on':''}" data-c="${i}"><div class="top"><span>${String(i+1).padStart(3,'0')}</span><input type="checkbox" data-i="${i}" ${S.has(i)?'checked':''} aria-label="${E(label(PS.kind,x))}"></div><div class="w ${PS.kind==='k'?'kj':''}">${E(label(PS.kind,x))}</div><span class="i" data-inf="${i}">i</span></div>`}).join('')}</div>`;
   }
-  $('#psBody').innerHTML=pager+body+pager+`<div class="ps-bar"><span class="cnt" id="psCnt"></span><button class="btn ghost" id="psAll" title="यो पेज सबै ✓">सबै ✓</button><button class="btn ghost" id="psClr" title="यो पेज खाली">खाली</button><button class="btn ps-check" id="psCheck">Check!</button></div>`+credit();
+  $('#psBody').innerHTML=pager+body+(UN?nextU(UN,PS.page):pager)+`<div class="ps-bar"><span class="cnt" id="psCnt"></span><button class="btn ghost" id="psAll" title="यो पेज सबै ✓">सबै ✓</button><button class="btn ghost" id="psClr" title="यो पेज खाली">खाली</button><button class="btn ps-check" id="psCheck">Check!</button></div>`+credit();
   const cnt=()=>{$('#psCnt').innerHTML=`✓ ${S.size} / ${L.length} (${KIND[PS.kind][1]})`};cnt();
   const toggle=(i,on)=>{on?S.add(i):S.delete(i);putSet(PS.lv,PS.kind,S);const inp=document.querySelector(`input[data-i="${i}"]`);if(inp){inp.checked=on;(inp.closest('.ps-cell')||inp.closest('.ps-gr')).classList.toggle('on',on)}cnt()};
   document.querySelectorAll('#psBody input[data-i]').forEach(x=>x.onchange=()=>toggle(+x.dataset.i,x.checked));
@@ -140,6 +141,7 @@ window.renderPass=async function(){
   $('#psClr').onclick=()=>{for(let i=a;i<b;i++)toggle(i,false)};
   $('#psCheck').onclick=()=>{PS.kind='r';saveUI();renderPass();window.scrollTo(0,0)};
 };
+function nextU(UN,p){return `<div class="ps-pager" style="justify-content:space-between">${p>0?`<button data-pg="${p-1}">← ${E(UN[p-1][0])}</button>`:"<span></span>"}${p<UN.length-1?`<button data-pg="${p+1}" class="on">${E(UN[p+1][0])} →</button>`:""}</div>`}
 function bindTabs(){
   document.querySelectorAll('[data-lv]').forEach(x=>x.onclick=()=>{PS.lv=x.dataset.lv;PS.page=0;saveUI();renderPass()});
   document.querySelectorAll('[data-kind]').forEach(x=>x.onclick=()=>{PS.kind=x.dataset.kind;PS.page=0;saveUI();renderPass()});
@@ -206,7 +208,7 @@ const RM=(()=>{const m={};const base='あa い i う u え e お o か ka き ki
 async function showKanji(ch,lv){
   const [b,W]=await Promise.all([kanjiBlock(ch,lv),kwords()]);if(!b){modal(`<p>${E(ch)}: जानकारी छैन।</p>`);return}
   const {x,P}=b;const L=b.lv.toUpperCase();
-  const KT=t=>t.replace(/[ぁ-ゖ]/g,c=>String.fromCharCode(c.charCodeAt(0)+96));const on=KT(String(x[1]||'')).split(/[、,\s]+/).filter(Boolean),kun=String(x[2]||'').split(/[、,\s]+/).filter(Boolean);
+  const KT=t=>t.replace(/[ぁ-ゖ]/g,c=>String.fromCharCode(c.charCodeAt(0)+96));const on=KT(String(x[1]||'')).split(/[、,・\s]+/).filter(Boolean),kun=String(x[2]||'').split(/[、,・\s]+/).filter(Boolean);
   const rcol=(t,a)=>`<div class="kc-rd"><div class="h">${t}</div>${a.length?a.map(r=>`<div class="r"><b>${E(RD(r).replace(/-/g,"〜"))}</b><span>${E(RM(r.replace(/[.\-]/g,'')))}</span></div>`).join(''):'<div class="r">—</div>'}</div>`;
   const ws=(W[ch]||[]);
   const m=modal(`<div class="kc">
