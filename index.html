@@ -1991,7 +1991,12 @@ const TODO=[/* [id, text, how / link] — only things that need Binod himself (h
  ['bak','Monthly: download the 💾 backup on this page','Keep the file in Google Drive.',''],
  ['bank','(Optional) Bank transfer details','If you want bank transfer as a second way to pay: send bank name, branch, account type/number, name (カナ).',''],
  ['books','Send N2 / N1 books and model sets','Upload them in the chat when ready.',''],
- ['later','Later (costs money): Blaze plan, own domain, card payment, automatic emails, better audio','Decide when you are ready. Nothing to do now.','']];
+ ['voice','Record listening in your own voice','Teacher page → 🎙 Voice recorder → open private/voice/listening-scripts.json → start with N3 Set 1. Send the files in the chat; they will be added to the site.',''],
+ ['video','Shoot short videos (TikTok/Facebook)','10 ready scripts in raku-nihongo/marketing/short-video-scripts.md. Picture posts: 📸 Daily post maker.',''],
+ ['class','Decide live class times and price','Then reply to requests in "Class requests" on this page (mark contacted).',''],
+ ['school','Send the school partnership PDF to schools/consultancies','raku-nihongo/marketing/school-partnership.pdf (Messenger, Viber, email).',''],
+ ['kaigo','Send 介護 / JFT-Basic / 特定技能 books or past questions','Free word lists are already on the site (lists/). Full courses need your books.',''],
+ ['later','Later (costs money): Blaze plan, own domain, card payment, automatic emails, AI teacher, Play Store / App Store app','Decide when you are ready. Nothing to do now.','']];
 function todoBox(done){const n=TODO.filter(x=>!done[x[0]]).length;
   return `<section class="card ttodo"><details ${n?'open':''}><summary><b>📝 My to-do · Binod (${n} left)</b></summary><ol>${TODO.map(([id,tx,how,url])=>`<li class="${done[id]?'dn':''}"><label><input type="checkbox" data-td="${id}" ${done[id]?'checked':''}> <b>${esc(tx)}</b></label><small>${esc(how)}${url?` <a href="${url}" target="_blank" rel="noopener">Open →</a>`:''}</small></li>`).join('')}</ol></details></section>`}
 async function renderTeacher(){
