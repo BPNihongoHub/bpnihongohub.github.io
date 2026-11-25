@@ -1030,18 +1030,19 @@ let UERR='',CODEUNTIL=0;
 const CDOM='@code.bpnihongohub.app',isCodeAcc=u=>!!(u&&/@code\.bpnihongohub\.app$/.test(u.email||''));
 /* code + name + password, no Gmail: the code itself becomes the account (same code + same password on up to 3 devices) */
 async function codeLogin(code,name,pw){code=(code||'').toUpperCase().replace(/[^0-9A-Z]/g,'');const K=KEYS;
-  if(code.length!==12||!K||!K.w||!K.w[code.slice(0,4)])return t('codeErr');
+  if(codeLockLeft())return lockMsg();
+  if(code.length!==12||!K||!K.w||!K.w[code.slice(0,4)]){codeFail();return codeLockLeft()?lockMsg():t('codeErr')}
   if((pw||'').length<6)return 'Password must be 6 letters or more.';
   let gen=0;try{gen=((BE.api.codeGen?await BE.api.codeGen():{})[code.slice(0,4)])||0}catch(e){}/* teacher 'Free code' bumps this, so a new password/account can be made */
   const em='c'+code.toLowerCase()+(gen?'-'+gen:'')+CDOM;
   try{await BE.api.signin(em,pw)}catch(x){const c=(x&&x.code)||'';
-    if(/user-not-found|invalid-credential|invalid-login/.test(c)){try{await BE.api.signup(em,pw,(name||'').trim().slice(0,60))}catch(y){return /email-already-in-use/.test((y&&y.code)||'')?'Wrong password for this code. Use the same password you made the first time (ask Binod sensei if you forgot).':authMsg(y)}}
-    else if(/wrong-password/.test(c))return 'Wrong password for this code. Use the same password you made the first time.';else return authMsg(x)}
+    if(/user-not-found|invalid-credential|invalid-login/.test(c)){try{await BE.api.signup(em,pw,(name||'').trim().slice(0,60))}catch(y){if(/email-already-in-use/.test((y&&y.code)||''))codeFail();return codeLockLeft()?lockMsg():/email-already-in-use/.test((y&&y.code)||'')?'Wrong password for this code. Use the same password you made the first time (ask Binod sensei if you forgot).':authMsg(y)}}
+    else if(/wrong-password/.test(c)){codeFail();return codeLockLeft()?lockMsg():'Wrong password for this code. Use the same password you made the first time.'}else return authMsg(x)}
   for(let i=0;i<50&&!(BE.user&&BE.prof&&BE.user.email===em);i++)await new Promise(r=>setTimeout(r,150));
   if(name&&name.trim()&&BE.prof&&BE.prof.name!==name.trim().slice(0,60)){try{await BE.api.saveProf(BE.user.uid,{name:name.trim().slice(0,60),phone:BE.prof.phone||''});BE.prof.name=name.trim().slice(0,60)}catch(e){}}
   const ok=await unlock(code,false);return ok?true:uerrMsg()}
 const UMSG={signin:'Please sign in first (Google or email). A code works only on one account.',other:'This code is already used by another account. Ask Binod sensei.',dev3:'This code is already open on 3 devices. Ask Binod sensei to reset it.',expired:'This code\'s 6 months have ended. Please pay or ask Binod sensei for a new code.'};
-const uerrMsg=()=>UMSG[UERR]?UMSG[UERR]+(UERR==='signin'?' <a href="#acc">Sign in →</a>':''):t('codeErr');
+const uerrMsg=()=>UERR==='locked'?lockMsg():UMSG[UERR]?UMSG[UERR]+(UERR==='signin'?' <a href="#acc">Sign in →</a>':''):t('codeErr');
 function beWait(){return new Promise(r=>{if(BE.ready)return r();let n=0;const iv=setInterval(()=>{if(BE.ready||++n>100){clearInterval(iv);r()}},150)})}
 function devId(){let d=LS.get('devid','');if(!d){d=Math.random().toString(36).slice(2,10)+Date.now().toString(36);LS.set('devid',d)}return d}
 const isAllCode=(K,code)=>!!(K&&K.a&&K.a.includes(code.slice(0,4)));/* one code that opens N3+N4+N5 */
@@ -1052,7 +1053,14 @@ async function codeBind(cx,code,all){await beWait();if(!BE.ok||!BE.api||!BE.api.
     if(d.uid!==uid)return 'other';if(d.at&&Date.now()>d.at+SIXM())return 'expired';CODEUNTIL=(d.at||Date.now())+SIXM();const ds=d.dev||[];if(ds.includes(dv))return true;if(ds.length>=3)return 'dev3';
     await BE.api.codeSet(id,{uid,email:d.email||'',dev:ds.concat(dv),at:d.at||Date.now()});return true}
   catch(e){return true}}/* offline or rules not pasted yet: do not block */
-async function unlock(code,silent,nosave){const cx=DX,K=KEYS;
+/* more than 2 wrong code tries → code entry blocked for 20 minutes (key has 'code' so it is not synced) */
+const codeLockLeft=()=>Math.max(0,(LS.get('codefail',{}).until||0)-Date.now());
+function codeFail(){const f=LS.get('codefail',{n:0});if((f.until||0)<Date.now()&&f.until)f.n=0;f.n=(f.n||0)+1;if(f.n>=3){f.until=Date.now()+20*60000;f.n=0}LS.set('codefail',f)}
+const lockMsg=()=>'Too many wrong tries. Please wait '+Math.ceil(codeLockLeft()/60000)+' minutes and try again.';
+async function unlock(code,silent,nosave){
+  if(!silent&&!nosave){if(codeLockLeft()){UERR='locked';return false}UERR='';const ok=await unlock0(code,silent,nosave);if(ok)LS.set('codefail',{n:0});else if(UERR!=='signin'){codeFail();if(codeLockLeft())UERR='locked'}return ok}
+  return unlock0(code,silent,nosave)}
+async function unlock0(code,silent,nosave){const cx=DX,K=KEYS;
   code=(code||'').toUpperCase().replace(/[^0-9A-Z]/g,'');const w=K&&K.w&&K.w[code.slice(0,4)];
   if(!nosave&&LS.get('blk',[]).includes(code.slice(0,4))){LS.set(codeKey(cx),'');return false}/* account keys work only through a signed-in paid/trial account */
   if(code.length!==12||!w){if(silent&&K)LS.set(codeKey(cx),'');return false}
