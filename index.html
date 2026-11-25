@@ -629,6 +629,15 @@ tr[data-kanji]:hover td{background:var(--ai-soft)}
 .imgzoom{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.8);display:grid;place-items:center;padding:16px}.imgzoom img{max-width:100%;max-height:100%}
 @media(max-width:480px){.tools{margin-left:auto;gap:4px}.tools .langsel{padding-left:6px}.tools .langsel select{max-width:78px}.tools .iconbtn{padding:6px 9px}.accbtn{width:32px;height:32px;padding:0!important}.brand small{white-space:nowrap}}
 
+.money .mtop{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}.money .mtop>div{background:linear-gradient(135deg,#0a1440,#2443e8);color:#fff;border-radius:14px;padding:12px 14px}
+.money .mtop small{display:block;opacity:.85;font-size:12px}.money .mtop b{display:block;font-size:26px;font-weight:800;color:#ffd24a}.money .mtop span{font-size:12px;opacity:.9}
+.money .mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-top:12px}.money .mc{border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}.money .mc b{display:block;font-size:13px}.money .mc i{display:block;font-style:normal;font-size:20px;font-weight:800;color:#12a150}.money .mc span{font-size:12px;opacity:.8}
+.plan.lock{background:rgba(229,25,63,.12);color:#e5193f;border:1.5px solid #e5193f}.plan.trial{background:rgba(227,162,0,.14);color:#c98a00;border:1.5px solid #e3a200}.plan.ok{border:1.5px solid var(--ok)}
+.lkred{color:#e5193f!important}.okgreen{color:#12a150!important}
+.lkchip{display:inline-block;margin:8px 0 0;padding:6px 12px;border-radius:999px;font-weight:700;font-size:13px}.lkchip.r{background:rgba(229,25,63,.14);color:#e5193f;border:1px solid #e5193f}.lkchip.g{background:rgba(18,161,80,.14);color:#12a150;border:1px solid #12a150}
+.ucard.ulock{border:1.5px solid #e5193f!important}.ucard.ulock .ubadge{background:#e5193f;color:#fff}.ucard:not(.ulock){border-left:4px solid #12a150}
+.bcard.blk{border:1.5px solid #e5193f}.bcard.bok{border:1.5px solid #12a150}.bcard .btag{align-self:flex-start;font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;margin-top:4px}.bcard.blk .btag{background:#e5193f;color:#fff}.bcard.bok .btag{background:#12a150;color:#fff}
+.lockbtn{background:#e5193f!important;color:#fff!important}
 .plan small{display:block;font-weight:600;font-size:12px;margin-top:4px;opacity:.85}
 .ucard.ulock{opacity:.75}.ucard.ulock .btn{width:100%}
 .paybox{display:grid;gap:10px;text-align:center}.paybox .big{font-size:34px;font-weight:900}.paybox ol{text-align:left;margin:0;padding-left:20px;line-height:1.8}
@@ -976,7 +985,7 @@ async function ensureData(){const ex=dxOf();if(DX===ex)return;
   DC[DX]={D,KEYS,UNL,LX};let c=DC[ex];
   let fresh=false;if(!c){const [d,k]=await Promise.all([fetch(ex==='n3'?'data.json':'data-'+ex+'.json').then(r=>r.json()),fetch(ex==='n3'?'keys.json':'keys-'+ex+'.json',{cache:'no-store'}).then(r=>r.json()).catch(()=>null)]);c={D:d,KEYS:k,UNL:ex==='n3'&&(d.sets||[]).every(n=>(d.free||[]).includes(n)),LX:{}};DC[ex]=c;fresh=true}
   D=c.D;KEYS=c.KEYS;UNL=c.UNL;LX=c.LX;DX=ex;window.MK=MKC[ex]||null;UD=null;for(const k in EX)delete EX[k];
-  if(fresh&&!UNL){const cc=LS.get(codeKey(ex),'');if(cc)unlock(cc,true);else if(BE.user&&(BE.admin||isPaidP(BE.prof,ex)))beKey()}
+  if(fresh&&!UNL){const cc=LS.get(codeKey(ex),'');if(cc)unlock(cc,true);else if(BE.user&&(BE.admin||isTrialP(BE.prof)||isPaidP(BE.prof,ex)))beKey()}
   const T=ex==='n5'?N5T:ex==='n4'?N4T:N3T;if(!N3T.MOJ){N3T.MOJ=MOJ;N3T.PTS=PTS;N3T.PART=PART}MOJ=T.MOJ||N3T.MOJ;PTS=T.PTS||N3T.PTS;PART=T.PART||N3T.PART;
   P.res=LS.get('res',{});SR.c=LS.get('srs',{})}
 async function boot(){
@@ -1202,7 +1211,7 @@ function renderQuiz(){
   shell('quiz',`${ph('練',t('navQuiz'),t('choose'))}<section class="card qhead setup" style="display:grid;gap:14px">
   <div class="chips">${Object.keys(SECT).filter(k=>D.q.some(q=>SECT[k].includes(q.t))).map(k=>[k,SECJ[k]+' '+(LI===0?'':t(k))]).map(([v,x])=>`<button class="chip ${s.sec===v?'on':''}" data-sec="${v}">${x}</button>`).join('')}</div>
   <div class="chips">${[['all',t('all')]].concat(types.map(ty=>[ty,TL[ty]+(TN(ty)?' · '+TN(ty):'')])).map(([v,x])=>`<button class="chip ${s.type===v?'on':''}" data-type="${v}">${x}</button>`).join('')}</div>
-  <div class="row"><label for="setSel">${t('set')}</label><select id="setSel"><option value="all">${t('allSets')}</option>${sets.map(n=>`<option value="${n}" ${s.set==n?'selected':''}>${isLocked(n)?'🔒 ':''}${t('setN',{n})}${(D.free||[]).includes(n)&&!UNL?' · '+t('freeTag'):''}</option>`).join('')}</select>
+  <div class="row"><label for="setSel">${t('set')}</label><select id="setSel"><option value="all">${t('allSets')}</option>${sets.map(n=>`<option value="${n}" ${s.set==n?'selected':''} class="${isLocked(n)?'lkred':'okgreen'}">${isLocked(n)?'🔒 ':'✅ '}${t('setN',{n})}${(D.free||[]).includes(n)&&!UNL?' · '+t('freeTag'):''}</option>`).join('')}</select><span></span><span>${(()=>{const lk=sets.filter(n=>isLocked(n));return lk.length?`<span class="lkchip r">🔒 Locked: Set ${lk.length>3?lk[0]+'–'+lk[lk.length-1]:lk.join(', ')}</span>`:`<span class="lkchip g">✅ All sets open</span>`})()}</span>
   <label for="ordSel">${t('order')}</label><select id="ordSel"><option value="exam" ${s.order==='exam'?'selected':''}>${t('ordExam')}</option><option value="shuffle" ${s.order==='shuffle'?'selected':''}>${t('ordShuf')}</option><option value="new" ${s.order==='new'?'selected':''}>${t('ordNew')}</option></select></div>
   <div><button class="btn grad" id="go">${t('start')}</button></div></section>`);
   $$('[data-sec]').forEach(b=>b.onclick=()=>{s.sec=b.dataset.sec;s.type='all';renderQuiz()});
@@ -1214,7 +1223,7 @@ function renderMock(){
   const sets=(D.sets||[...new Set(D.q.map(q=>q.s))]).slice().sort((a,b)=>a-b);const hist=LS.get('mock',{});
   shell('mock',`${ph('試',t('mockH'),'模擬試験 · MOCK TEST')}<section class="card qhead" style="display:grid;gap:12px">
   <p class="muted" style="margin:0">${t('mockD')}</p>
-  <div class="row"><label for="msSel">${t('set')}</label><select id="msSel">${sets.map(n=>`<option value="${n}">${isLocked(n)?'🔒 ':''}${t('setN',{n})}${hist[n]!=null?' · '+t('last',{n:hist[n]}):''}</option>`).join('')}</select>
+  <div class="row"><label for="msSel">${t('set')}</label><select id="msSel">${sets.map(n=>`<option value="${n}" class="${isLocked(n)?'lkred':'okgreen'}">${isLocked(n)?'🔒 ':'✅ '}${t('setN',{n})}${hist[n]!=null?' · '+t('last',{n:hist[n]}):''}</option>`).join('')}</select>
 </div><div class="card" style="padding:10px 14px;font-size:14px;line-height:1.8"><b>JLPT ${exam().toUpperCase()}</b><br>${t('part1')} · ${PART[1][0]} · ${t('min',{n:PART[1][1]})} · ${D.q.filter(q=>q.s===1&&q.pt===1).length}問<br>${t('part2')} · ${PART[2][0]} · ${t('min',{n:PART[2][1]})} · ${D.q.filter(q=>q.s===1&&q.pt===2).length}問<br>${D.q.some(q=>q.pt===3)?`${t('part3')} · ${PART[3][0]} · ${t('min',{n:PART[3][1]})} · ${D.q.filter(q=>q.s===1&&q.pt===3).length}問<br>`:''}<span class="muted">${t('mockRule')}</span></div>
   <div><button class="btn red" id="mgo">${t('startExam')}</button></div></section>`);
   $('#mgo').onclick=()=>{const n=+$('#msSel').value;if(isLocked(n)){location.hash='#unlock';return}Q.start({mode:'mock',set:n,part:1})};
@@ -1405,7 +1414,7 @@ async function loadUnits(){if(UD&&UDE===exam())return;UDE=exam();try{UD=await fe
 async function renderUnits(){
   if(!UD||UDE!==exam()){shell('units','<div class="card empty" style="margin-top:20px">…</div>');await loadUnits()}
   const res=LS.get('ures',{}),sec=US.sec,kp=UKP();
-  const card=u=>{if(u.lk&&!u.qs)return `<div class="card ucard ulock"><div class="uh"><b>Unit ${u.n}</b><span class="ubadge">🔒</span></div>${u.title?`<small class="muted">${esc(u.te||u.title)}</small>`:''}<a class="btn ghost" href="#unlock">🔒 ${t('unlockBtn')} · ${u.lk}問</a></div>`;const r=res[kp+sec+u.n];const pct=r?Math.round(r.b/u.qs.length*100):null;
+  const card=u=>{if(u.lk&&!u.qs)return `<div class="card ucard ulock"><div class="uh"><b>Unit ${u.n}</b><span class="ubadge">🔒 Locked</span></div>${u.title?`<small class="muted">${esc(u.te||u.title)}</small>`:''}<a class="btn ghost" href="#unlock">🔒 ${t('unlockBtn')} · ${u.lk}問</a></div>`;const r=res[kp+sec+u.n];const pct=r?Math.round(r.b/u.qs.length*100):null;
     return `<div class="card ucard ${r?(r.b/u.qs.length>=UPASS?'pass':'tried'):''}"><div class="uh"><b>Unit ${u.n}</b>${r?`<span class="ubadge ${r.b/u.qs.length>=UPASS?'ok':'ng'}">${r.b/u.qs.length>=UPASS?'✓ ':''}${ut('best')} ${r.b}/${u.qs.length}</span>`:`<span class="ubadge">${ut('notyet')}</span>`}</div>
     ${u.title?`<small class="muted">${esc(u.te||u.title)}</small>`:''}<div class="bar"><i style="width:${pct||0}%;background:${pct==null?'var(--line)':pct>=70?'var(--ok)':'var(--shu)'}"></i></div>
     <button class="btn ${r?'':'grad'}" data-us="${u.n}">${r?ut('again'):ut('start')} · ${u.qs.length}問</button></div>`};
@@ -1485,7 +1494,7 @@ async function renderBooks(){
   const SS=BSECS();if(!SS.includes(BS.sec))BS.sec=SS[0]||'k';const sec=BS.sec,list=Object.entries(BK).filter(([,b])=>bOf(b)&&b.sec===sec);
   shell('books',`<section class="card uhero"><div class="eyebrow">LIBRARY · 教材</div><h1>${bt('lib')}</h1><p class="muted">${bt('libS')}</p><p class="cpnote">🔒 ${bt('cp')}</p></section>
   <div class="usecs bsecs" role="tablist">${SS.map(s=>`<button role="tab" aria-selected="${s===sec}" class="usec ${s===sec?'on':''}" data-bs="${s}"><b>${BICON[s]} ${bt(s)}</b></button>`).join('')}</div>
-  <div class="bkgrid">${list.map(([id,b])=>`<button class="card bcard" data-bid="${id}"><b>${esc(b.t)}</b>${b.sub?`<small>${esc(b.sub)}</small>`:''}<span>${b.n} ${bt('pages')}</span></button>`).join('')}</div>`);
+  <div class="bkgrid">${list.map(([id,b])=>`<button class="card bcard ${b.e&&!window.MK?'blk':'bok'}" data-bid="${id}"><b>${esc(b.t)}</b>${b.sub?`<small>${esc(b.sub)}</small>`:''}<span>${b.n} ${bt('pages')}</span><i class="btag">${b.e&&!window.MK?'🔒 Locked':'✅ Open'}</i></button>`).join('')}</div>`);
   $$('[data-bs]').forEach(x=>x.onclick=()=>{BS.sec=x.dataset.bs;renderBooks()});
   $$('[data-bid]').forEach(x=>x.onclick=()=>{BS.id=x.dataset.bid;location.hash='#read'});
 }
@@ -1514,6 +1523,10 @@ const PAY={on:true,price:2000,cur:'¥',course:'JLPT N3',months:6,qr:'pay/qr.png'
 const SIXM=()=>183*864e5;
 const tms=v=>v&&v.toMillis?v.toMillis():(+v||0);
 const untilOf=(p,c)=>{c=c||dxOf();return p?(c==='n3'?tms(p.paidUntil):tms((p.pu||{})[c])):0};
+const TRIALD=3;/* every new account: all courses open for 3 days (rules: secret/* readable while users.created + 3 days > now) */
+const trialEnd=p=>p&&p.created?tms(p.created)+TRIALD*864e5:0;
+const isTrialP=p=>trialEnd(p)>Date.now();
+const trialLeft=p=>Math.max(0,Math.ceil((trialEnd(p)-Date.now())/864e5));
 const isPaidP=(p,c)=>{c=c||dxOf();if(!p)return false;return c==='n3'?!!(p.paid&&untilOf(p,c)>Date.now()):untilOf(p,c)>Date.now()};
 const PAYC=c=>'JLPT '+(c||dxOf()).toUpperCase();
 const FBV='10.12.5';
@@ -1569,7 +1582,7 @@ async function beInit(){
   if(!BE.ok){BE.ready=true;return}
   BE.api.onAuth(async u=>{BE.user=u;BE.prof=null;BE.admin=false;
     if(u){BE.err='';try{BE.prof=await BE.api.touch(u)}catch(e){BE.err='profile: '+((e&&(e.code||e.message))||e)}try{BE.admin=await BE.api.isAdmin()}catch(e){}
-      if(BE.admin||isPaidP(BE.prof,DX))beKey()}
+      if(BE.admin||isTrialP(BE.prof)||isPaidP(BE.prof,DX))beKey()}
     BE.ready=true;render()});
 }
 async function beKey(){/* paid account: fetch the course unlock code (readable only by paid users) and open locked sets */
@@ -1680,7 +1693,7 @@ async function renderAccount(){
   const pend=mine.some(x=>x.status==='pending'&&(x.course||'n3')===dxOf());
   const vals=Object.values(P.res),done=vals.length,ok=vals.filter(v=>v===1).length,ures=LS.get('ures',{}),hwp=Object.values(ures).filter(v=>(v.b||0)>=35).length;
   shell('acc',`${ph('人',at('acc'),esc(p.email||BE.user.email||''))}
-  <section class="card accbox"><div class="plan ${isPaidP(p)?'ok':''}"><b>${PAYC()}</b> · ${isPaidP(p)?at('paid')+`<small>${at('until')}: ${fdate(untilOf(p))}</small>`:pend?at('pending'):untilOf(p)?at('expired'):at('free')}</div>
+  <section class="card accbox"><div class="plan ${isPaidP(p)?'ok':isTrialP(p)?'trial':'lock'}"><b>${PAYC()}</b> · ${isPaidP(p)?at('paid')+`<small>${at('until')}: ${fdate(untilOf(p))}</small>`:pend?at('pending'):isTrialP(p)?`🎁 Free trial: everything open<small>${trialLeft(p)} day(s) left · until ${fdate(trialEnd(p))}. Pay before it ends to keep everything open.</small>`:untilOf(p)?at('expired'):`🔒 Locked${trialEnd(p)?'<small>Your 3-day free trial has ended. Pay to open everything.</small>':''}`}</div>
    ${!isPaidP(p)&&PAY.on&&!pend?`<a class="btn grad" href="#pay">💳 ${at('payT')} · ${PAY.cur}${PAY.price.toLocaleString('en')} · ${at('per6')}</a>`:''}
    <form id="pForm" class="eform"><label>${at('name')}<input id="pName" value="${esc(p.name||'')}"></label><label>${at('phone')}<input id="pPhone" type="tel" value="${esc(p.phone||'')}"></label>
    <button class="btn ghost">${at('save')}</button></form></section>
@@ -1791,6 +1804,9 @@ async function renderTeacher(){
   let HW=null;try{HW=await BE.api.allHw()}catch(e){HW=null}
   shell('teacher',`${ph('師',at('tT'),new Date().toISOString().slice(0,10))}
   <div class="erow" style="margin:0 0 12px">${['n5','n4','n3'].map(c=>`<button class="chip ${c===tc?'on':''}" data-tc="${c}">${PAYC(c)}</button>`).join('')}</div>
+  ${(()=>{const ok=PH.filter(p=>p.status==='approved'),sum=a=>a.reduce((t,p)=>t+(+p.amount||0),0),yen=n=>PAY.cur+n.toLocaleString('en'),mo=new Date().toISOString().slice(0,7),tm=ok.filter(p=>fdate(p.decided||p.created).startsWith(mo)),tr=U.filter(u=>isTrialP(u)&&!['n5','n4','n3','n2','n1'].some(c=>isPaidP(u,c))).length;
+    return `<section class="card money"><div class="mtop"><div><small>💰 Total received · 合計</small><b>${yen(sum(ok))}</b><span>${ok.length} approved payment(s)</span></div><div><small>📅 This month (${mo})</small><b>${yen(sum(tm))}</b><span>${tm.length} payment(s)</span></div><div><small>⏳ Waiting to check</small><b>${PY.length}</b><span>🎁 On free trial: ${tr}</span></div></div>
+    <div class="mgrid">${['n5','n4','n3','n2','n1'].map(c=>{const a=ok.filter(p=>(p.course||'n3')===c);return `<div class="mc"><b>${PAYC(c)}</b><i>${yen(sum(a))}</i><span>${a.length} student(s)</span></div>`}).join('')}</div></section>`})()}
   ${hk?'':`<section class="card accbox"><b>🔑 ${at('keyT')} · ${PAYC(tc)}</b><p class="muted" style="margin:0">${at('keyS')}</p><form id="kF" class="erow"><input id="kC" placeholder="XXXX-XXXXXXXX" autocomplete="off" style="flex:2"><button class="btn grad">${at('save')}</button></form></section>`}
   <section class="tstats">${[[at('total'),U.length],[at('active'),act],[at('inactive'),U.length-act],[at('paidN'),paid],[at('pendN'),PY.length],[at('avg'),avg+(RV.length?' ★':'')]].map(([l,v])=>`<div class="card ts"><b>${v}</b><span>${l}</span></div>`).join('')}</section>
   <h2 class="hsech"><i>¥</i>${at('pays')} (${PY.length})</h2>
@@ -1800,7 +1816,7 @@ async function renderTeacher(){
   <h2 class="hsech"><i>人</i>${at('students')} (${U.length})</h2>
   <div class="ttools"><input id="tq" placeholder="${at('search')}" value="${esc(TD.q)}"><select id="tsort">${[['last',at('last')],['joined',at('joined')],['done',at('done')],['name',at('name')]].map(([k,l])=>`<option value="${k}" ${TD.sort===k?'selected':''}>${l}</option>`).join('')}</select></div>
   <div class="tscroll"><table class="ttab"><thead><tr><th>${at('name')}</th><th>${at('last')}</th><th>${at('done')}</th><th>${at('acc2')}</th><th>${at('hw')} ✓</th><th>${at('joined')}</th><th></th></tr></thead><tbody>
-  ${L.map(u=>{const x=pr(u),on=(u.last||0)>=wk;return `<tr><td><b>${esc(u.name||'—')}</b><small>${esc(u.email||'')}${u.phone?' · '+esc(u.phone):''}</small></td><td><span class="dot ${on?'on':''}"></span>${ago(u.last)}</td><td>${x.d}</td><td>${x.a}%</td><td>${x.h}</td><td>${fdate(u.created)}</td><td>${isPaidP(u,tc)?`<span class="paidtag">¥ ✓ ${fdate(untilOf(u,tc))}</span>`:(untilOf(u,tc)?'<span class="muted">⌛ '+fdate(untilOf(u,tc))+'</span> ':'')}<button class="chip" data-pd="${u.id}" data-v="${isPaidP(u,tc)?0:1}">${PAYC(tc)} ${isPaidP(u,tc)?at('takePaid'):at('givePaid')}</button></td></tr>`}).join('')||`<tr><td colspan="7" class="muted">${at('none')}</td></tr>`}
+  ${L.map(u=>{const x=pr(u),on=(u.last||0)>=wk;return `<tr><td><b>${esc(u.name||'—')}</b><small>${esc(u.email||'')}${u.phone?' · '+esc(u.phone):''}</small></td><td><span class="dot ${on?'on':''}"></span>${ago(u.last)}</td><td>${x.d}</td><td>${x.a}%</td><td>${x.h}</td><td>${fdate(u.created)}</td><td>${!isPaidP(u,tc)&&isTrialP(u)?`<span class="paidtag" style="background:#e3a200">🎁 trial ${trialLeft(u)}d</span> `:''}${isPaidP(u,tc)?`<span class="paidtag">¥ ✓ ${fdate(untilOf(u,tc))}</span>`:(untilOf(u,tc)?'<span class="muted">⌛ '+fdate(untilOf(u,tc))+'</span> ':'')}<button class="chip" data-pd="${u.id}" data-v="${isPaidP(u,tc)?0:1}">${PAYC(tc)} ${isPaidP(u,tc)?at('takePaid'):at('givePaid')}</button></td></tr>`}).join('')||`<tr><td colspan="7" class="muted">${at('none')}</td></tr>`}
   </tbody></table></div>
   <h2 class="hsech"><i>★</i>${at('revs')} (${RV.length})</h2>
   ${RV.map(r=>`<div class="card trev"><div><span class="st">${stars(r.stars||0)}</span> <b>${esc(r.name||'')}</b><p>${esc(r.text||'')}</p><small>${fdate(r.created)}</small></div><button class="chip ${r.show?'on':''}" data-rv="${r.id}" data-v="${r.show?0:1}">${r.show?at('hide'):at('show')}</button></div>`).join('')||`<p class="muted">${at('none')}</p>`}
