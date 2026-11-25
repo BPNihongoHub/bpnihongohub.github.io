@@ -10,10 +10,13 @@ const PD={},SD={};
 const PS={lv:'n5',kind:'k',page:0};
 try{Object.assign(PS,JSON.parse(localStorage.getItem('rk_passui')||'{}'))}catch(e){}
 const saveUI=()=>{try{localStorage.setItem('rk_passui',JSON.stringify(PS))}catch(e){}};
-const keyOf=(lv,kind)=>((lv==='n3'&&kind==='g')||lv==='n4'?'rk_pass4_':'rk_pass3_')+lv+'_'+kind;
+const keyOf=(lv,kind)=>(lv==='n3'&&kind==='k'?'rk_pass5_':(lv==='n3'&&kind==='g')||lv==='n4'?'rk_pass4_':'rk_pass3_')+lv+'_'+kind;
 function getSet(lv,kind){try{return new Set(JSON.parse(localStorage.getItem(keyOf(lv,kind))||'[]'))}catch(e){return new Set()}}
 function putSet(lv,kind,s){try{localStorage.setItem(keyOf(lv,kind),JSON.stringify([...s]))}catch(e){}}
-async function load(lv){if(!PD[lv])PD[lv]=await fetch('pass/pass-'+lv+'.json').then(r=>r.json());return PD[lv]}
+async function load(lv){if(!PD[lv]){PD[lv]=await fetch('pass/pass-'+lv+'.json').then(r=>r.json());
+  /* N3 kanji re-ordered into 12 units (2026-11-26): move old ticks to the new positions */
+  const ko=PD[lv].kold;if(ko)try{const nk='rk_pass5_'+lv+'_k',ok='rk_pass3_'+lv+'_k';if(localStorage.getItem(nk)==null&&localStorage.getItem(ok)!=null)localStorage.setItem(nk,JSON.stringify(JSON.parse(localStorage.getItem(ok)).map(i=>ko[i]).filter(i=>i!=null)))}catch(e){}}
+  return PD[lv]}
 async function strokes(lv){if(!SD[lv])SD[lv]=await fetch('pass/strokes-'+lv+'.json').then(r=>r.json());return SD[lv]}
 let KMAP=null;
 async function kmap(){if(!KMAP)KMAP=await fetch('pass/kmap.json').then(r=>r.json());return KMAP}
