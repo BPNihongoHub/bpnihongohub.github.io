@@ -1031,8 +1031,9 @@ const UMSG={signin:'Please sign in first (Google or email). A code works only on
 const uerrMsg=()=>UMSG[UERR]?UMSG[UERR]+(UERR==='signin'?' <a href="#acc">Sign in →</a>':''):t('codeErr');
 function beWait(){return new Promise(r=>{if(BE.ready)return r();let n=0;const iv=setInterval(()=>{if(BE.ready||++n>100){clearInterval(iv);r()}},150)})}
 function devId(){let d=LS.get('devid','');if(!d){d=Math.random().toString(36).slice(2,10)+Date.now().toString(36);LS.set('devid',d)}return d}
-async function codeBind(cx,code){await beWait();if(!BE.ok||!BE.api||!BE.api.codeGet)return true;if(!BE.user)return 'signin';if(BE.admin)return true;
-  const id=cx+'_'+code.slice(0,4),dv=devId(),uid=BE.user.uid;
+const isAllCode=(K,code)=>!!(K&&K.a&&K.a.includes(code.slice(0,4)));/* one code that opens N3+N4+N5 */
+async function codeBind(cx,code,all){await beWait();if(!BE.ok||!BE.api||!BE.api.codeGet)return true;if(!BE.user)return 'signin';if(BE.admin)return true;
+  const id=(all?'all':cx)+'_'+code.slice(0,4),dv=devId(),uid=BE.user.uid;
   try{const d=await BE.api.codeGet(id);
     if(!d){const now=Date.now();await BE.api.codeSet(id,{uid,email:(BE.user.email||'').slice(0,120),dev:[dv],at:now});CODEUNTIL=now+SIXM();return true}
     if(d.uid!==uid)return 'other';if(d.at&&Date.now()>d.at+SIXM())return 'expired';CODEUNTIL=(d.at||Date.now())+SIXM();const ds=d.dev||[];if(ds.includes(dv))return true;if(ds.length>=3)return 'dev3';
@@ -1048,8 +1049,8 @@ async function unlock(code,silent,nosave){const cx=DX,K=KEYS;
     const raw=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64d(w[1])},k,b64d(w[2]));
     mk=await crypto.subtle.importKey('raw',raw,'AES-GCM',false,['decrypt'])}
   catch(e){if(silent)LS.set(codeKey(cx),'');return false}
-  UERR='';if(!nosave){const r=await codeBind(cx,code);if(r!==true){UERR=r;if(r!=='signin'&&silent)LS.set(codeKey(cx),'');return false}}/* a typed code belongs to the first account that uses it, max 3 devices */
-  MKC[cx]=mk;if(DX===cx)window.MK=mk;
+  UERR='';const allc=isAllCode(K,code);if(!nosave){const r=await codeBind(cx,code,allc);if(r!==true){UERR=r;if(r!=='signin'&&silent)LS.set(codeKey(cx),'');return false}}/* a typed code belongs to the first account that uses it, max 3 devices */
+  MKC[cx]=mk;if(DX===cx)window.MK=mk;if(allc&&!nosave)['n3','n4','n5'].forEach(c=>{if(!LS.get(codeKey(c),''))LS.set(codeKey(c),code)});
   try{const L=await fetch(cx==='n3'?'locked.json':'locked-'+cx+'.json').then(r=>r.json());
     const raw=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64d(L.iv)},mk,b64d(L.ct));
     const B=JSON.parse(new TextDecoder().decode(raw));
@@ -1067,7 +1068,7 @@ function render(){
   if(['n3','n4','n5'].includes(exam())&&DX!==dxOf()){BPLoad(true,'Loading '+exam().toUpperCase()+'…');ensureData().then(()=>{BPLoad(false);render()}).catch(()=>BPLoad(false));return}
   if(false&&['drive','bjt'].includes(exam())&&['home','quiz','mock','review','words','srs','unlock'].includes(r))return driveRoute(r);
   const views={home:renderHome,quiz:renderQuiz,mock:renderMock,review:()=>Q.start({mode:'review'}),words:renderWords,srs:renderSRS,admin:renderAdmin,unlock:renderUnlock};
-  if(r==='acc')return renderAccount();if(r==='pay')return renderPay();if(r==='rate')return renderReview();if(r==='story')return renderStory();if(r==='class')return renderClass();if(r==='teacher')return renderTeacher();
+  if(r==='acc')return renderAccount();if(r==='pay')return renderPay();if(r==='rate')return renderReview();if(r==='story')return renderStory();if(r==='class')return renderClass();if(r==='teacher')return renderTeacher();if(r.startsWith('teacher/codes/')){try{sessionStorage.setItem('rk_ckey',r.slice(14))}catch(e){}history.replaceState(null,'','#teacher');return renderTeacher()}
   if(r==='pass'||r.startsWith('pass/'))return window.renderPass?renderPass():null;
   if(r==='units')return renderUnits();
   if(r==='books')return renderBooks();
@@ -1782,6 +1783,7 @@ function fbApi(){
     repMark:(id,o)=>F.doc('reports/'+id).update(o),
     async todoGet(){const s=await F.doc('config/todo').get();return s.exists?(s.data().done||{}):{}},
     todoSet:done=>F.doc('config/todo').set({done}),
+    async cfgGet(id){const s=await F.doc('config/'+id).get();return s.exists?s.data():null},cfgSet:(id,o)=>F.doc('config/'+id).set(o),
     lbPut:(uid,o)=>F.doc('lb/'+uid).set(o),
     async lbWeek(w){const q=await F.collection('lb').where('w','==',w).get();return q.docs.map(norm)},
     hwMark:(id,o)=>F.doc('hw/'+id).update(Object.assign({},o,{checked:TS()})),
@@ -1826,7 +1828,7 @@ function mockApi(){/* localhost test double with the same shape as fbApi */
     async report(o){const d=db();d.rep=d.rep||{};d.rep['r'+Date.now()]=Object.assign({status:'new',created:Date.now()},o);put(d)},
     async allRep(){return Object.entries(db().rep||{}).map(([id,h])=>Object.assign({id},h)).sort((a,b)=>b.created-a.created)},
     async repMark(id,o){const d=db();Object.assign(d.rep[id],o);put(d)},
-    async todoGet(){return db().todo||{}},async todoSet(x){const d=db();d.todo=x;put(d)},
+    async todoGet(){return db().todo||{}},async todoSet(x){const d=db();d.todo=x;put(d)},async cfgGet(id){return (db().cfg||{})[id]||null},async cfgSet(id,o){const d=db();d.cfg=d.cfg||{};d.cfg[id]=o;put(d)},
     async lbPut(uid,o){const d=db();d.lb=d.lb||{};d.lb[uid]=o;put(d)},async lbWeek(w){return Object.entries(db().lb||{}).map(([id,o])=>Object.assign({id},o)).filter(o=>o.w===w)},
     toMs:v=>v||0};
 }
@@ -2045,6 +2047,30 @@ const TODO=[/* [id, text, how / link] — only things that need Binod himself (h
  ['later','Later (costs money): Blaze plan, own domain, card payment, automatic emails, AI teacher, Play Store / App Store app','Decide when you are ready. Nothing to do now.','']];
 function todoBox(done){const n=TODO.filter(x=>!done[x[0]]).length;
   return `<section class="card ttodo"><details ${n?'open':''}><summary><b>📝 My to-do · Binod (${n} left)</b></summary><ol>${TODO.map(([id,tx,how,url])=>`<li class="${done[id]?'dn':''}"><label><input type="checkbox" data-td="${id}" ${done[id]?'checked':''}> <b>${esc(tx)}</b></label><small>${esc(how)}${url?` <a href="${url}" target="_blank" rel="noopener">Open →</a>`:''}</small></li>`).join('')}</ol></details></section>`}
+const SCT={c:'n5',q:''};
+async function stCodesBox(){const el=$('#tSCodes');if(!el||!BE.api.cfgGet)return;
+  let ck='';try{ck=sessionStorage.getItem('rk_ckey')||''}catch(e){}
+  if(ck){try{const E=await fetch('codes.enc.json',{cache:'no-store'}).then(r=>r.json());const kb=b64d(ck.replace(/-/g,'+').replace(/_/g,'/')+'==='.slice((ck.length+3)%4));
+      const k=await crypto.subtle.importKey('raw',kb,'AES-GCM',false,['decrypt']);const raw=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64d(E.iv)},k,b64d(E.ct));
+      await BE.api.cfgSet('codes',{d:new TextDecoder().decode(raw),at:Date.now()});sessionStorage.removeItem('rk_ckey');toast('✓ Student codes saved in your Teacher page')}catch(e){el.innerHTML='<section class="card"><b>🎟 Student codes</b><p class="muted">Could not save the codes. Open the link again while signed in as teacher.</p></section>';return}}
+  let C=null,U={};try{const d=await BE.api.cfgGet('codes');C=d&&d.d?JSON.parse(d.d):null}catch(e){}
+  if(!C){el.innerHTML='<section class="card"><b>🎟 Student codes</b><p class="muted">Not added yet. Open the special link from Claude once (while signed in here).</p></section>';return}
+  try{(await BE.api.codes()).forEach(x=>U[x.id]=x)}catch(e){}
+  const NM={n5:'N5',n4:'N4',n3:'N3',all:'ALL (N3+N4+N5)'},fm=c=>c.slice(0,4)+'-'+c.slice(4,8)+'-'+c.slice(8);
+  const L=(C[SCT.c]||[]).map((r,i)=>({n:i+1,c:r[0],st:r[1],note:r[2],u:U[SCT.c+'_'+r[0].slice(0,4)]})),q=SCT.q.toLowerCase();
+  const rows=L.filter(x=>!q||(x.c+' '+x.st+' '+(x.u&&x.u.email||'')).toLowerCase().includes(q.replace(/-/g,'')));
+  const free=L.filter(x=>!x.u&&x.n>2).length;
+  el.innerHTML=`<section class="card"><details ${SCT.open?'open':''} id="scD"><summary><b>🎟 Student codes · ${NM[SCT.c]} (${free} not used)</b></summary>
+  <p class="muted" style="font-size:12px;margin:6px 0">Give one unused code to a student. After they sign in and type it, everything of that course opens on their account for 6 months (ALL = N3, N4 and N5 together). One code = one account, max 3 devices.</p>
+  <div class="erow" style="flex-wrap:wrap;gap:6px">${Object.keys(NM).map(k=>`<button class="chip ${k===SCT.c?'on':''}" data-scc="${k}">${NM[k]}</button>`).join('')}</div>
+  <input id="scQ" placeholder="Search code / student / email" value="${esc(SCT.q)}" style="margin:8px 0;width:100%">
+  <div style="max-height:420px;overflow:auto"><table class="ptbl" style="width:100%;font-size:13px;border-collapse:collapse"><tr><th>#</th><th>Code</th><th>Status</th><th></th></tr>
+  ${rows.map(x=>{const tk=SCT.c!=='all'&&x.n===2,own=SCT.c!=='all'&&x.n===1,exp=x.u&&x.u.at&&Date.now()>x.u.at+SIXM();
+    return `<tr style="border-top:1px solid #e3e8f2${x.u||tk?';opacity:.6':''}"><td>${x.n}</td><td style="font-family:monospace;white-space:nowrap">${fm(x.c)}</td><td>${tk?'🔑 Teacher key, do not give':own?'Your own code':x.u?`${exp?'⛔ ended':'✅ used'} · ${esc(x.u.email||'')}<br><small>until ${x.u.at?fdate(x.u.at+SIXM()):'—'}</small>`:esc(x.st||x.note||'Not used')}</td><td>${tk?'':`<button class="chip" data-scp="${x.c}">📋 Copy</button>`}</td></tr>`}).join('')}</table></div></details></section>`;
+  $('#scD').ontoggle=e=>SCT.open=e.target.open;
+  $$('[data-scc]').forEach(b=>b.onclick=()=>{SCT.c=b.dataset.scc;SCT.open=true;stCodesBox()});
+  $('#scQ').onchange=e=>{SCT.q=e.target.value.trim();SCT.open=true;stCodesBox()};
+  $$('[data-scp]').forEach(b=>b.onclick=()=>{const t=fm(b.dataset.scp);(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Copied: '+t)).catch(()=>prompt('Copy',t))})}
 async function codesBox(){const el=$('#tCodes');if(!el||!BE.api.codes)return;let C;try{C=await BE.api.codes()}catch(e){el.innerHTML='<section class="card"><b>🔑 Used codes</b><p class="muted">Not available yet. Paste the new Firebase rules (to-do list).</p></section>';return}
   C.sort((a,b)=>(b.at||0)-(a.at||0));
   el.innerHTML=`<section class="card"><details><summary><b>🔑 Used codes (${C.length})</b> · one code = one account, max 3 devices, 6 months from first use</summary>
@@ -2073,7 +2099,7 @@ async function renderTeacher(){
     return `<section class="card money"><div class="mtop"><div><small>💰 Total received · 合計</small><b>${yen(sum(ok))}</b><span>${ok.length} approved payment(s)</span></div><div><small>📅 This month (${mo})</small><b>${yen(sum(tm))}</b><span>${tm.length} payment(s)</span></div><div><small>⏳ Waiting to check</small><b>${PY.length}</b><span>🎁 On free trial: ${tr}</span></div></div>
     <div class="mgrid">${['n5','n4','n3','n2','n1'].map(c=>{const a=ok.filter(p=>(p.course||'n3')===c);return `<div class="mc"><b>${PAYC(c)}</b><i>${yen(sum(a))}</i><span>${a.length} student(s)</span></div>`}).join('')}</div></section>`})()}
   ${hk?'':`<section class="card accbox"><b>🔑 ${at('keyT')} · ${PAYC(tc)}</b><p class="muted" style="margin:0">${at('keyS')}</p><form id="kF" class="erow"><input id="kC" placeholder="XXXX-XXXXXXXX" autocomplete="off" style="flex:2"><button class="btn grad">${at('save')}</button></form></section>`}
-  ${todoBox(TDN)}<div id="tCodes"></div>
+  ${todoBox(TDN)}<div id="tSCodes"></div><div id="tCodes"></div>
   ${(()=>{const d0=new Date();d0.setHours(0,0,0,0);const T0=d0.getTime(),W0=T0-6*864e5,ms=v=>tms(v)||+v||0;
     const nT=U.filter(u=>ms(u.created)>=T0).length,nW=U.filter(u=>ms(u.created)>=W0).length,aT=U.filter(u=>ms(u.last)>=T0).length,tr=U.filter(u=>!isPaidP(u,tc)&&isTrialP(u)).length;
     const soon=U.filter(u=>isPaidP(u,tc)&&untilOf(u,tc)-Date.now()<14*864e5),pT=PH.filter(x=>ms(x.created)>=T0),pW=PH.filter(x=>x.status==='approved'&&ms(x.decided||x.created)>=W0);
@@ -2123,7 +2149,7 @@ async function renderTeacher(){
   const kf=$('#kF');if(kf)kf.onsubmit=async e=>{e.preventDefault();const c=$('#kC').value.toUpperCase().replace(/[^0-9A-Z]/g,'');if(c.length!==12){toast(at('err'));return}try{await BE.api.setKey(tc,c);toast('✓');renderTeacher()}catch(x){toast(at('err'))}};
   $('#tsort').onchange=e=>{TD.sort=e.target.value;renderTeacher()};
   $$('[data-tc]').forEach(b=>b.onclick=()=>{TD.c=b.dataset.tc;renderTeacher()});
-  const byId=id=>PY.find(p=>p.id===id);codesBox();
+  const byId=id=>PY.find(p=>p.id===id);codesBox();stCodesBox();
   renderBills(PH.concat(PY.filter(p=>!PH.some(h=>h.id===p.id))),U);
   $$('[data-ok]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await BE.api.decide(byId(b.dataset.ok),true);toast('✓')}catch(e){toast(at('err'))}renderTeacher()});
   $$('[data-no]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await BE.api.decide(byId(b.dataset.no),false)}catch(e){toast(at('err'))}renderTeacher()});
