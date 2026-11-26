@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-26 09:00",
+ "updated": "2026-11-26 21:00",
  "note": "Short summaries in our own easy Japanese, based on NHK headlines. Each item disappears 7 days after its date. Full story: NHK link.",
  "items": [
   {
@@ -60,6 +60,106 @@
    "ne": "युक्रेनले रुसका तेल प्रशोधन कारखानामा आक्रमण गरिरहेको छ, जसले गर्दा रुसको तेल प्रशोधन क्षमता करिब ३०% घटेको भनिएको छ।",
    "en": "Ukraine's attacks on Russian oil refineries may have cut Russia's refining capacity by about 30% since October.",
    "u": "https://news.web.nhk/newsweb/na/nd-20261126de81562",
+   "src": "NHK"
+  },
+  {
+   "d": "2026-11-26",
+   "cat": "quake",
+   "lv": "important",
+   "ja": "熊本県で震度5弱の地震から1週間です。天草や芦北などでは地震が多い状態が続いています。家具が倒れないようにするなど、準備を続けてください。",
+   "ne": "कुमामोतोमा भूकम्प (震度5弱) गएको एक हप्ता भयो। आमाकुसा, आसिकिता लगायत ठाउँमा अझै धेरै भूकम्प गइरहेका छन्। फर्निचर नढल्ने बनाउने जस्ता तयारी जारी राख्नुहोस्।",
+   "en": "One week after the shindo 5-lower quake in Kumamoto, quakes remain frequent around Amakusa and Ashikita. Keep preparing, e.g. fix furniture so it cannot fall.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261126de81759",
+   "src": "NHK"
+  },
+  {
+   "d": "2026-11-26",
+   "cat": "accident",
+   "lv": "safety",
+   "ja": "鹿児島県姶良市で家が火事になり、3人が亡くなって見つかりました。",
+   "ne": "कागोसिमाको आइरा सहरमा घरमा आगलागी हुँदा ३ जनाको शव भेटियो।",
+   "en": "Aira, Kagoshima: three people found dead after a house fire.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261126de81572",
+   "src": "NHK"
+  },
+  {
+   "d": "2026-11-26",
+   "cat": "accident",
+   "lv": "safety",
+   "ja": "千葉県銚子市で家が全部焼け、2人が亡くなりました。冬はストーブの火に気をつけてください。",
+   "ne": "चिबाको चोसीमा एउटा घर पूरै जल्दा २ जनाको मृत्यु भयो। जाडोमा हिटरको आगोमा ध्यान दिनुहोस्।",
+   "en": "Choshi, Chiba: a house burned down and two people died. Be careful with heaters in winter.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261126de81678",
+   "src": "NHK"
+  },
+  {
+   "d": "2026-11-26",
+   "cat": "transport",
+   "lv": "important",
+   "ja": "東京の港区で国道に穴があき、トラックが一時動けなくなりました。近くで地下鉄の駅の工事をしています。",
+   "ne": "टोकियोको मिनातो वार्डमा राष्ट्रिय राजमार्गमा खाल्डो पर्दा एउटा ट्रक केही समय अड्कियो। नजिकै मेट्रो स्टेशनको निर्माण भइरहेको छ।",
+   "en": "Minato, Tokyo: a road caved in and a truck was briefly stuck; subway station work is under way nearby.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261126de82022",
+   "src": "NHK"
+  },
+  {
+   "d": "2026-11-26",
+   "cat": "politics",
+   "lv": "info",
+   "ja": "中国の海警局の船2隻が、沖縄の尖閣諸島の近くで日本の海に入りました。",
+   "ne": "चीनको तटरक्षक बलका २ वटा जहाज ओकिनावाको सेन्काकु टापु नजिक जापानको समुद्री क्षेत्रमा पसे।",
+   "en": "Two China Coast Guard ships entered Japanese waters near the Senkaku Islands, Okinawa.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261126de82093",
+   "src": "NHK"
+  },
+  {
+   "d": "2026-11-26",
+   "cat": "society",
+   "lv": "info",
+   "ja": "お年寄りに電話をしてから家に入ってお金をとった強盗事件で、3人の無期懲役が決まります（最高裁）。",
+   "ne": "बूढाबूढीलाई फोन गरेर पछि घरमा पसी पैसा लुट्ने घटनाका ३ जनाको आजीवन कारावास सर्वोच्च अदालतबाट पक्का हुने भयो।",
+   "en": "Supreme Court: life sentences for three people in a \"phone-call-then-robbery\" case will be finalized.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261126de82095",
+   "src": "NHK"
+  },
+  {
+   "d": "2026-11-26",
+   "cat": "society",
+   "lv": "info",
+   "ja": "結婚していないとうそをついて交際し、子どもが生まれた事件の裁判で、2審はお金の支払いを610万円以上に増やしました。",
+   "ne": "अविवाहित भएको झूट बोलेर सम्बन्ध राखी बच्चा जन्मिएको मुद्दामा उच्च अदालतले क्षतिपूर्ति बढाएर ६१ लाख येनभन्दा बढी तिर्न आदेश दियो।",
+   "en": "High court raised damages to over ¥6.1 million in a case where a man hid his marriage and a child was born.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261126de82076",
+   "src": "NHK"
+  },
+  {
+   "d": "2026-11-26",
+   "cat": "safety",
+   "lv": "info",
+   "ja": "山形県長井市で、死亡事故が続いた交差点に信号機がつけられることになりました。",
+   "ne": "यामागातको नागाई सहरमा मृत्यु हुने दुर्घटना बारम्बार भएको चोकमा ट्राफिक बत्ती राखिने भयो।",
+   "en": "Nagai, Yamagata: traffic lights will be installed at a crossing with repeated fatal accidents.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261126de82077",
+   "src": "NHK"
+  },
+  {
+   "d": "2026-11-26",
+   "cat": "world",
+   "lv": "info",
+   "ja": "エジプトのカイロの近くで交通事故があり、火事になって31人が亡くなりました。",
+   "ne": "इजिप्टको कायरो नजिक सडक दुर्घटनापछि आगो लाग्दा ३१ जनाको मृत्यु भयो।",
+   "en": "Near Cairo, Egypt: a road crash caused a fire and 31 people died.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261126de81584",
+   "src": "NHK"
+  },
+  {
+   "d": "2026-11-26",
+   "cat": "culture",
+   "lv": "info",
+   "ja": "滋賀県高島市で、子どもたちの夢をテーマにしたイルミネーションが始まりました。",
+   "ne": "सिगाको ताकासिमामा बालबालिकाको सपनाको विषयमा बत्ती सजावट (इल्युमिनेसन) सुरु भयो।",
+   "en": "Takashima, Shiga: an illumination themed on children's dreams has started.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261126de81803",
    "src": "NHK"
   },
   {
