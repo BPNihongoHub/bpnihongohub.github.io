@@ -1,21 +1,260 @@
-{"updated":"2026-11-26",
-"note":"Short summaries in our own easy Japanese, based on NHK headlines. Each item disappears 7 days after its date. Full story: NHK link.",
-"items":[
- {"d":"2026-11-25","cat":"economy","lv":"info","ja":"日本の株の値段が大きく下がりました。一時、2100円以上下がりました。半導体の会社の株が多く売られました。","ne":"जापानको शेयर मूल्य धेरै घट्यो। एक समय २१०० येनभन्दा बढी घट्यो। सेमिकन्डक्टर कम्पनीका शेयर धेरै बेचिए।","en":"Japanese stock prices fell sharply, at one point by more than 2,100 yen. Many semiconductor company shares were sold.","u":"https://news.web.nhk/newsweb/na/nd-20261125de80958"},
- {"d":"2026-11-25","cat":"politics","lv":"info","ja":"政府は今年2回目の補正予算を作ります。熊本の地震からの復旧などに使う予定です。","ne":"सरकारले यो वर्ष दोस्रो पूरक बजेट बनाउँदैछ। मुख्य गरी कुमामोतो भूकम्पपछिको पुनर्निर्माणमा प्रयोग हुनेछ।","en":"The government will make a second extra budget this year, mainly for recovery from the Kumamoto earthquake.","u":"https://news.web.nhk/newsweb/na/nd-20261125de80904"},
- {"d":"2026-11-25","cat":"weather","lv":"safety","ja":"空の上に強い寒気が来て、各地でとても寒くなりました。暖かい服を着てください。","ne":"माथि आकाशमा कडा चिसो हावा आएकाले धेरै ठाउँमा एकदमै जाडो भयो। न्यानो लुगा लगाउनुहोस्।","en":"Strong cold air has come over Japan and many places became very cold. Wear warm clothes.","u":"https://news.web.nhk/newsweb/na/nd-20261125de81083"},
- {"d":"2026-11-25","cat":"weather","lv":"safety","ja":"青森県では雪が降りました。道がこおってすべりやすいので、気をつけてください。","ne":"आओमोरीमा हिउँ पर्‍यो। बाटो जमेर चिप्लो छ, होसियार हुनुहोस्।","en":"It snowed in Aomori. Roads are icy and slippery, so be careful.","u":"https://news.web.nhk/newsweb/na/nd-20261125de81049"},
- {"d":"2026-11-25","cat":"weather","lv":"info","ja":"大雪で電気が止まっていた福島県の家は、すべて電気がもどりました。","ne":"ठूलो हिउँले फुकुसिमामा बिजुली गएका सबै घरमा अब बिजुली फर्कियो।","en":"Power has come back to all homes in Fukushima that lost electricity due to heavy snow.","u":"https://news.web.nhk/newsweb/na/nd-20261125de81495"},
- {"d":"2026-11-25","cat":"foreigners","lv":"important","ja":"高いお金がかかる病院の治療を受けるために日本に来る外国人について、国（厚生労働省）はルールを強くする方向で考えています。","ne":"महँगो अस्पताल उपचार गराउने उद्देश्यले जापान आउने विदेशीबारे स्वास्थ्य मन्त्रालयले नियम कडा बनाउने तयारी गर्दैछ।","en":"The health ministry is planning stricter rules for foreigners who come to Japan to get expensive treatment under the health insurance system.","u":"https://news.web.nhk/newsweb/na/nd-20261125de81522"},
- {"d":"2026-11-25","cat":"accident","lv":"safety","ja":"神奈川県で、車が道を反対に走って事故があり、人が亡くなりました。車は5分以上反対に走っていました。","ne":"कानागावामा गाडी उल्टो दिशामा गुडेर दुर्घटना भयो र एक जनाको मृत्यु भयो। गाडी ५ मिनेटभन्दा बढी उल्टो गुडेको थियो।","en":"In Kanagawa, a car driving the wrong way caused a fatal accident. It drove the wrong way for more than 5 minutes.","u":"https://news.web.nhk/newsweb/na/nd-20261125de81420"},
- {"d":"2026-11-25","cat":"accident","lv":"safety","ja":"埼玉県上尾市で家が火事になり、1人が亡くなりました。冬は火事が多いので、ストーブなどに気をつけましょう。","ne":"साइतामाको आगेओमा घरमा आगलागी भई एक जनाको मृत्यु भयो। जाडोमा आगलागी धेरै हुन्छ, हिटर आदिमा ध्यान दिनुहोस्।","en":"A house fire in Ageo, Saitama killed one person. Fires are common in winter, so be careful with heaters.","u":"https://news.web.nhk/newsweb/na/nd-20261125de81449"},
- {"d":"2026-11-25","cat":"politics","lv":"info","ja":"公明党と立憲民主党は、政治のお金（献金）のルールを強くする法律の案を、いっしょに国会に出しました。","ne":"कोमेइतो र संवैधानिक प्रजातान्त्रिक पार्टीले राजनीतिक चन्दाको नियम कडा पार्ने विधेयक संयुक्त रूपमा संसदमा पेश गरे।","en":"Komeito and the Constitutional Democratic Party jointly submitted a bill to tighten rules on political donations.","u":"https://news.web.nhk/newsweb/na/nd-20261125de81170"},
- {"d":"2026-11-25","cat":"society","lv":"info","ja":"安倍元首相がうたれた事件の裁判で、2回目の裁判が行われます。弁護士は「刑は10年以下がいい」と言うつもりです。","ne":"पूर्वप्रधानमन्त्री आबेमाथि गोली हानेको मुद्दाको दोस्रो तहको सुनुवाइमा वकिलहरूले १० वर्षभन्दा कम सजाय माग्ने भएका छन्।","en":"In the appeal trial over the shooting of former PM Abe, the defence will argue for a sentence of 10 years or less.","u":"https://news.web.nhk/newsweb/na/nd-20261125de81466"},
- {"d":"2026-11-24","cat":"weather","lv":"important","ja":"気象庁によると、この冬はいつもより暖かくなりそうです。でも、気温の変化が大きく、大雪になるおそれもあります。","ne":"मौसम विभागका अनुसार यो जाडो सामान्यभन्दा न्यानो हुन सक्छ। तर तापक्रम धेरै फेरिने र ठूलो हिउँ पर्ने सम्भावना पनि छ।","en":"The weather agency says this winter will likely be warmer than usual, but temperatures will change a lot and heavy snow is possible.","u":"https://news.web.nhk/newsweb/na/nd-20261124de80586"},
- {"d":"2026-11-24","cat":"weather","lv":"safety","ja":"前線が通って、関東でも雨と風が強くなりました。長野などでは雪も降りました。","ne":"मौसमी रेखा पार गर्दा कान्तोमा पनि वर्षा र हावा बढ्यो। नागानो आदिमा हिउँ पनि पर्‍यो।","en":"A weather front brought strong rain and wind to Kanto, and snow in places like Nagano.","u":"https://news.web.nhk/newsweb/na/nd-20261124de80744"},
- {"d":"2026-11-24","cat":"politics","lv":"info","ja":"高市首相は、今年2回目の補正予算を作るように指示しました。","ne":"प्रधानमन्त्री ताकाइचीले यो वर्षको दोस्रो पूरक बजेट बनाउन निर्देशन दिनुभयो।","en":"Prime Minister Takaichi ordered the making of this year's second extra budget.","u":"https://news.web.nhk/newsweb/na/nd-20261124de80761"},
- {"d":"2026-11-24","cat":"economy","lv":"info","ja":"10月、東京23区の中古マンションの値段は、5か月続けて下がりました。","ne":"अक्टोबरमा टोकियोका २३ वडामा पुराना अपार्टमेन्टको मूल्य लगातार ५ महिना घट्यो।","en":"In October, used apartment prices in Tokyo's 23 wards fell for the 5th month in a row.","u":"https://news.web.nhk/newsweb/na/nd-20261124de80510"},
- {"d":"2026-11-24","cat":"politics","lv":"info","ja":"国会で、消費税を下げるとどんな効果があるか、専門家が意見を話しました。","ne":"संसदमा उपभोग कर घटाउँदा के असर हुन्छ भन्नेबारे विज्ञहरूले आफ्नो विचार राखे।","en":"In the Diet, experts gave opinions on the effects of cutting the consumption tax.","u":"https://news.web.nhk/newsweb/na/nd-20261124de80414"},
- {"d":"2026-11-24","cat":"safety","lv":"safety","ja":"北海道でクマ（ヒグマ）が出たという情報が続いています。山や森の近くでは気をつけてください。","ne":"होक्काइदोमा भालु (हिगुमा) देखिएको खबर लगातार आइरहेको छ। पहाड र जङ्गल नजिक होसियार हुनुहोस्।","en":"Brown bear sightings continue in Hokkaido. Be careful near mountains and forests.","u":"https://news.web.nhk/newsweb/na/nd-20261124de80701"},
- {"d":"2026-11-19","cat":"foreigners","lv":"important","ja":"外国人4人に、在留資格で認められていない仕事をさせた疑いで、人材派遣会社の社長たちが逮捕されました。自分の在留資格でできる仕事を確認しましょう。","ne":"४ जना विदेशीलाई भिसाले अनुमति नदिएको काम गराएको आशंकामा जनशक्ति कम्पनीका अध्यक्षलगायत पक्राउ परे। आफ्नो भिसाले कुन काम गर्न मिल्छ, जाँच गर्नुहोस्।","en":"The president of a staffing company and others were arrested for allegedly making 4 foreigners do work their residence status does not allow. Check what work your status permits.","u":"https://news.web.nhk/newsweb/na/nd-20261119de78276"}
-]}
+{
+ "updated": "2026-11-26 09:00",
+ "note": "Short summaries in our own easy Japanese, based on NHK headlines. Each item disappears 7 days after its date. Full story: NHK link.",
+ "items": [
+  {
+   "d": "2026-11-26",
+   "cat": "weather",
+   "lv": "safety",
+   "ja": "岐阜県では大雪のため、郡上市などで約2400の家の電気が止まっています。もどるまで1週間かかる所もあります。",
+   "ne": "गिफु प्रिफेक्चरमा भारी हिउँका कारण गुजो सहर लगायत करिब २४०० घरमा बत्ती छैन। केही ठाउँमा बत्ती फर्किन एक हप्ता लाग्न सक्छ।",
+   "en": "Heavy snow in Gifu: about 2,400 homes in Gujo and nearby still have no power. Some may wait up to a week.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261126de81569",
+   "src": "NHK"
+  },
+  {
+   "d": "2026-11-26",
+   "cat": "weather",
+   "lv": "important",
+   "ja": "石川県などでは1月のような寒さでしたが、26日は晴れます。朝と昼の気温の差が大きいので、体に気をつけてください。",
+   "ne": "इसिकावा लगायत ठाउँमा जनवरीजस्तै जाडो भयो, तर २६ गते घाम लाग्छ। बिहान र दिउँसोको तापक्रममा ठूलो फरक हुने भएकाले स्वास्थ्यमा ध्यान दिनुहोस्।",
+   "en": "Ishikawa and nearby had January-like cold; the 26th turns sunny. Big gap between morning and daytime temperatures, so take care.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261125de81408",
+   "src": "NHK"
+  },
+  {
+   "d": "2026-11-26",
+   "cat": "transport",
+   "lv": "info",
+   "ja": "広島県のJR福塩線で、線路にイノシシがいたため、一部の電車が止まりました。",
+   "ne": "हिरोसिमाको JR फुकुएन लाइनमा रेलमार्गमा बँदेल आएकाले केही रेल रोकिए।",
+   "en": "JR Fukuen Line (Hiroshima): some trains stopped because a wild boar was on the tracks.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261126de81576",
+   "src": "NHK"
+  },
+  {
+   "d": "2026-11-26",
+   "cat": "politics",
+   "lv": "info",
+   "ja": "野党は、関文部科学大臣の責任を問う決議案を国会に出す予定です。与党は反対する予定です。",
+   "ne": "विपक्षी दलहरूले शिक्षामन्त्री सेकीमाथि जिम्मेवारी माग्ने प्रस्ताव संसदमा पेस गर्ने तयारी गरेका छन्। सत्तापक्षले यसलाई अस्वीकार गर्ने प्रयास गर्नेछ।",
+   "en": "Opposition parties plan to submit a censure motion against Education Minister Seki; the ruling side will try to vote it down.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261126de81559",
+   "src": "NHK"
+  },
+  {
+   "d": "2026-11-26",
+   "cat": "economy",
+   "lv": "info",
+   "ja": "アメリカの中央銀行（FRB）は、多くの仕事でコストが上がっていると言いました。来月、金利をさらに上げるか注目されています。",
+   "ne": "अमेरिकी केन्द्रीय बैंक (FRB) ले धेरै क्षेत्रमा खर्च बढेको बतायो। अर्को महिना ब्याजदर अझै बढाउँछ कि भन्नेमा सबैको ध्यान छ।",
+   "en": "The US Federal Reserve says costs are rising in many industries; markets watch whether it raises rates again next month.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261126de81570",
+   "src": "NHK"
+  },
+  {
+   "d": "2026-11-26",
+   "cat": "world",
+   "lv": "info",
+   "ja": "ウクライナがロシアの石油工場を攻撃していて、ロシアの石油を作る力が30％ぐらい下がったと言われています。",
+   "ne": "युक्रेनले रुसका तेल प्रशोधन कारखानामा आक्रमण गरिरहेको छ, जसले गर्दा रुसको तेल प्रशोधन क्षमता करिब ३०% घटेको भनिएको छ।",
+   "en": "Ukraine's attacks on Russian oil refineries may have cut Russia's refining capacity by about 30% since October.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261126de81562",
+   "src": "NHK"
+  },
+  {
+   "d": "2026-11-25",
+   "cat": "economy",
+   "lv": "info",
+   "ja": "日本の株の値段が大きく下がりました。一時、2100円以上下がりました。半導体の会社の株が多く売られました。",
+   "ne": "जापानको शेयर मूल्य धेरै घट्यो। एक समय २१०० येनभन्दा बढी घट्यो। सेमिकन्डक्टर कम्पनीका शेयर धेरै बेचिए।",
+   "en": "Japanese stock prices fell sharply, at one point by more than 2,100 yen. Many semiconductor company shares were sold.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261125de80958"
+  },
+  {
+   "d": "2026-11-25",
+   "cat": "politics",
+   "lv": "info",
+   "ja": "政府は今年2回目の補正予算を作ります。熊本の地震からの復旧などに使う予定です。",
+   "ne": "सरकारले यो वर्ष दोस्रो पूरक बजेट बनाउँदैछ। मुख्य गरी कुमामोतो भूकम्पपछिको पुनर्निर्माणमा प्रयोग हुनेछ।",
+   "en": "The government will make a second extra budget this year, mainly for recovery from the Kumamoto earthquake.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261125de80904"
+  },
+  {
+   "d": "2026-11-25",
+   "cat": "weather",
+   "lv": "safety",
+   "ja": "空の上に強い寒気が来て、各地でとても寒くなりました。暖かい服を着てください。",
+   "ne": "माथि आकाशमा कडा चिसो हावा आएकाले धेरै ठाउँमा एकदमै जाडो भयो। न्यानो लुगा लगाउनुहोस्।",
+   "en": "Strong cold air has come over Japan and many places became very cold. Wear warm clothes.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261125de81083"
+  },
+  {
+   "d": "2026-11-25",
+   "cat": "weather",
+   "lv": "safety",
+   "ja": "青森県では雪が降りました。道がこおってすべりやすいので、気をつけてください。",
+   "ne": "आओमोरीमा हिउँ पर्‍यो। बाटो जमेर चिप्लो छ, होसियार हुनुहोस्।",
+   "en": "It snowed in Aomori. Roads are icy and slippery, so be careful.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261125de81049"
+  },
+  {
+   "d": "2026-11-25",
+   "cat": "weather",
+   "lv": "info",
+   "ja": "大雪で電気が止まっていた福島県の家は、すべて電気がもどりました。",
+   "ne": "ठूलो हिउँले फुकुसिमामा बिजुली गएका सबै घरमा अब बिजुली फर्कियो।",
+   "en": "Power has come back to all homes in Fukushima that lost electricity due to heavy snow.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261125de81495"
+  },
+  {
+   "d": "2026-11-25",
+   "cat": "foreigners",
+   "lv": "important",
+   "ja": "高いお金がかかる病院の治療を受けるために日本に来る外国人について、国（厚生労働省）はルールを強くする方向で考えています。",
+   "ne": "महँगो अस्पताल उपचार गराउने उद्देश्यले जापान आउने विदेशीबारे स्वास्थ्य मन्त्रालयले नियम कडा बनाउने तयारी गर्दैछ।",
+   "en": "The health ministry is planning stricter rules for foreigners who come to Japan to get expensive treatment under the health insurance system.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261125de81522"
+  },
+  {
+   "d": "2026-11-25",
+   "cat": "accident",
+   "lv": "safety",
+   "ja": "神奈川県で、車が道を反対に走って事故があり、人が亡くなりました。車は5分以上反対に走っていました。",
+   "ne": "कानागावामा गाडी उल्टो दिशामा गुडेर दुर्घटना भयो र एक जनाको मृत्यु भयो। गाडी ५ मिनेटभन्दा बढी उल्टो गुडेको थियो।",
+   "en": "In Kanagawa, a car driving the wrong way caused a fatal accident. It drove the wrong way for more than 5 minutes.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261125de81420"
+  },
+  {
+   "d": "2026-11-25",
+   "cat": "accident",
+   "lv": "safety",
+   "ja": "埼玉県上尾市で家が火事になり、1人が亡くなりました。冬は火事が多いので、ストーブなどに気をつけましょう。",
+   "ne": "साइतामाको आगेओमा घरमा आगलागी भई एक जनाको मृत्यु भयो। जाडोमा आगलागी धेरै हुन्छ, हिटर आदिमा ध्यान दिनुहोस्।",
+   "en": "A house fire in Ageo, Saitama killed one person. Fires are common in winter, so be careful with heaters.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261125de81449"
+  },
+  {
+   "d": "2026-11-25",
+   "cat": "politics",
+   "lv": "info",
+   "ja": "公明党と立憲民主党は、政治のお金（献金）のルールを強くする法律の案を、いっしょに国会に出しました。",
+   "ne": "कोमेइतो र संवैधानिक प्रजातान्त्रिक पार्टीले राजनीतिक चन्दाको नियम कडा पार्ने विधेयक संयुक्त रूपमा संसदमा पेश गरे।",
+   "en": "Komeito and the Constitutional Democratic Party jointly submitted a bill to tighten rules on political donations.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261125de81170"
+  },
+  {
+   "d": "2026-11-25",
+   "cat": "society",
+   "lv": "info",
+   "ja": "安倍元首相がうたれた事件の裁判で、2回目の裁判が行われます。弁護士は「刑は10年以下がいい」と言うつもりです。",
+   "ne": "पूर्वप्रधानमन्त्री आबेमाथि गोली हानेको मुद्दाको दोस्रो तहको सुनुवाइमा वकिलहरूले १० वर्षभन्दा कम सजाय माग्ने भएका छन्।",
+   "en": "In the appeal trial over the shooting of former PM Abe, the defence will argue for a sentence of 10 years or less.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261125de81466"
+  },
+  {
+   "d": "2026-11-25",
+   "cat": "accident",
+   "lv": "safety",
+   "ja": "北海道の函館で、観光バスなど4台の車がぶつかりました。道がすべったことが原因かもしれません。雪の道はゆっくり運転してください。",
+   "ne": "होक्काइडोको हाकोदातेमा पर्यटक बस सहित ४ वटा गाडी ठोक्किए। बाटो चिप्लिएर भएको हुन सक्छ। हिउँ परेको बाटोमा बिस्तारै चलाउनुहोस्।",
+   "en": "Hakodate, Hokkaido: four vehicles including a tour bus collided, possibly after skidding. Drive slowly on snowy roads.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261125de81034",
+   "src": "NHK"
+  },
+  {
+   "d": "2026-11-25",
+   "cat": "accident",
+   "lv": "safety",
+   "ja": "岡山県美作市で、車が歩いていた80代の女性にぶつかり、女性が亡くなりました。",
+   "ne": "ओकायामाको मिमासाकामा गाडीले हिँडिरहेकी ८० वर्ष माथिकी महिलालाई ठक्कर दिँदा उनको मृत्यु भयो।",
+   "en": "Mimasaka, Okayama: a woman in her 80s died after being hit by a car while walking.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261125de81126",
+   "src": "NHK"
+  },
+  {
+   "d": "2026-11-25",
+   "cat": "society",
+   "lv": "info",
+   "ja": "徳島県阿波市の市長が、だましてお金を取った疑いで逮捕され、市長をやめると言いました。",
+   "ne": "तोकुसिमाको आवा सहरका मेयर ठगीको आरोपमा पक्राउ परेपछि उनले पद छोड्ने बताए।",
+   "en": "The mayor of Awa City, Tokushima, arrested on suspicion of fraud, says he will resign.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261125de81248",
+   "src": "NHK"
+  },
+  {
+   "d": "2026-11-25",
+   "cat": "culture",
+   "lv": "info",
+   "ja": "沖縄の首里城の式典に、中国は来ませんでした。台湾の人を招待したことに反対したためと見られています。",
+   "ne": "ओकिनावाको सुरी किल्लाको समारोहमा चीन आएन। ताइवानका मानिसलाई निम्तो दिएकोमा विरोध गरेको हुन सक्ने भनिएको छ।",
+   "en": "China skipped an Okinawa ceremony at Shuri Castle, apparently in protest at Taiwanese guests being invited.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261125de81536",
+   "src": "NHK"
+  },
+  {
+   "d": "2026-11-25",
+   "cat": "economy",
+   "lv": "info",
+   "ja": "パナソニックが4本の足で歩くロボットを見せました。野球場などのライトを自動で調べることができます。",
+   "ne": "पानासोनिकले चार खुट्टाले हिँड्ने रोबोट देखायो। यसले बेसबल मैदान आदिका बत्ती आफैँ जाँच्न सक्छ।",
+   "en": "Panasonic showed a four-legged robot that automatically checks lighting at places such as ballparks.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261125de81544",
+   "src": "NHK"
+  },
+  {
+   "d": "2026-11-24",
+   "cat": "weather",
+   "lv": "important",
+   "ja": "気象庁によると、この冬はいつもより暖かくなりそうです。でも、気温の変化が大きく、大雪になるおそれもあります。",
+   "ne": "मौसम विभागका अनुसार यो जाडो सामान्यभन्दा न्यानो हुन सक्छ। तर तापक्रम धेरै फेरिने र ठूलो हिउँ पर्ने सम्भावना पनि छ।",
+   "en": "The weather agency says this winter will likely be warmer than usual, but temperatures will change a lot and heavy snow is possible.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261124de80586"
+  },
+  {
+   "d": "2026-11-24",
+   "cat": "weather",
+   "lv": "safety",
+   "ja": "前線が通って、関東でも雨と風が強くなりました。長野などでは雪も降りました。",
+   "ne": "मौसमी रेखा पार गर्दा कान्तोमा पनि वर्षा र हावा बढ्यो। नागानो आदिमा हिउँ पनि पर्‍यो।",
+   "en": "A weather front brought strong rain and wind to Kanto, and snow in places like Nagano.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261124de80744"
+  },
+  {
+   "d": "2026-11-24",
+   "cat": "politics",
+   "lv": "info",
+   "ja": "高市首相は、今年2回目の補正予算を作るように指示しました。",
+   "ne": "प्रधानमन्त्री ताकाइचीले यो वर्षको दोस्रो पूरक बजेट बनाउन निर्देशन दिनुभयो।",
+   "en": "Prime Minister Takaichi ordered the making of this year's second extra budget.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261124de80761"
+  },
+  {
+   "d": "2026-11-24",
+   "cat": "economy",
+   "lv": "info",
+   "ja": "10月、東京23区の中古マンションの値段は、5か月続けて下がりました。",
+   "ne": "अक्टोबरमा टोकियोका २३ वडामा पुराना अपार्टमेन्टको मूल्य लगातार ५ महिना घट्यो।",
+   "en": "In October, used apartment prices in Tokyo's 23 wards fell for the 5th month in a row.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261124de80510"
+  },
+  {
+   "d": "2026-11-24",
+   "cat": "politics",
+   "lv": "info",
+   "ja": "国会で、消費税を下げるとどんな効果があるか、専門家が意見を話しました。",
+   "ne": "संसदमा उपभोग कर घटाउँदा के असर हुन्छ भन्नेबारे विज्ञहरूले आफ्नो विचार राखे।",
+   "en": "In the Diet, experts gave opinions on the effects of cutting the consumption tax.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261124de80414"
+  },
+  {
+   "d": "2026-11-24",
+   "cat": "safety",
+   "lv": "safety",
+   "ja": "北海道でクマ（ヒグマ）が出たという情報が続いています。山や森の近くでは気をつけてください。",
+   "ne": "होक्काइदोमा भालु (हिगुमा) देखिएको खबर लगातार आइरहेको छ। पहाड र जङ्गल नजिक होसियार हुनुहोस्।",
+   "en": "Brown bear sightings continue in Hokkaido. Be careful near mountains and forests.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261124de80701"
+  }
+ ]
+}
