@@ -1,7 +1,67 @@
 {
- "updated": "2026-11-26 21:00",
+ "updated": "2026-11-27 09:00",
  "note": "Short summaries in our own easy Japanese, based on NHK headlines. Each item disappears 7 days after its date. Full story: NHK link.",
  "items": [
+  {
+   "d": "2026-11-27",
+   "cat": "weather",
+   "lv": "safety",
+   "ja": "沖縄本島の北部で線状降水帯が発生し、とても強い雨が続いています。名護市などにレベル4の危険警報が出ています。がけの近くには行かないで、避難の情報を確認してください。",
+   "ne": "ओकिनावा मुख्य टापुको उत्तरी भागमा लगातार भारी वर्षा (線状降水帯) भइरहेको छ। नागो सहर लगायत ठाउँमा लेभल ४ खतराको चेतावनी छ। पहिरो जाने ठाउँ नजिक नजानुहोस् र सुरक्षित ठाउँमा जाने सूचना हेर्नुहोस्।",
+   "en": "Northern Okinawa Island: a \"linear rain band\" is bringing very heavy rain. Level 4 danger warnings for Nago and nearby. Stay away from slopes and check evacuation info.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261127de82190",
+   "src": "NHK"
+  },
+  {
+   "d": "2026-11-27",
+   "cat": "weather",
+   "lv": "safety",
+   "ja": "沖縄の国頭村と大宜味村の一部に避難指示が出ました。安全な場所に逃げてください。",
+   "ne": "ओकिनावाको कुनिगामी र ओगिमी गाउँका केही भागमा सुरक्षित ठाउँ जान आदेश (避難指示) जारी भयो। सुरक्षित ठाउँमा जानुहोस्।",
+   "en": "Evacuation orders issued for parts of Kunigami and Ogimi villages, Okinawa. Move to a safe place.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261127de82185",
+   "src": "NHK"
+  },
+  {
+   "d": "2026-11-27",
+   "cat": "weather",
+   "lv": "important",
+   "ja": "岐阜県で大雪から1週間たちましたが、郡上市などで約1500の家はまだ電気が止まっています。",
+   "ne": "गिफुमा भारी हिउँ परेको एक हप्ता भइसक्यो, तर गुजो सहर लगायत करिब १५०० घरमा अझै बत्ती छैन।",
+   "en": "One week after heavy snow in Gifu, about 1,500 homes in Gujo and nearby still have no power.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261127de82200",
+   "src": "NHK"
+  },
+  {
+   "d": "2026-11-27",
+   "cat": "accident",
+   "lv": "safety",
+   "ja": "大阪府堺市の道で女性が亡くなっているのが見つかりました。車でひいて逃げた可能性があります。",
+   "ne": "ओसाकाको साकाई सहरको सडकमा एक महिलाको मृत्यु भएको भेटियो। गाडीले ठक्कर दिएर भागेको हुन सक्छ।",
+   "en": "Sakai, Osaka: a woman was found dead on a road, possibly a hit-and-run.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261127de82196",
+   "src": "NHK"
+  },
+  {
+   "d": "2026-11-27",
+   "cat": "society",
+   "lv": "info",
+   "ja": "福岡の駐輪場で男性が刺されて亡くなった事件で、男は服を買ってから逃げた可能性があると調べられています。",
+   "ne": "फुकुओकाको साइकल पार्किङमा एक पुरुषलाई छुरा प्रहार गरी मारिएको घटनामा, आरोपीले लुगा किनेर भागेको हुन सक्ने भनी अनुसन्धान भइरहेको छ।",
+   "en": "Fukuoka bicycle-parking stabbing: police think the suspect bought a cardigan and then fled.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261127de82142",
+   "src": "NHK"
+  },
+  {
+   "d": "2026-11-27",
+   "cat": "world",
+   "lv": "info",
+   "ja": "アジアで2000人以上が亡くなった記録的な大雨から1年です。生活を元にもどすことが課題です。",
+   "ne": "एसियामा २००० भन्दा बढीको ज्यान लिने रेकर्ड भारी वर्षा भएको एक वर्ष भयो। जीवन पहिलेजस्तै बनाउनु चुनौती छ।",
+   "en": "One year since record rains in Asia killed over 2,000 people; rebuilding lives remains a challenge.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261127de82141",
+   "src": "NHK"
+  },
   {
    "d": "2026-11-26",
    "cat": "weather",
@@ -160,6 +220,36 @@
    "ne": "सिगाको ताकासिमामा बालबालिकाको सपनाको विषयमा बत्ती सजावट (इल्युमिनेसन) सुरु भयो।",
    "en": "Takashima, Shiga: an illumination themed on children's dreams has started.",
    "u": "https://news.web.nhk/newsweb/na/nd-20261126de81803",
+   "src": "NHK"
+  },
+  {
+   "d": "2026-11-26",
+   "cat": "education",
+   "lv": "important",
+   "ja": "学校に行かない子ども（不登校）が過去いちばん多い35万9424人になりました。小学生で増えています。",
+   "ne": "विद्यालय नजाने बालबालिका (不登校) को संख्या अहिलेसम्मकै सबैभन्दा धेरै ३,५९,४२४ पुग्यो। प्राथमिक विद्यालयका विद्यार्थीमा बढेको छ।",
+   "en": "A record 359,424 children are not attending school (futoko), with the rise mainly among elementary students.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261126de81766",
+   "src": "NHK"
+  },
+  {
+   "d": "2026-11-26",
+   "cat": "foreigners",
+   "lv": "important",
+   "ja": "高いお金がかかる保険の治療を受けるために日本に来る外国人について、厚生労働省は対応を強くする方針を出しました。",
+   "ne": "महँगो बीमा उपचार लिने उद्देश्यले जापान आउने विदेशीहरूबारे स्वास्थ्य मन्त्रालयले कडाइ गर्ने नीति ल्यायो।",
+   "en": "Health ministry plans stronger steps against foreigners entering Japan to use expensive insurance-covered treatment.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261126de81810",
+   "src": "NHK"
+  },
+  {
+   "d": "2026-11-26",
+   "cat": "culture",
+   "lv": "info",
+   "ja": "広島県安芸高田市で、特産のゆずの収穫が行われています。",
+   "ne": "हिरोसिमाको आकितातामा त्यहाँको विशेष फल युजुको टिपाइ भइरहेको छ।",
+   "en": "Akitakata, Hiroshima: harvest of the local specialty yuzu citrus is under way.",
+   "u": "https://news.web.nhk/newsweb/na/nd-20261126de82135",
    "src": "NHK"
   },
   {
